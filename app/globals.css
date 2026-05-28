@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 248 250 252;
+  --surface: 255 255 255;
+  --elevated: 241 245 249;
+  --border: 226 232 240;
+  --text: 15 23 42;
+  --muted: 100 116 139;
+  --primary: 220 38 38;
+  --primary-fg: 255 255 255;
+  --primary-dark: 185 28 28;
+  --accent: 30 64 175;
+  --norge: 220 38 38;
+  --gold: 202 138 4;
+  --success: 22 163 74;
+  --danger: 220 38 38;
+  --warning: 217 119 6;
+}
+
+[data-theme="dark"] {
+  --bg: 11 15 20;
+  --surface: 18 24 33;
+  --elevated: 26 34 48;
+  --border: 36 48 66;
+  --text: 245 247 250;
+  --muted: 138 149 168;
+  --primary: 34 211 153;
+  --primary-fg: 11 15 20;
+  --primary-dark: 22 168 121;
+  --accent: 59 130 246;
+  --norge: 248 113 113;
+  --gold: 250 204 21;
+  --success: 34 211 153;
+  --danger: 239 68 68;
+  --warning: 245 158 11;
+}
+
+html,
+body {
+  background-color: rgb(var(--bg));
+  color: rgb(var(--text));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

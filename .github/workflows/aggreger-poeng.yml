@@ -1,0 +1,29 @@
+name: Aggreger poeng
+
+on:
+  schedule:
+    # 03:00 Europe/Oslo = 01:00 UTC (CEST sommer, 02:00 UTC vinter)
+    - cron: "0 1 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aggreger-poeng
+  cancel-in-progress: false
+
+jobs:
+  aggreger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Kjør aggregator
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node scripts/aggreger-poeng.mjs

@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function erInnlogget() {
+      return request.auth != null;
+    }
+    function erEier(uid) {
+      return erInnlogget() && request.auth.uid == uid;
+    }
+    function erAdmin() {
+      return erInnlogget()
+        && exists(/databases/$(database)/documents/brukere/$(request.auth.uid))
+        && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.rolle == 'admin';
+    }
+    // Tipping på en kamp låses 1 time før kampstart.
+    function kampAapen(matchId) {
+      return exists(/databases/$(database)/documents/kamper/$(matchId))
+        && get(/databases/$(database)/documents/kamper/$(matchId)).data.starttid - 3600000 > request.time.toMillis();
+    }
+
+    // Spesialtips låses 1 time før første VM-kamp (11. juni 2026 18:00 UTC = 20:00 norsk tid).
+    // Konstanten = new Date('2026-06-11T15:00:00-04:00').getTime() - 3600000 = 1781200800000
+    function spesialAapen() {
+      return request.time.toMillis() < 1781200800000;
+    }
+
+    // Brukere: alle innloggede kan lese (ledertavle).
+    // Eier kan opprette egen profil med medlems-rolle og 0 poeng.
+    // Eier kan oppdatere navn/avdeling, men ikke rolle eller poeng.
+    // Admin kan alt.
+    match /brukere/{uid} {
+      allow read: if erInnlogget();
+      allow create: if erEier(uid)
+        && request.resource.data.rolle == 'medlem'
+        && request.resource.data.poeng == 0
+        && request.resource.data.klubbRolle in ['trener', 'spiller', 'annet'];
+      allow update: if (erEier(uid)
+        && request.resource.data.rolle == resource.data.rolle
+        && request.resource.data.poeng == resource.data.poeng)
+        || erAdmin();
+      allow delete: if erAdmin();
+    }
+
+    // Kamper: alle innloggede kan lese, bare admin skriver.
+    match /kamper/{matchId} {
+      allow read: if erInnlogget();
+      allow write: if erAdmin();
+    }
+
+    // Tips: alle innloggede kan lese, eier kan opprette/oppdatere/slette
+    // egne tipps frem til kampstart.
+    match /tips/{tipId} {
+      allow read: if erInnlogget();
+      allow create: if erInnlogget()
+        && request.resource.data.uid == request.auth.uid
+        && kampAapen(request.resource.data.matchId);
+      allow update: if resource.data.uid == request.auth.uid
+        && kampAapen(resource.data.matchId);
+      allow delete: if (resource.data.uid == request.auth.uid
+        && kampAapen(resource.data.matchId))
+        || erAdmin();
+    }
+
+    // Spesialtips: alle kan lese (for ledertavle), eier skriver egen
+    // frem til 1 time før VM-start.
+    match /spesialtips/{uid} {
+      allow read: if erInnlogget();
+      allow create, update: if erEier(uid) && spesialAapen();
+      allow delete: if (erEier(uid) && spesialAapen()) || erAdmin();
+    }
+
+    // Fasit: alle kan lese, bare admin skriver.
+    match /fasit/{dok} {
+      allow read: if erInnlogget();
+      allow write: if erAdmin();
+    }
+
+    // Aggregert ledertavle: alle kan lese, ingen klient kan skrive.
+    // Skrives kun av GitHub Actions med service account (admin SDK
+    // omgår rules — så ingen klientregel for write trenges).
+    match /aggregert/{dok} {
+      allow read: if erInnlogget();
+      allow write: if false;
+    }
+  }
+}

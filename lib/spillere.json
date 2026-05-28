@@ -1,0 +1,5158 @@
+{
+  "Tsjekkia": [
+    {
+      "navn": "Matěj Kovář",
+      "pos": "GK"
+    },
+    {
+      "navn": "Jindřich Staněk",
+      "pos": "GK"
+    },
+    {
+      "navn": "Lukáš Horníček",
+      "pos": "GK"
+    },
+    {
+      "navn": "Vladimír Coufal",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tomáš Holeš",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ladislav Krejčí",
+      "pos": "DF"
+    },
+    {
+      "navn": "David Zima",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jaroslav Zelený",
+      "pos": "DF"
+    },
+    {
+      "navn": "David Jurásek",
+      "pos": "DF"
+    },
+    {
+      "navn": "David Douděra",
+      "pos": "DF"
+    },
+    {
+      "navn": "Robin Hranáč",
+      "pos": "DF"
+    },
+    {
+      "navn": "Štěpán Chaloupek",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tomáš Souček",
+      "pos": "MF"
+    },
+    {
+      "navn": "Vladimír Darida",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lukáš Provod",
+      "pos": "MF"
+    },
+    {
+      "navn": "Michal Sadílek",
+      "pos": "MF"
+    },
+    {
+      "navn": "Pavel Šulc",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lukáš Červ",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tomáš Ladra",
+      "pos": "MF"
+    },
+    {
+      "navn": "Pavel Bucha",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hugo Sochůrek",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexandr Sojka",
+      "pos": "MF"
+    },
+    {
+      "navn": "Denis Višinský",
+      "pos": "MF"
+    },
+    {
+      "navn": "Patrik Schick",
+      "pos": "FW"
+    },
+    {
+      "navn": "Adam Hložek",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jan Kuchta",
+      "pos": "FW"
+    },
+    {
+      "navn": "Tomáš Chorý",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mojmír Chytil",
+      "pos": "FW"
+    },
+    {
+      "navn": "Christophe Kabongo",
+      "pos": "FW"
+    }
+  ],
+  "Mexico": [
+    {
+      "navn": "Guillermo Ochoa",
+      "pos": "GK"
+    },
+    {
+      "navn": "Raúl Rangel",
+      "pos": "GK"
+    },
+    {
+      "navn": "Carlos Acevedo",
+      "pos": "GK"
+    },
+    {
+      "navn": "José Antonio Rodríguez",
+      "pos": "GK"
+    },
+    {
+      "navn": "Carlos Moreno",
+      "pos": "GK"
+    },
+    {
+      "navn": "Alex Padilla",
+      "pos": "GK"
+    },
+    {
+      "navn": "Jesús Gallardo",
+      "pos": "DF"
+    },
+    {
+      "navn": "César Montes",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jorge Sánchez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Johan Vásquez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Israel Reyes",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jesús Alberto Angulo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Julián Araujo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mateo Chávez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Víctor Guzmán",
+      "pos": "DF"
+    },
+    {
+      "navn": "Richard Ledezma",
+      "pos": "DF"
+    },
+    {
+      "navn": "Everardo López",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alejandro Gómez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Bryan González",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ramón Juárez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Edson Álvarez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Orbelín Pineda",
+      "pos": "MF"
+    },
+    {
+      "navn": "Carlos Rodríguez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Roberto Alvarado",
+      "pos": "MF"
+    },
+    {
+      "navn": "Luis Romo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Luis Chávez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Érick Sánchez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Diego Lainez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Érik Lira",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marcel Ruiz",
+      "pos": "MF"
+    },
+    {
+      "navn": "Efraín Álvarez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Brian Gutiérrez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Gilberto Mora",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexis Gutiérrez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Obed Vargas",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jesús Ricardo Angulo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kevin Castañeda",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jordán Carrillo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Álvaro Fidalgo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jorge Ruvalcaba",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexéi Domínguez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jeremy Márquez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Elías Montiel",
+      "pos": "MF"
+    },
+    {
+      "navn": "Raúl Jiménez",
+      "pos": "FW"
+    },
+    {
+      "navn": "Alexis Vega",
+      "pos": "FW"
+    },
+    {
+      "navn": "Santiago Giménez",
+      "pos": "FW"
+    },
+    {
+      "navn": "César Huerta",
+      "pos": "FW"
+    },
+    {
+      "navn": "Julián Quiñones",
+      "pos": "FW"
+    },
+    {
+      "navn": "Guillermo Martínez",
+      "pos": "FW"
+    },
+    {
+      "navn": "Germán Berterame",
+      "pos": "FW"
+    },
+    {
+      "navn": "Armando González",
+      "pos": "FW"
+    }
+  ],
+  "Sør-Afrika": [
+    {
+      "navn": "Ronwen Williams",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ricardo Goss",
+      "pos": "GK"
+    },
+    {
+      "navn": "Sipho Chaine",
+      "pos": "GK"
+    },
+    {
+      "navn": "Aubrey Modiba",
+      "pos": "DF"
+    },
+    {
+      "navn": "Khuliso Mudau",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nkosinathi Sibisi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mbekezeli Mbokazi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ime Okon",
+      "pos": "DF"
+    },
+    {
+      "navn": "Samukele Kabini",
+      "pos": "DF"
+    },
+    {
+      "navn": "Khulumani Ndamane",
+      "pos": "DF"
+    },
+    {
+      "navn": "Thabang Matuludi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kamogelo Sebelebele",
+      "pos": "DF"
+    },
+    {
+      "navn": "Bradley Cross",
+      "pos": "DF"
+    },
+    {
+      "navn": "Olwethu Makhanya",
+      "pos": "DF"
+    },
+    {
+      "navn": "Teboho Mokoena",
+      "pos": "MF"
+    },
+    {
+      "navn": "Sphephelo Sithole",
+      "pos": "MF"
+    },
+    {
+      "navn": "Thalente Mbatha",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jayden Adams",
+      "pos": "MF"
+    },
+    {
+      "navn": "Themba Zwane",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lyle Foster",
+      "pos": "FW"
+    },
+    {
+      "navn": "Evidence Makgopa",
+      "pos": "FW"
+    },
+    {
+      "navn": "Oswin Appollis",
+      "pos": "FW"
+    },
+    {
+      "navn": "Iqraam Rayners",
+      "pos": "FW"
+    },
+    {
+      "navn": "Relebohile Mofokeng",
+      "pos": "FW"
+    },
+    {
+      "navn": "Thapelo Maseko",
+      "pos": "FW"
+    },
+    {
+      "navn": "Tshepang Moremi",
+      "pos": "FW"
+    }
+  ],
+  "Sør-Korea": [
+    {
+      "navn": "Kim Seung-gyu",
+      "pos": "GK"
+    },
+    {
+      "navn": "Jo Hyeon-woo",
+      "pos": "GK"
+    },
+    {
+      "navn": "Song Bum-keun",
+      "pos": "GK"
+    },
+    {
+      "navn": "Kim Min-jae",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kim Moon-hwan",
+      "pos": "DF"
+    },
+    {
+      "navn": "Seol Young-woo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Cho Yu-min",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lee Tae-seok",
+      "pos": "DF"
+    },
+    {
+      "navn": "Park Jin-seob",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kim Tae-hyeon",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lee Han-beom",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jens Castrop",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lee Ki-hyuk",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lee Jae-sung",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hwang Hee-chan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hwang In-beom",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lee Kang-in",
+      "pos": "MF"
+    },
+    {
+      "navn": "Paik Seung-ho",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kim Jin-gyu",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lee Dong-gyeong",
+      "pos": "MF"
+    },
+    {
+      "navn": "Bae Jun-ho",
+      "pos": "MF"
+    },
+    {
+      "navn": "Eom Ji-sung",
+      "pos": "MF"
+    },
+    {
+      "navn": "Yang Hyun-jun",
+      "pos": "MF"
+    },
+    {
+      "navn": "Son Heung-min",
+      "pos": "FW"
+    },
+    {
+      "navn": "Cho Gue-sung",
+      "pos": "FW"
+    },
+    {
+      "navn": "Oh Hyeon-gyu",
+      "pos": "FW"
+    }
+  ],
+  "Bosnia-Hercegovina": [
+    {
+      "navn": "Nikola Vasilj",
+      "pos": "GK"
+    },
+    {
+      "navn": "Martin Zlomislić",
+      "pos": "GK"
+    },
+    {
+      "navn": "Osman Hadžikić",
+      "pos": "GK"
+    },
+    {
+      "navn": "Sead Kolašinac",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dennis Hadžikadunić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Amar Dedić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nikola Katić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tarik Muharemović",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nihad Mujakić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Stjepan Radeljić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nidal Čelik",
+      "pos": "DF"
+    },
+    {
+      "navn": "Amir Hadžiahmetović",
+      "pos": "MF"
+    },
+    {
+      "navn": "Benjamin Tahirović",
+      "pos": "MF"
+    },
+    {
+      "navn": "Armin Gigović",
+      "pos": "MF"
+    },
+    {
+      "navn": "Dženis Burnić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ivan Bašić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Esmir Bajraktarević",
+      "pos": "MF"
+    },
+    {
+      "navn": "Amar Memić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ivan Šunjić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kerim Alajbegović",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ermin Mahmić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Edin Džeko",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ermedin Demirović",
+      "pos": "FW"
+    },
+    {
+      "navn": "Samed Baždar",
+      "pos": "FW"
+    },
+    {
+      "navn": "Haris Tabaković",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jovo Lukić",
+      "pos": "FW"
+    }
+  ],
+  "Canada": [
+    {
+      "navn": "Maxime Crépeau",
+      "pos": "GK"
+    },
+    {
+      "navn": "Dayne St. Clair",
+      "pos": "GK"
+    },
+    {
+      "navn": "Owen Goodman",
+      "pos": "GK"
+    },
+    {
+      "navn": "Richie Laryea",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alphonso Davies",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alistair Johnston",
+      "pos": "DF"
+    },
+    {
+      "navn": "Derek Cornelius",
+      "pos": "DF"
+    },
+    {
+      "navn": "Moïse Bombito",
+      "pos": "DF"
+    },
+    {
+      "navn": "Niko Sigur",
+      "pos": "DF"
+    },
+    {
+      "navn": "Joel Waterman",
+      "pos": "DF"
+    },
+    {
+      "navn": "Luc de Fougerolles",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zorhan Bassong",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jamie Knight-Lebel",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ralph Priso",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alfie Jones",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jonathan Osorio",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tajon Buchanan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Stephen Eustáquio",
+      "pos": "MF"
+    },
+    {
+      "navn": "Liam Millar",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ismaël Koné",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jacob Shaffelburg",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ali Ahmed",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mathieu Choinière",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nathan Saliba",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jayden Nelson",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marcelo Flores",
+      "pos": "MF"
+    },
+    {
+      "navn": "Cyle Larin",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jonathan David",
+      "pos": "FW"
+    },
+    {
+      "navn": "Tani Oluwaseyi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Promise David",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jacen Russell-Rowe",
+      "pos": "FW"
+    },
+    {
+      "navn": "Daniel Jebbison",
+      "pos": "FW"
+    }
+  ],
+  "Qatar": [
+    {
+      "navn": "Meshaal Barsham",
+      "pos": "GK"
+    },
+    {
+      "navn": "Salah Zakaria",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mahmud Abunada",
+      "pos": "GK"
+    },
+    {
+      "navn": "Shehab Ellethy",
+      "pos": "GK"
+    },
+    {
+      "navn": "Boualem Khoukhi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Pedro Miguel",
+      "pos": "DF"
+    },
+    {
+      "navn": "Homam Ahmed",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lucas Mendes",
+      "pos": "DF"
+    },
+    {
+      "navn": "Sultan Al-Brake",
+      "pos": "DF"
+    },
+    {
+      "navn": "Al-Hashmi Al-Hussain",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ayoub Al-Oui",
+      "pos": "DF"
+    },
+    {
+      "navn": "Issa Laye",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdulaziz Hatem",
+      "pos": "MF"
+    },
+    {
+      "navn": "Karim Boudiaf",
+      "pos": "MF"
+    },
+    {
+      "navn": "Assim Madibo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ahmed Fathy",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jassem Gaber",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohamed Al-Mannai",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tahsin Jamshid",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hassan Al-Haydos",
+      "pos": "FW"
+    },
+    {
+      "navn": "Akram Afif",
+      "pos": "FW"
+    },
+    {
+      "navn": "Almoez Ali",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mohammed Muntari",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ahmed Alaaeldin",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yusuf Abdurisag",
+      "pos": "FW"
+    },
+    {
+      "navn": "Edmilson Junior",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ahmed Al-Ganehi",
+      "pos": "FW"
+    }
+  ],
+  "Sveits": [
+    {
+      "navn": "Gregor Kobel",
+      "pos": "GK"
+    },
+    {
+      "navn": "Miro Muheim",
+      "pos": "DF"
+    },
+    {
+      "navn": "Silvan Widmer",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nico Elvedi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Manuel Akanji",
+      "pos": "DF"
+    },
+    {
+      "navn": "Denis Zakaria",
+      "pos": "MF"
+    },
+    {
+      "navn": "Breel Embolo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Remo Freuler",
+      "pos": "MF"
+    },
+    {
+      "navn": "Johan Manzambi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Granit Xhaka",
+      "pos": "MF"
+    },
+    {
+      "navn": "Dan Ndoye",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yvon Mvogo",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ricardo Rodriguez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ardon Jashari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Djibril Sow",
+      "pos": "MF"
+    },
+    {
+      "navn": "Christian Fassnacht",
+      "pos": "MF"
+    },
+    {
+      "navn": "Rubén Vargas",
+      "pos": "FW"
+    },
+    {
+      "navn": "Eray Cömert",
+      "pos": "DF"
+    },
+    {
+      "navn": "Noah Okafor",
+      "pos": "FW"
+    },
+    {
+      "navn": "Michel Aebischer",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marvin Keller",
+      "pos": "GK"
+    },
+    {
+      "navn": "Fabian Rieder",
+      "pos": "MF"
+    },
+    {
+      "navn": "Zeki Amdouni",
+      "pos": "FW"
+    },
+    {
+      "navn": "Aurèle Amenda",
+      "pos": "DF"
+    },
+    {
+      "navn": "Luca Jaquez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Cedric Itten",
+      "pos": "FW"
+    }
+  ],
+  "Brasil": [
+    {
+      "navn": "Alisson",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ederson",
+      "pos": "GK"
+    },
+    {
+      "navn": "Weverton",
+      "pos": "GK"
+    },
+    {
+      "navn": "Marquinhos",
+      "pos": "DF"
+    },
+    {
+      "navn": "Danilo Luiz",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alex Sandro",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gabriel Magalhães",
+      "pos": "DF"
+    },
+    {
+      "navn": "Bremer",
+      "pos": "DF"
+    },
+    {
+      "navn": "Wesley",
+      "pos": "DF"
+    },
+    {
+      "navn": "Roger Ibañez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Douglas Santos",
+      "pos": "DF"
+    },
+    {
+      "navn": "Léo Pereira",
+      "pos": "DF"
+    },
+    {
+      "navn": "Casemiro",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lucas Paquetá",
+      "pos": "MF"
+    },
+    {
+      "navn": "Bruno Guimarães",
+      "pos": "MF"
+    },
+    {
+      "navn": "Fabinho",
+      "pos": "MF"
+    },
+    {
+      "navn": "Danilo Santos",
+      "pos": "MF"
+    },
+    {
+      "navn": "Neymar",
+      "pos": "FW"
+    },
+    {
+      "navn": "Vinícius Júnior",
+      "pos": "FW"
+    },
+    {
+      "navn": "Raphinha",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gabriel Martinelli",
+      "pos": "FW"
+    },
+    {
+      "navn": "Matheus Cunha",
+      "pos": "FW"
+    },
+    {
+      "navn": "Endrick",
+      "pos": "FW"
+    },
+    {
+      "navn": "Luiz Henrique",
+      "pos": "FW"
+    },
+    {
+      "navn": "Igor Thiago",
+      "pos": "FW"
+    },
+    {
+      "navn": "Rayan",
+      "pos": "FW"
+    }
+  ],
+  "Haiti": [
+    {
+      "navn": "Johny Placide",
+      "pos": "GK"
+    },
+    {
+      "navn": "Alexandre Pierre",
+      "pos": "GK"
+    },
+    {
+      "navn": "Josué Duverger",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ricardo Adé",
+      "pos": "DF"
+    },
+    {
+      "navn": "Carlens Arcus",
+      "pos": "DF"
+    },
+    {
+      "navn": "Martin Expérience",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jean-Kévin Duverne",
+      "pos": "DF"
+    },
+    {
+      "navn": "Duke Lacroix",
+      "pos": "DF"
+    },
+    {
+      "navn": "Wilguens Paugain",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hannes Delcroix",
+      "pos": "DF"
+    },
+    {
+      "navn": "Keeto Thermoncy",
+      "pos": "DF"
+    },
+    {
+      "navn": "Leverton Pierre",
+      "pos": "MF"
+    },
+    {
+      "navn": "Danley Jean Jacques",
+      "pos": "MF"
+    },
+    {
+      "navn": "Carl Sainté",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jean-Ricner Bellegarde",
+      "pos": "MF"
+    },
+    {
+      "navn": "Woodensky Pierre",
+      "pos": "MF"
+    },
+    {
+      "navn": "Dominique Simon",
+      "pos": "MF"
+    },
+    {
+      "navn": "Duckens Nazon",
+      "pos": "FW"
+    },
+    {
+      "navn": "Frantzdy Pierrot",
+      "pos": "FW"
+    },
+    {
+      "navn": "Derrick Etienne Jr.",
+      "pos": "FW"
+    },
+    {
+      "navn": "Louicius Deedson",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ruben Providence",
+      "pos": "FW"
+    },
+    {
+      "navn": "Josué Casimir",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yassin Fortuné",
+      "pos": "FW"
+    },
+    {
+      "navn": "Wilson Isidor",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lenny Joseph",
+      "pos": "FW"
+    }
+  ],
+  "Marokko": [
+    {
+      "navn": "Yassine Bounou",
+      "pos": "GK"
+    },
+    {
+      "navn": "Munir Mohamedi",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ahmed Reda Tagnaouti",
+      "pos": "GK"
+    },
+    {
+      "navn": "Achraf Hakimi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nayef Aguerd",
+      "pos": "DF"
+    },
+    {
+      "navn": "Noussair Mazraoui",
+      "pos": "DF"
+    },
+    {
+      "navn": "Youssef Belammari",
+      "pos": "DF"
+    },
+    {
+      "navn": "Anass Salah-Eddine",
+      "pos": "DF"
+    },
+    {
+      "navn": "Chadi Riad",
+      "pos": "DF"
+    },
+    {
+      "navn": "Issa Diop",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zakaria El Ouahdi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Redouane Halhal",
+      "pos": "DF"
+    },
+    {
+      "navn": "Sofyan Amrabat",
+      "pos": "MF"
+    },
+    {
+      "navn": "Azzedine Ounahi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Bilal El Khannouss",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ismael Saibari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Neil El Aynaoui",
+      "pos": "MF"
+    },
+    {
+      "navn": "Samir El Mourabet",
+      "pos": "MF"
+    },
+    {
+      "navn": "Gessime Yassine",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ayyoub Bouaddi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ayoub El Kaabi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Abde Ezzalzouli",
+      "pos": "FW"
+    },
+    {
+      "navn": "Soufiane Rahimi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Brahim Díaz",
+      "pos": "FW"
+    },
+    {
+      "navn": "Chemsdine Talbi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ayoube Amaimouni",
+      "pos": "FW"
+    }
+  ],
+  "Skottland": [
+    {
+      "navn": "Craig Gordon",
+      "pos": "GK"
+    },
+    {
+      "navn": "Angus Gunn",
+      "pos": "GK"
+    },
+    {
+      "navn": "Liam Kelly",
+      "pos": "GK"
+    },
+    {
+      "navn": "Andy Robertson",
+      "pos": "DF"
+    },
+    {
+      "navn": "Grant Hanley",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kieran Tierney",
+      "pos": "DF"
+    },
+    {
+      "navn": "Scott McKenna",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jack Hendry",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nathan Patterson",
+      "pos": "DF"
+    },
+    {
+      "navn": "Anthony Ralston",
+      "pos": "DF"
+    },
+    {
+      "navn": "John Souttar",
+      "pos": "DF"
+    },
+    {
+      "navn": "Aaron Hickey",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dominic Hyam",
+      "pos": "DF"
+    },
+    {
+      "navn": "John McGinn",
+      "pos": "MF"
+    },
+    {
+      "navn": "Scott McTominay",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ryan Christie",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kenny McLean",
+      "pos": "MF"
+    },
+    {
+      "navn": "Billy Gilmour",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lewis Ferguson",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ben Gannon-Doak",
+      "pos": "MF"
+    },
+    {
+      "navn": "Findlay Curtis",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lyndon Dykes",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ché Adams",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lawrence Shankland",
+      "pos": "FW"
+    },
+    {
+      "navn": "George Hirst",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ross Stewart",
+      "pos": "FW"
+    }
+  ],
+  "Paraguay": [
+    {
+      "navn": "Gatito Fernández",
+      "pos": "GK"
+    },
+    {
+      "navn": "Carlos Coronel",
+      "pos": "GK"
+    },
+    {
+      "navn": "Orlando Gill",
+      "pos": "GK"
+    },
+    {
+      "navn": "Santiago Rojas",
+      "pos": "GK"
+    },
+    {
+      "navn": "Juan Espínola",
+      "pos": "GK"
+    },
+    {
+      "navn": "Gastón Olveira",
+      "pos": "GK"
+    },
+    {
+      "navn": "Gustavo Gómez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Júnior Alonso",
+      "pos": "DF"
+    },
+    {
+      "navn": "Fabián Balbuena",
+      "pos": "DF"
+    },
+    {
+      "navn": "Omar Alderete",
+      "pos": "DF"
+    },
+    {
+      "navn": "Juan José Cáceres",
+      "pos": "DF"
+    },
+    {
+      "navn": "Blas Riveros",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gustavo Velázquez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alan Benítez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Agustín Sández",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mateo Gamarra",
+      "pos": "DF"
+    },
+    {
+      "navn": "Saúl Salcedo",
+      "pos": "DF"
+    },
+    {
+      "navn": "José Canale",
+      "pos": "DF"
+    },
+    {
+      "navn": "Diego León",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alexandro Maidana",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alcides Benítez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ronaldo Dejesús",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alan Núñez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Miguel Almirón",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mathías Villasanti",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kaku",
+      "pos": "MF"
+    },
+    {
+      "navn": "Andrés Cubas",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ramón Sosa",
+      "pos": "MF"
+    },
+    {
+      "navn": "Diego Gómez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Damián Bobadilla",
+      "pos": "MF"
+    },
+    {
+      "navn": "Braian Ojeda",
+      "pos": "MF"
+    },
+    {
+      "navn": "Matías Galarza",
+      "pos": "MF"
+    },
+    {
+      "navn": "Robert Piris Da Motta",
+      "pos": "MF"
+    },
+    {
+      "navn": "Álvaro Campuzano",
+      "pos": "MF"
+    },
+    {
+      "navn": "Diego González",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hugo Cuenca",
+      "pos": "MF"
+    },
+    {
+      "navn": "Maurício",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lucas Romero",
+      "pos": "MF"
+    },
+    {
+      "navn": "Enso González",
+      "pos": "MF"
+    },
+    {
+      "navn": "Rubén Lezcano",
+      "pos": "MF"
+    },
+    {
+      "navn": "Óscar Romero",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ángel Romero",
+      "pos": "FW"
+    },
+    {
+      "navn": "Antonio Sanabria",
+      "pos": "FW"
+    },
+    {
+      "navn": "Julio Enciso",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gabriel Ávalos",
+      "pos": "FW"
+    },
+    {
+      "navn": "Carlos González",
+      "pos": "FW"
+    },
+    {
+      "navn": "Álex Arce",
+      "pos": "FW"
+    },
+    {
+      "navn": "Adam Bareiro",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lorenzo Melgarejo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Isidro Pitta",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ronaldo Martínez",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gustavo Caballero",
+      "pos": "FW"
+    },
+    {
+      "navn": "Robert Morales",
+      "pos": "FW"
+    },
+    {
+      "navn": "Rodney Redes",
+      "pos": "FW"
+    }
+  ],
+  "Tyrkia": [
+    {
+      "navn": "Uğurcan Çakır",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mert Günok",
+      "pos": "GK"
+    },
+    {
+      "navn": "Altay Bayındır",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ersin Destanoğlu",
+      "pos": "GK"
+    },
+    {
+      "navn": "Muhammed Şengezer",
+      "pos": "GK"
+    },
+    {
+      "navn": "Merih Demiral",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zeki Çelik",
+      "pos": "DF"
+    },
+    {
+      "navn": "Çağlar Söyüncü",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mert Müldür",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ferdi Kadıoğlu",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ozan Kabak",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdülkerim Bardakcı",
+      "pos": "DF"
+    },
+    {
+      "navn": "Eren Elmalı",
+      "pos": "DF"
+    },
+    {
+      "navn": "Samet Akaydin",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yusuf Akçiçek",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mustafa Eskihellaç",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ahmetcan Kaplan",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hakan Çalhanoğlu",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kaan Ayhan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Orkun Kökçü",
+      "pos": "MF"
+    },
+    {
+      "navn": "İsmail Yüksek",
+      "pos": "MF"
+    },
+    {
+      "navn": "Salih Özcan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Atakan Karazor",
+      "pos": "MF"
+    },
+    {
+      "navn": "Demir Ege Tıknaz",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kerem Aktürkoğlu",
+      "pos": "FW"
+    },
+    {
+      "navn": "İrfan Can Kahveci",
+      "pos": "FW"
+    },
+    {
+      "navn": "Barış Alper Yılmaz",
+      "pos": "FW"
+    },
+    {
+      "navn": "Arda Güler",
+      "pos": "FW"
+    },
+    {
+      "navn": "Kenan Yıldız",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yunus Akgün",
+      "pos": "FW"
+    },
+    {
+      "navn": "Oğuz Aydın",
+      "pos": "FW"
+    },
+    {
+      "navn": "Deniz Gül",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yusuf Sarı",
+      "pos": "FW"
+    },
+    {
+      "navn": "Can Uzun",
+      "pos": "FW"
+    },
+    {
+      "navn": "Aral Şimşir",
+      "pos": "FW"
+    }
+  ],
+  "USA": [
+    {
+      "navn": "Matt Turner",
+      "pos": "GK"
+    },
+    {
+      "navn": "Sergiño Dest",
+      "pos": "DF"
+    },
+    {
+      "navn": "Chris Richards",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tyler Adams",
+      "pos": "MF"
+    },
+    {
+      "navn": "Antonee Robinson",
+      "pos": "DF"
+    },
+    {
+      "navn": "Auston Trusty",
+      "pos": "DF"
+    },
+    {
+      "navn": "Giovanni Reyna",
+      "pos": "MF"
+    },
+    {
+      "navn": "Weston McKennie",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ricardo Pepi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Christian Pulisic",
+      "pos": "FW"
+    },
+    {
+      "navn": "Brenden Aaronson",
+      "pos": "FW"
+    },
+    {
+      "navn": "Miles Robinson",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tim Ream",
+      "pos": "DF"
+    },
+    {
+      "navn": "Sebastian Berhalter",
+      "pos": "MF"
+    },
+    {
+      "navn": "Cristian Roldan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alex Freeman",
+      "pos": "DF"
+    },
+    {
+      "navn": "Malik Tillman",
+      "pos": "MF"
+    },
+    {
+      "navn": "Maximilian Arfsten",
+      "pos": "DF"
+    },
+    {
+      "navn": "Haji Wright",
+      "pos": "FW"
+    },
+    {
+      "navn": "Folarin Balogun",
+      "pos": "FW"
+    },
+    {
+      "navn": "Timothy Weah",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mark McKenzie",
+      "pos": "DF"
+    },
+    {
+      "navn": "Joe Scally",
+      "pos": "DF"
+    },
+    {
+      "navn": "Matt Freese",
+      "pos": "GK"
+    },
+    {
+      "navn": "Chris Brady",
+      "pos": "GK"
+    },
+    {
+      "navn": "Alejandro Zendejas",
+      "pos": "FW"
+    }
+  ],
+  "Curaçao": [
+    {
+      "navn": "Eloy Room",
+      "pos": "GK"
+    },
+    {
+      "navn": "Trevor Doornbusch",
+      "pos": "GK"
+    },
+    {
+      "navn": "Tyrick Bodak",
+      "pos": "GK"
+    },
+    {
+      "navn": "Juriën Gaari",
+      "pos": "DF"
+    },
+    {
+      "navn": "Roshon van Eijma",
+      "pos": "DF"
+    },
+    {
+      "navn": "Sherel Floranus",
+      "pos": "DF"
+    },
+    {
+      "navn": "Joshua Brenet",
+      "pos": "DF"
+    },
+    {
+      "navn": "Shurandy Sambo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Armando Obispo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Riechedly Bazoer",
+      "pos": "DF"
+    },
+    {
+      "navn": "Deveron Fonville",
+      "pos": "DF"
+    },
+    {
+      "navn": "Leandro Bacuna",
+      "pos": "MF"
+    },
+    {
+      "navn": "Juninho Bacuna",
+      "pos": "MF"
+    },
+    {
+      "navn": "Godfried Roemeratoe",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kevin Felida",
+      "pos": "MF"
+    },
+    {
+      "navn": "Livano Comenencia",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ar'jany Martha",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tyrese Noslin",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kenji Gorré",
+      "pos": "FW"
+    },
+    {
+      "navn": "Brandley Kuwas",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gervane Kastaneer",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jeremy Antonisse",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jearl Margaritha",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jürgen Locadia",
+      "pos": "FW"
+    },
+    {
+      "navn": "Sontje Hansen",
+      "pos": "FW"
+    },
+    {
+      "navn": "Tahith Chong",
+      "pos": "FW"
+    }
+  ],
+  "Tyskland": [
+    {
+      "navn": "Manuel Neuer",
+      "pos": "GK"
+    },
+    {
+      "navn": "Antonio Rüdiger",
+      "pos": "DF"
+    },
+    {
+      "navn": "Waldemar Anton",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jonathan Tah",
+      "pos": "DF"
+    },
+    {
+      "navn": "Aleksandar Pavlović",
+      "pos": "MF"
+    },
+    {
+      "navn": "Joshua Kimmich",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kai Havertz",
+      "pos": "FW"
+    },
+    {
+      "navn": "Leon Goretzka",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jamie Leweling",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jamal Musiala",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nick Woltemade",
+      "pos": "FW"
+    },
+    {
+      "navn": "Oliver Baumann",
+      "pos": "GK"
+    },
+    {
+      "navn": "Pascal Groß",
+      "pos": "MF"
+    },
+    {
+      "navn": "Maximilian Beier",
+      "pos": "FW"
+    },
+    {
+      "navn": "Nico Schlotterbeck",
+      "pos": "DF"
+    },
+    {
+      "navn": "Angelo Stiller",
+      "pos": "MF"
+    },
+    {
+      "navn": "Florian Wirtz",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nathaniel Brown",
+      "pos": "DF"
+    },
+    {
+      "navn": "Leroy Sané",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nadiem Amiri",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexander Nübel",
+      "pos": "GK"
+    },
+    {
+      "navn": "David Raum",
+      "pos": "DF"
+    },
+    {
+      "navn": "Felix Nmecha",
+      "pos": "MF"
+    },
+    {
+      "navn": "Malick Thiaw",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lennart Karl",
+      "pos": "MF"
+    },
+    {
+      "navn": "Deniz Undav",
+      "pos": "FW"
+    }
+  ],
+  "Elfenbenskysten": [
+    {
+      "navn": "Yahia Fofana",
+      "pos": "GK"
+    },
+    {
+      "navn": "Alban Lafont",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mohamed Koné",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ghislain Konan",
+      "pos": "DF"
+    },
+    {
+      "navn": "Odilon Kossounou",
+      "pos": "DF"
+    },
+    {
+      "navn": "Wilfried Singo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Evan Ndicka",
+      "pos": "DF"
+    },
+    {
+      "navn": "Emmanuel Agbadou",
+      "pos": "DF"
+    },
+    {
+      "navn": "Guéla Doué",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ousmane Diomande",
+      "pos": "DF"
+    },
+    {
+      "navn": "Clément Akpa",
+      "pos": "DF"
+    },
+    {
+      "navn": "Franck Kessié",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jean Michaël Seri",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ibrahim Sangaré",
+      "pos": "MF"
+    },
+    {
+      "navn": "Seko Fofana",
+      "pos": "MF"
+    },
+    {
+      "navn": "Christ Inao Oulaï",
+      "pos": "MF"
+    },
+    {
+      "navn": "Parfait Guiagon",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nicolas Pépé",
+      "pos": "FW"
+    },
+    {
+      "navn": "Oumar Diakité",
+      "pos": "FW"
+    },
+    {
+      "navn": "Simon Adingra",
+      "pos": "FW"
+    },
+    {
+      "navn": "Evann Guessand",
+      "pos": "FW"
+    },
+    {
+      "navn": "Amad Diallo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yan Diomande",
+      "pos": "FW"
+    },
+    {
+      "navn": "Bazoumana Touré",
+      "pos": "FW"
+    },
+    {
+      "navn": "Elye Wahi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ange-Yoan Bonny",
+      "pos": "FW"
+    }
+  ],
+  "Japan": [
+    {
+      "navn": "Zion Suzuki",
+      "pos": "GK"
+    },
+    {
+      "navn": "Yukinari Sugawara",
+      "pos": "DF"
+    },
+    {
+      "navn": "Shōgo Taniguchi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kō Itakura",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yūto Nagatomo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Wataru Endo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ao Tanaka",
+      "pos": "MF"
+    },
+    {
+      "navn": "Takefusa Kubo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Keisuke Gotō",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ritsu Dōan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Daizen Maeda",
+      "pos": "FW"
+    },
+    {
+      "navn": "Keisuke Ōsako",
+      "pos": "GK"
+    },
+    {
+      "navn": "Keito Nakamura",
+      "pos": "MF"
+    },
+    {
+      "navn": "Junya Itō",
+      "pos": "MF"
+    },
+    {
+      "navn": "Daichi Kamada",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tsuyoshi Watanabe",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yuito Suzuki",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ayase Ueda",
+      "pos": "FW"
+    },
+    {
+      "navn": "Kōki Ogawa",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ayumu Seko",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hiroki Itō",
+      "pos": "DF"
+    },
+    {
+      "navn": "Takehiro Tomiyasu",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tomoki Hayakawa",
+      "pos": "GK"
+    },
+    {
+      "navn": "Kaishū Sano",
+      "pos": "MF"
+    },
+    {
+      "navn": "Junnosuke Suzuki",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kento Shiogai",
+      "pos": "FW"
+    }
+  ],
+  "Nederland": [
+    {
+      "navn": "Bart Verbruggen",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mark Flekken",
+      "pos": "GK"
+    },
+    {
+      "navn": "Robin Roefs",
+      "pos": "GK"
+    },
+    {
+      "navn": "Virgil van Dijk",
+      "pos": "DF"
+    },
+    {
+      "navn": "Denzel Dumfries",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nathan Aké",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jurriën Timber",
+      "pos": "DF"
+    },
+    {
+      "navn": "Micky van de Ven",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mats Wieffer",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jan Paul van Hecke",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jorrel Hato",
+      "pos": "DF"
+    },
+    {
+      "navn": "Frenkie de Jong",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marten de Roon",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tijjani Reijnders",
+      "pos": "MF"
+    },
+    {
+      "navn": "Teun Koopmeiners",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ryan Gravenberch",
+      "pos": "MF"
+    },
+    {
+      "navn": "Justin Kluivert",
+      "pos": "MF"
+    },
+    {
+      "navn": "Quinten Timber",
+      "pos": "MF"
+    },
+    {
+      "navn": "Guus Til",
+      "pos": "MF"
+    },
+    {
+      "navn": "Memphis Depay",
+      "pos": "FW"
+    },
+    {
+      "navn": "Wout Weghorst",
+      "pos": "FW"
+    },
+    {
+      "navn": "Donyell Malen",
+      "pos": "FW"
+    },
+    {
+      "navn": "Cody Gakpo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Noa Lang",
+      "pos": "FW"
+    },
+    {
+      "navn": "Brian Brobbey",
+      "pos": "FW"
+    },
+    {
+      "navn": "Crysencio Summerville",
+      "pos": "FW"
+    }
+  ],
+  "Sverige": [
+    {
+      "navn": "Jacob Widell Zetterström",
+      "pos": "GK"
+    },
+    {
+      "navn": "Gustaf Lagerbielke",
+      "pos": "DF"
+    },
+    {
+      "navn": "Victor Lindelöf",
+      "pos": "DF"
+    },
+    {
+      "navn": "Isak Hien",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gabriel Gudmundsson",
+      "pos": "DF"
+    },
+    {
+      "navn": "Emil Holm",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lucas Bergvall",
+      "pos": "MF"
+    },
+    {
+      "navn": "Daniel Svensson",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alexander Isak",
+      "pos": "FW"
+    },
+    {
+      "navn": "Benjamin Nygren",
+      "pos": "FW"
+    },
+    {
+      "navn": "Anthony Elanga",
+      "pos": "FW"
+    },
+    {
+      "navn": "Viktor Johansson",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ken Sema",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hjalmar Ekdal",
+      "pos": "DF"
+    },
+    {
+      "navn": "Carl Starfelt",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jesper Karlström",
+      "pos": "MF"
+    },
+    {
+      "navn": "Viktor Gyökeres",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yasin Ayari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mattias Svanberg",
+      "pos": "MF"
+    },
+    {
+      "navn": "Eric Smith",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alexander Bernhardsson",
+      "pos": "FW"
+    },
+    {
+      "navn": "Besfort Zeneli",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kristoffer Nordfeldt",
+      "pos": "GK"
+    },
+    {
+      "navn": "Elliot Stroud",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gustaf Nilsson",
+      "pos": "FW"
+    },
+    {
+      "navn": "Taha Ali",
+      "pos": "FW"
+    }
+  ],
+  "Tunisia": [
+    {
+      "navn": "Aymen Dahmen",
+      "pos": "GK"
+    },
+    {
+      "navn": "Sabri Ben Hessen",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mouhib Chamakh",
+      "pos": "GK"
+    },
+    {
+      "navn": "Montassar Talbi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dylan Bronn",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ali Abdi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yan Valery",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mohamed Amine Ben Hamida",
+      "pos": "DF"
+    },
+    {
+      "navn": "Moutaz Neffati",
+      "pos": "DF"
+    },
+    {
+      "navn": "Omar Rekik",
+      "pos": "DF"
+    },
+    {
+      "navn": "Adem Arous",
+      "pos": "DF"
+    },
+    {
+      "navn": "Raed Chikhaoui",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ellyes Skhiri",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hannibal Mejbri",
+      "pos": "MF"
+    },
+    {
+      "navn": "Anis Ben Slimane",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mortadha Ben Ouanes",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ismaël Gharbi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hadj Mahmoud",
+      "pos": "MF"
+    },
+    {
+      "navn": "Rani Khedira",
+      "pos": "MF"
+    },
+    {
+      "navn": "Elias Achouri",
+      "pos": "FW"
+    },
+    {
+      "navn": "Firas Chaouat",
+      "pos": "FW"
+    },
+    {
+      "navn": "Hazem Mastouri",
+      "pos": "FW"
+    },
+    {
+      "navn": "Elias Saad",
+      "pos": "FW"
+    },
+    {
+      "navn": "Sebastian Tounekti",
+      "pos": "FW"
+    },
+    {
+      "navn": "Khalil Ayari",
+      "pos": "FW"
+    },
+    {
+      "navn": "Rayan Elloumi",
+      "pos": "FW"
+    }
+  ],
+  "Belgia": [
+    {
+      "navn": "Thibaut Courtois",
+      "pos": "GK"
+    },
+    {
+      "navn": "Senne Lammens",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mike Penders",
+      "pos": "GK"
+    },
+    {
+      "navn": "Thomas Meunier",
+      "pos": "DF"
+    },
+    {
+      "navn": "Timothy Castagne",
+      "pos": "DF"
+    },
+    {
+      "navn": "Arthur Theate",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zeno Debast",
+      "pos": "DF"
+    },
+    {
+      "navn": "Maxim De Cuyper",
+      "pos": "DF"
+    },
+    {
+      "navn": "Brandon Mechele",
+      "pos": "DF"
+    },
+    {
+      "navn": "Koni De Winter",
+      "pos": "DF"
+    },
+    {
+      "navn": "Joaquin Seys",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nathan Ngoy",
+      "pos": "DF"
+    },
+    {
+      "navn": "Axel Witsel",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kevin De Bruyne",
+      "pos": "MF"
+    },
+    {
+      "navn": "Youri Tielemans",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hans Vanaken",
+      "pos": "MF"
+    },
+    {
+      "navn": "Amadou Onana",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nicolas Raskin",
+      "pos": "MF"
+    },
+    {
+      "navn": "Romelu Lukaku",
+      "pos": "FW"
+    },
+    {
+      "navn": "Leandro Trossard",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jérémy Doku",
+      "pos": "FW"
+    },
+    {
+      "navn": "Dodi Lukébakio",
+      "pos": "FW"
+    },
+    {
+      "navn": "Charles De Ketelaere",
+      "pos": "FW"
+    },
+    {
+      "navn": "Alexis Saelemaekers",
+      "pos": "FW"
+    },
+    {
+      "navn": "Diego Moreira",
+      "pos": "FW"
+    },
+    {
+      "navn": "Matias Fernandez-Pardo",
+      "pos": "FW"
+    }
+  ],
+  "Egypt": [
+    {
+      "navn": "Mohamed El Shenawy",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mostafa Shobeir",
+      "pos": "GK"
+    },
+    {
+      "navn": "El Mahdy Soliman",
+      "pos": "GK"
+    },
+    {
+      "navn": "Hamdy Fathy",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ramy Rabia",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mohamed Hany",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ahmed Fatouh",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mohamed Abdelmonem",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yasser Ibrahim",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hossam Abdelmaguid",
+      "pos": "DF"
+    },
+    {
+      "navn": "Karim Hafez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tarek Alaa",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marwan Attia",
+      "pos": "MF"
+    },
+    {
+      "navn": "Emam Ashour",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohanad Lasheen",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mahmoud Saber",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nabil Emad",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohamed Salah",
+      "pos": "FW"
+    },
+    {
+      "navn": "Trézéguet",
+      "pos": "FW"
+    },
+    {
+      "navn": "Zizo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Omar Marmoush",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ibrahim Adel",
+      "pos": "FW"
+    },
+    {
+      "navn": "Haissem Hassan",
+      "pos": "FW"
+    },
+    {
+      "navn": "Hamza Abdelkarim",
+      "pos": "FW"
+    }
+  ],
+  "Iran": [
+    {
+      "navn": "Alireza Beiranvand",
+      "pos": "GK"
+    },
+    {
+      "navn": "Payam Niazmand",
+      "pos": "GK"
+    },
+    {
+      "navn": "Hossein Hosseini",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ehsan Hajsafi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Milad Mohammadi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ramin Rezaeian",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hossein Kanaanizadegan",
+      "pos": "DF"
+    },
+    {
+      "navn": "Shojae Khalilzadeh",
+      "pos": "DF"
+    },
+    {
+      "navn": "Saleh Hardani",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ali Nemati",
+      "pos": "DF"
+    },
+    {
+      "navn": "Aria Yousefi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alireza Jahanbakhsh",
+      "pos": "MF"
+    },
+    {
+      "navn": "Saeid Ezatolahi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Saman Ghoddos",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mehdi Torabi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Rouzbeh Cheshmi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Omid Noorafkan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohammad Mohebi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohammad Ghorbani",
+      "pos": "MF"
+    },
+    {
+      "navn": "Amirmohammad Razzaghinia",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hadi Habibinejad",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mehdi Taremi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mehdi Ghayedi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Amirhossein Hosseinzadeh",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ali Alipour",
+      "pos": "FW"
+    },
+    {
+      "navn": "Kasra Taheri",
+      "pos": "FW"
+    },
+    {
+      "navn": "Dennis Eckert",
+      "pos": "FW"
+    }
+  ],
+  "New Zealand": [
+    {
+      "navn": "Max Crocombe",
+      "pos": "GK"
+    },
+    {
+      "navn": "Tim Payne",
+      "pos": "DF"
+    },
+    {
+      "navn": "Francis de Vries",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tyler Bindon",
+      "pos": "DF"
+    },
+    {
+      "navn": "Michael Boxall",
+      "pos": "DF"
+    },
+    {
+      "navn": "Joe Bell",
+      "pos": "MF"
+    },
+    {
+      "navn": "Matthew Garbett",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marko Stamenić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Chris Wood",
+      "pos": "FW"
+    },
+    {
+      "navn": "Sarpreet Singh",
+      "pos": "MF"
+    },
+    {
+      "navn": "Elijah Just",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alex Paulsen",
+      "pos": "GK"
+    },
+    {
+      "navn": "Liberato Cacace",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alex Rufer",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nando Pijnaker",
+      "pos": "DF"
+    },
+    {
+      "navn": "Finn Surman",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kosta Barbarouses",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ben Waine",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ben Old",
+      "pos": "MF"
+    },
+    {
+      "navn": "Callum McCowatt",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jesse Randall",
+      "pos": "FW"
+    },
+    {
+      "navn": "Michael Woud",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ryan Thomas",
+      "pos": "MF"
+    },
+    {
+      "navn": "Callan Elliot",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lachlan Bayliss",
+      "pos": "MF"
+    },
+    {
+      "navn": "Tommy Smith",
+      "pos": "DF"
+    }
+  ],
+  "Kapp Verde": [
+    {
+      "navn": "Vozinha",
+      "pos": "GK"
+    },
+    {
+      "navn": "Márcio Rosa",
+      "pos": "GK"
+    },
+    {
+      "navn": "CJ dos Santos",
+      "pos": "GK"
+    },
+    {
+      "navn": "Stopira",
+      "pos": "DF"
+    },
+    {
+      "navn": "Roberto Lopes",
+      "pos": "DF"
+    },
+    {
+      "navn": "João Paulo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Diney",
+      "pos": "DF"
+    },
+    {
+      "navn": "Logan Costa",
+      "pos": "DF"
+    },
+    {
+      "navn": "Steven Moreira",
+      "pos": "DF"
+    },
+    {
+      "navn": "Wagner Pina",
+      "pos": "DF"
+    },
+    {
+      "navn": "Sidny Lopes Cabral",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kelvin Pires",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jamiro Monteiro",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kevin Pina",
+      "pos": "MF"
+    },
+    {
+      "navn": "Deroy Duarte",
+      "pos": "MF"
+    },
+    {
+      "navn": "Telmo Arcanjo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Laros Duarte",
+      "pos": "MF"
+    },
+    {
+      "navn": "Yannick Semedo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ryan Mendes",
+      "pos": "FW"
+    },
+    {
+      "navn": "Garry Rodrigues",
+      "pos": "FW"
+    },
+    {
+      "navn": "Willy Semedo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jovane Cabral",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gilson Benchimol",
+      "pos": "FW"
+    },
+    {
+      "navn": "Dailon Livramento",
+      "pos": "FW"
+    },
+    {
+      "navn": "Hélio Varela",
+      "pos": "FW"
+    },
+    {
+      "navn": "Nuno da Costa",
+      "pos": "FW"
+    }
+  ],
+  "Saudi-Arabia": [
+    {
+      "navn": "Mohammed Al-Owais",
+      "pos": "GK"
+    },
+    {
+      "navn": "Nawaf Al-Aqidi",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ahmed Al-Kassar",
+      "pos": "GK"
+    },
+    {
+      "navn": "Abdulquddus Atiah",
+      "pos": "GK"
+    },
+    {
+      "navn": "Saud Abdulhamid",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hassan Al-Tambakti",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdulelah Al-Amri",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nawaf Boushal",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ali Majrashi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ali Lajami",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hassan Kadesh",
+      "pos": "DF"
+    },
+    {
+      "navn": "Moteb Al-Harbi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jehad Thakri",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mohammed Abu Al-Shamat",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zakaria Hawsawi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Salem Al-Dawsari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohamed Kanno",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nasser Al-Dawsari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Abdullah Al-Khaibari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Musab Al-Juwayr",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ayman Yahya",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ziyad Al-Johani",
+      "pos": "MF"
+    },
+    {
+      "navn": "Saleh Abu Al-Shamat",
+      "pos": "MF"
+    },
+    {
+      "navn": "Sultan Mandash",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alaa Al-Hejji",
+      "pos": "MF"
+    },
+    {
+      "navn": "Firas Al-Buraikan",
+      "pos": "FW"
+    },
+    {
+      "navn": "Saleh Al-Shehri",
+      "pos": "FW"
+    },
+    {
+      "navn": "Abdullah Al-Hamdan",
+      "pos": "FW"
+    },
+    {
+      "navn": "Khalid Al-Ghannam",
+      "pos": "FW"
+    },
+    {
+      "navn": "Abdullah Al-Salem",
+      "pos": "FW"
+    }
+  ],
+  "Spania": [
+    {
+      "navn": "Unai Simón",
+      "pos": "GK"
+    },
+    {
+      "navn": "David Raya",
+      "pos": "GK"
+    },
+    {
+      "navn": "Joan Garcia",
+      "pos": "GK"
+    },
+    {
+      "navn": "Aymeric Laporte",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marc Cucurella",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marcos Llorente",
+      "pos": "DF"
+    },
+    {
+      "navn": "Eric García",
+      "pos": "DF"
+    },
+    {
+      "navn": "Pedro Porro",
+      "pos": "DF"
+    },
+    {
+      "navn": "Álex Grimaldo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Pau Cubarsí",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marc Pubill",
+      "pos": "DF"
+    },
+    {
+      "navn": "Rodri",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mikel Merino",
+      "pos": "MF"
+    },
+    {
+      "navn": "Fabián Ruiz",
+      "pos": "MF"
+    },
+    {
+      "navn": "Pedri",
+      "pos": "MF"
+    },
+    {
+      "navn": "Gavi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Martín Zubimendi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Álex Baena",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ferran Torres",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mikel Oyarzabal",
+      "pos": "FW"
+    },
+    {
+      "navn": "Dani Olmo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Nico Williams",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lamine Yamal",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yéremy Pino",
+      "pos": "FW"
+    },
+    {
+      "navn": "Borja Iglesias",
+      "pos": "FW"
+    },
+    {
+      "navn": "Víctor Muñoz",
+      "pos": "FW"
+    }
+  ],
+  "Frankrike": [
+    {
+      "navn": "Brice Samba",
+      "pos": "GK"
+    },
+    {
+      "navn": "Malo Gusto",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lucas Digne",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dayot Upamecano",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jules Koundé",
+      "pos": "DF"
+    },
+    {
+      "navn": "Manu Koné",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ousmane Dembélé",
+      "pos": "FW"
+    },
+    {
+      "navn": "Aurélien Tchouaméni",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marcus Thuram",
+      "pos": "FW"
+    },
+    {
+      "navn": "Kylian Mbappé",
+      "pos": "FW"
+    },
+    {
+      "navn": "Michael Olise",
+      "pos": "FW"
+    },
+    {
+      "navn": "Bradley Barcola",
+      "pos": "FW"
+    },
+    {
+      "navn": "N'Golo Kanté",
+      "pos": "MF"
+    },
+    {
+      "navn": "Adrien Rabiot",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ibrahima Konaté",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mike Maignan",
+      "pos": "GK"
+    },
+    {
+      "navn": "William Saliba",
+      "pos": "DF"
+    },
+    {
+      "navn": "Warren Zaïre-Emery",
+      "pos": "MF"
+    },
+    {
+      "navn": "Théo Hernandez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Désiré Doué",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lucas Hernandez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jean-Philippe Mateta",
+      "pos": "FW"
+    },
+    {
+      "navn": "Robin Risser",
+      "pos": "GK"
+    },
+    {
+      "navn": "Rayan Cherki",
+      "pos": "FW"
+    },
+    {
+      "navn": "Maghnes Akliouche",
+      "pos": "FW"
+    },
+    {
+      "navn": "Maxence Lacroix",
+      "pos": "DF"
+    }
+  ],
+  "Irak": [
+    {
+      "navn": "Jalal Hassan",
+      "pos": "GK"
+    },
+    {
+      "navn": "Fahad Talib",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ahmed Basil",
+      "pos": "GK"
+    },
+    {
+      "navn": "Kumel Al-Rekabe",
+      "pos": "GK"
+    },
+    {
+      "navn": "Rebin Sulaka",
+      "pos": "DF"
+    },
+    {
+      "navn": "Manaf Younis",
+      "pos": "DF"
+    },
+    {
+      "navn": "Merchas Doski",
+      "pos": "DF"
+    },
+    {
+      "navn": "Hussein Ali",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zaid Tahseen",
+      "pos": "DF"
+    },
+    {
+      "navn": "Frans Putros",
+      "pos": "DF"
+    },
+    {
+      "navn": "Maitham Jabbar",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ahmed Yahya",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mustafa Saadoon",
+      "pos": "DF"
+    },
+    {
+      "navn": "Akam Hashim",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ahmed Maknzi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dario Naamo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ibrahim Bayesh",
+      "pos": "MF"
+    },
+    {
+      "navn": "Amir Al-Ammari",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ali Jasim",
+      "pos": "MF"
+    },
+    {
+      "navn": "Youssef Amyn",
+      "pos": "MF"
+    },
+    {
+      "navn": "Zidane Iqbal",
+      "pos": "MF"
+    },
+    {
+      "navn": "Hasan Abdulkareem",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marko Farji",
+      "pos": "MF"
+    },
+    {
+      "navn": "Karrar Nabeel",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kevin Yakob",
+      "pos": "MF"
+    },
+    {
+      "navn": "Aimar Sher",
+      "pos": "MF"
+    },
+    {
+      "navn": "Zaid Ismail",
+      "pos": "MF"
+    },
+    {
+      "navn": "Peter Gwargis",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jussef Nasrawe",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ahmed Qasem",
+      "pos": "MF"
+    },
+    {
+      "navn": "Aymen Hussein",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mohanad Ali",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ali Al-Hamadi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ali Yousif",
+      "pos": "FW"
+    }
+  ],
+  "Norge": [
+    {
+      "navn": "Ørjan Nyland",
+      "pos": "GK"
+    },
+    {
+      "navn": "Morten Thorsby",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kristoffer Ajer",
+      "pos": "DF"
+    },
+    {
+      "navn": "Leo Østigård",
+      "pos": "DF"
+    },
+    {
+      "navn": "David Møller Wolfe",
+      "pos": "DF"
+    },
+    {
+      "navn": "Patrick Berg",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexander Sørloth",
+      "pos": "FW"
+    },
+    {
+      "navn": "Sander Berge",
+      "pos": "MF"
+    },
+    {
+      "navn": "Erling Haaland",
+      "pos": "FW"
+    },
+    {
+      "navn": "Martin Ødegaard",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jørgen Strand Larsen",
+      "pos": "FW"
+    },
+    {
+      "navn": "Sander Tangvik",
+      "pos": "GK"
+    },
+    {
+      "navn": "Egil Selvik",
+      "pos": "GK"
+    },
+    {
+      "navn": "Fredrik Aursnes",
+      "pos": "MF"
+    },
+    {
+      "navn": "Fredrik André Bjørkan",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marcus Holmgren Pedersen",
+      "pos": "DF"
+    },
+    {
+      "navn": "Torbjørn Heggem",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kristian Thorstvedt",
+      "pos": "MF"
+    },
+    {
+      "navn": "Thelo Aasgaard",
+      "pos": "MF"
+    },
+    {
+      "navn": "Antonio Nusa",
+      "pos": "MF"
+    },
+    {
+      "navn": "Andreas Schjelderup",
+      "pos": "MF"
+    },
+    {
+      "navn": "Oscar Bobb",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jens Petter Hauge",
+      "pos": "MF"
+    },
+    {
+      "navn": "Sondre Langås",
+      "pos": "DF"
+    },
+    {
+      "navn": "Henrik Falchener",
+      "pos": "DF"
+    },
+    {
+      "navn": "Julian Ryerson",
+      "pos": "DF"
+    }
+  ],
+  "Senegal": [
+    {
+      "navn": "Édouard Mendy",
+      "pos": "GK"
+    },
+    {
+      "navn": "Mory Diaw",
+      "pos": "GK"
+    },
+    {
+      "navn": "Yehvann Diouf",
+      "pos": "GK"
+    },
+    {
+      "navn": "Kalidou Koulibaly",
+      "pos": "DF"
+    },
+    {
+      "navn": "Krépin Diatta",
+      "pos": "DF"
+    },
+    {
+      "navn": "Moussa Niakhaté",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ismail Jakobs",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdoulaye Seck",
+      "pos": "DF"
+    },
+    {
+      "navn": "El Hadji Malick Diouf",
+      "pos": "DF"
+    },
+    {
+      "navn": "Antoine Mendy",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mamadou Sarr",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ilay Camara",
+      "pos": "DF"
+    },
+    {
+      "navn": "Moustapha Mbow",
+      "pos": "DF"
+    },
+    {
+      "navn": "Idrissa Gueye",
+      "pos": "MF"
+    },
+    {
+      "navn": "Pape Gueye",
+      "pos": "MF"
+    },
+    {
+      "navn": "Pape Matar Sarr",
+      "pos": "MF"
+    },
+    {
+      "navn": "Pathé Ciss",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lamine Camara",
+      "pos": "MF"
+    },
+    {
+      "navn": "Habib Diarra",
+      "pos": "MF"
+    },
+    {
+      "navn": "Bara Sapoko Ndiaye",
+      "pos": "MF"
+    },
+    {
+      "navn": "Sadio Mané",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ismaïla Sarr",
+      "pos": "FW"
+    },
+    {
+      "navn": "Iliman Ndiaye",
+      "pos": "FW"
+    },
+    {
+      "navn": "Nicolas Jackson",
+      "pos": "FW"
+    },
+    {
+      "navn": "Bamba Dieng",
+      "pos": "FW"
+    },
+    {
+      "navn": "Cherif Ndiaye",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ibrahim Mbaye",
+      "pos": "FW"
+    },
+    {
+      "navn": "Assane Diao",
+      "pos": "FW"
+    }
+  ],
+  "Argentina": [
+    {
+      "navn": "Emiliano Martínez",
+      "pos": "GK"
+    },
+    {
+      "navn": "Gerónimo Rulli",
+      "pos": "GK"
+    },
+    {
+      "navn": "Juan Musso",
+      "pos": "GK"
+    },
+    {
+      "navn": "Walter Benítez",
+      "pos": "GK"
+    },
+    {
+      "navn": "Facundo Cambeses",
+      "pos": "GK"
+    },
+    {
+      "navn": "Santiago Beltrán",
+      "pos": "GK"
+    },
+    {
+      "navn": "Nicolás Otamendi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nicolás Tagliafico",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marcos Acuña",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nahuel Molina",
+      "pos": "DF"
+    },
+    {
+      "navn": "Cristian Romero",
+      "pos": "DF"
+    },
+    {
+      "navn": "Germán Pezzella",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gonzalo Montiel",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lisandro Martínez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lucas Martínez Quarta",
+      "pos": "DF"
+    },
+    {
+      "navn": "Leonardo Balerdi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Facundo Medina",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marcos Senesi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Agustín Giay",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kevin Mac Allister",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gabriel Rojas",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nicolás Capaldo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Lautaro Di Lollo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Zaid Romero",
+      "pos": "DF"
+    },
+    {
+      "navn": "Rodrigo De Paul",
+      "pos": "MF"
+    },
+    {
+      "navn": "Leandro Paredes",
+      "pos": "MF"
+    },
+    {
+      "navn": "Giovani Lo Celso",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexis Mac Allister",
+      "pos": "MF"
+    },
+    {
+      "navn": "Enzo Fernández",
+      "pos": "MF"
+    },
+    {
+      "navn": "Exequiel Palacios",
+      "pos": "MF"
+    },
+    {
+      "navn": "Guido Rodríguez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Thiago Almada",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nicolás Domínguez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Giuliano Simeone",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nico Paz",
+      "pos": "MF"
+    },
+    {
+      "navn": "Valentín Barco",
+      "pos": "MF"
+    },
+    {
+      "navn": "Emiliano Buendía",
+      "pos": "MF"
+    },
+    {
+      "navn": "Máximo Perrone",
+      "pos": "MF"
+    },
+    {
+      "navn": "Aníbal Moreno",
+      "pos": "MF"
+    },
+    {
+      "navn": "Milton Delgado",
+      "pos": "MF"
+    },
+    {
+      "navn": "Equi Fernández",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alan Varela",
+      "pos": "MF"
+    },
+    {
+      "navn": "Lionel Messi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Lautaro Martínez",
+      "pos": "FW"
+    },
+    {
+      "navn": "Julián Alvarez",
+      "pos": "FW"
+    },
+    {
+      "navn": "Nicolás González",
+      "pos": "FW"
+    },
+    {
+      "navn": "Alejandro Garnacho",
+      "pos": "FW"
+    },
+    {
+      "navn": "Franco Mastantuono",
+      "pos": "FW"
+    },
+    {
+      "navn": "José Manuel López",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gianluca Prestianni",
+      "pos": "FW"
+    },
+    {
+      "navn": "Tomás Aranda",
+      "pos": "FW"
+    },
+    {
+      "navn": "Santiago Castro",
+      "pos": "FW"
+    },
+    {
+      "navn": "Claudio Echeverri",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mateo Pellegrino",
+      "pos": "FW"
+    },
+    {
+      "navn": "Matías Soulé",
+      "pos": "FW"
+    }
+  ],
+  "Østerrike": [
+    {
+      "navn": "Alexander Schlager",
+      "pos": "GK"
+    },
+    {
+      "navn": "David Affengruber",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kevin Danso",
+      "pos": "DF"
+    },
+    {
+      "navn": "Xaver Schlager",
+      "pos": "MF"
+    },
+    {
+      "navn": "Stefan Posch",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nicolas Seiwald",
+      "pos": "MF"
+    },
+    {
+      "navn": "Marko Arnautović",
+      "pos": "FW"
+    },
+    {
+      "navn": "David Alaba",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marcel Sabitzer",
+      "pos": "MF"
+    },
+    {
+      "navn": "Florian Grillitsch",
+      "pos": "MF"
+    },
+    {
+      "navn": "Michael Gregoritsch",
+      "pos": "FW"
+    },
+    {
+      "navn": "Florian Wiegele",
+      "pos": "GK"
+    },
+    {
+      "navn": "Patrick Pentz",
+      "pos": "GK"
+    },
+    {
+      "navn": "Saša Kalajdžić",
+      "pos": "FW"
+    },
+    {
+      "navn": "Philipp Lienhart",
+      "pos": "DF"
+    },
+    {
+      "navn": "Phillipp Mwene",
+      "pos": "DF"
+    },
+    {
+      "navn": "Carney Chukwuemeka",
+      "pos": "MF"
+    },
+    {
+      "navn": "Romano Schmid",
+      "pos": "MF"
+    },
+    {
+      "navn": "Christoph Baumgartner",
+      "pos": "MF"
+    },
+    {
+      "navn": "Konrad Laimer",
+      "pos": "MF"
+    },
+    {
+      "navn": "Patrick Wimmer",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alexander Prass",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marco Friedl",
+      "pos": "DF"
+    },
+    {
+      "navn": "Paul Wanner",
+      "pos": "MF"
+    },
+    {
+      "navn": "Michael Svoboda",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alessandro Schöpf",
+      "pos": "MF"
+    }
+  ],
+  "Jordan": [
+    {
+      "navn": "Yazeed Abulaila",
+      "pos": "GK"
+    },
+    {
+      "navn": "Abdallah Al-Fakhouri",
+      "pos": "GK"
+    },
+    {
+      "navn": "Nour Bani Attiah",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ihsan Haddad",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yazan Al-Arab",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdallah Nasib",
+      "pos": "DF"
+    },
+    {
+      "navn": "Saed Al-Rosan",
+      "pos": "DF"
+    },
+    {
+      "navn": "Husam Abu Dahab",
+      "pos": "DF"
+    },
+    {
+      "navn": "Mo Abualnadi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Salim Obaid",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ahmad Assaf",
+      "pos": "DF"
+    },
+    {
+      "navn": "Anas Badawi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Rajaei Ayed",
+      "pos": "MF"
+    },
+    {
+      "navn": "Noor Al-Rawabdeh",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ibrahim Sadeh",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohammad Abu Hashish",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nizar Al-Rashdan",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohannad Abu Taha",
+      "pos": "MF"
+    },
+    {
+      "navn": "Amer Jamous",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohammad Al-Dawoud",
+      "pos": "MF"
+    },
+    {
+      "navn": "Yousef Qashi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mohammad Taha",
+      "pos": "MF"
+    },
+    {
+      "navn": "Musa Al-Taamari",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mahmoud Al-Mardi",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ali Olwan",
+      "pos": "FW"
+    },
+    {
+      "navn": "Mohammad Abu Zrayq",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ibrahim Sabra",
+      "pos": "FW"
+    },
+    {
+      "navn": "Odeh Al-Fakhouri",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ali Azaizeh",
+      "pos": "FW"
+    }
+  ],
+  "Colombia": [
+    {
+      "navn": "David Ospina",
+      "pos": "GK"
+    },
+    {
+      "navn": "Camilo Vargas",
+      "pos": "GK"
+    },
+    {
+      "navn": "Álvaro Montero",
+      "pos": "GK"
+    },
+    {
+      "navn": "Davinson Sánchez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Santiago Arias",
+      "pos": "DF"
+    },
+    {
+      "navn": "Yerry Mina",
+      "pos": "DF"
+    },
+    {
+      "navn": "Daniel Muñoz",
+      "pos": "DF"
+    },
+    {
+      "navn": "Johan Mojica",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jhon Lucumí",
+      "pos": "DF"
+    },
+    {
+      "navn": "Deiver Machado",
+      "pos": "DF"
+    },
+    {
+      "navn": "Willer Ditta",
+      "pos": "DF"
+    },
+    {
+      "navn": "James Rodríguez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jefferson Lerma",
+      "pos": "MF"
+    },
+    {
+      "navn": "Juan Fernando Quintero",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jhon Arias",
+      "pos": "MF"
+    },
+    {
+      "navn": "Richard Ríos",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kevin Castaño",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jorge Carrascal",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jaminton Campaz",
+      "pos": "MF"
+    },
+    {
+      "navn": "Juan Portilla",
+      "pos": "MF"
+    },
+    {
+      "navn": "Gustavo Puerta",
+      "pos": "MF"
+    },
+    {
+      "navn": "Luis Díaz",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jhon Córdoba",
+      "pos": "FW"
+    },
+    {
+      "navn": "Luis Suárez",
+      "pos": "FW"
+    },
+    {
+      "navn": "Cucho Hernández",
+      "pos": "FW"
+    },
+    {
+      "navn": "Andrés Gómez",
+      "pos": "FW"
+    }
+  ],
+  "DR Kongo": [
+    {
+      "navn": "Lionel Mpasi",
+      "pos": "GK"
+    },
+    {
+      "navn": "Timothy Fayulu",
+      "pos": "GK"
+    },
+    {
+      "navn": "Matthieu Epolo",
+      "pos": "GK"
+    },
+    {
+      "navn": "Chancel Mbemba",
+      "pos": "DF"
+    },
+    {
+      "navn": "Arthur Masuaku",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gédéon Kalulu",
+      "pos": "DF"
+    },
+    {
+      "navn": "Joris Kayembe",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dylan Batubinsika",
+      "pos": "DF"
+    },
+    {
+      "navn": "Axel Tuanzebe",
+      "pos": "DF"
+    },
+    {
+      "navn": "Aaron Wan-Bissaka",
+      "pos": "DF"
+    },
+    {
+      "navn": "Steve Kapuadi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Samuel Moutoussamy",
+      "pos": "MF"
+    },
+    {
+      "navn": "Edo Kayembe",
+      "pos": "MF"
+    },
+    {
+      "navn": "Charles Pickel",
+      "pos": "MF"
+    },
+    {
+      "navn": "Gaël Kakuta",
+      "pos": "MF"
+    },
+    {
+      "navn": "Noah Sadiki",
+      "pos": "MF"
+    },
+    {
+      "navn": "Aaron Tshibola",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ngal'ayel Mukau",
+      "pos": "MF"
+    },
+    {
+      "navn": "Brian Cipenga",
+      "pos": "MF"
+    },
+    {
+      "navn": "Cédric Bakambu",
+      "pos": "FW"
+    },
+    {
+      "navn": "Meschak Elia",
+      "pos": "FW"
+    },
+    {
+      "navn": "Théo Bongonda",
+      "pos": "FW"
+    },
+    {
+      "navn": "Fiston Mayele",
+      "pos": "FW"
+    },
+    {
+      "navn": "Yoane Wissa",
+      "pos": "FW"
+    },
+    {
+      "navn": "Nathanaël Mbuku",
+      "pos": "FW"
+    },
+    {
+      "navn": "Simon Banza",
+      "pos": "FW"
+    }
+  ],
+  "Portugal": [
+    {
+      "navn": "Diogo Costa",
+      "pos": "GK"
+    },
+    {
+      "navn": "José Sá",
+      "pos": "GK"
+    },
+    {
+      "navn": "Rui Silva",
+      "pos": "GK"
+    },
+    {
+      "navn": "Rúben Dias",
+      "pos": "DF"
+    },
+    {
+      "navn": "João Cancelo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nélson Semedo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nuno Mendes",
+      "pos": "DF"
+    },
+    {
+      "navn": "Diogo Dalot",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gonçalo Inácio",
+      "pos": "DF"
+    },
+    {
+      "navn": "Matheus Nunes",
+      "pos": "DF"
+    },
+    {
+      "navn": "Renato Veiga",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tomás Araújo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Bernardo Silva",
+      "pos": "MF"
+    },
+    {
+      "navn": "Bruno Fernandes",
+      "pos": "MF"
+    },
+    {
+      "navn": "Rúben Neves",
+      "pos": "MF"
+    },
+    {
+      "navn": "Vitinha",
+      "pos": "MF"
+    },
+    {
+      "navn": "João Neves",
+      "pos": "MF"
+    },
+    {
+      "navn": "Samú Costa",
+      "pos": "MF"
+    },
+    {
+      "navn": "Cristiano Ronaldo",
+      "pos": "FW"
+    },
+    {
+      "navn": "João Félix",
+      "pos": "FW"
+    },
+    {
+      "navn": "Rafael Leão",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gonçalo Guedes",
+      "pos": "FW"
+    },
+    {
+      "navn": "Gonçalo Ramos",
+      "pos": "FW"
+    },
+    {
+      "navn": "Pedro Neto",
+      "pos": "FW"
+    },
+    {
+      "navn": "Francisco Trincão",
+      "pos": "FW"
+    },
+    {
+      "navn": "Francisco Conceição",
+      "pos": "FW"
+    }
+  ],
+  "Usbekistan": [
+    {
+      "navn": "Utkir Yusupov",
+      "pos": "GK"
+    },
+    {
+      "navn": "Abduvohid Nematov",
+      "pos": "GK"
+    },
+    {
+      "navn": "Botirali Ergashev",
+      "pos": "GK"
+    },
+    {
+      "navn": "Rustam Ashurmatov",
+      "pos": "DF"
+    },
+    {
+      "navn": "Farrukh Sayfiev",
+      "pos": "DF"
+    },
+    {
+      "navn": "Khojiakbar Alijonov",
+      "pos": "DF"
+    },
+    {
+      "navn": "Sherzod Nasrullaev",
+      "pos": "DF"
+    },
+    {
+      "navn": "Umar Eshmurodov",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdukodir Khusanov",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdulla Abdullaev",
+      "pos": "DF"
+    },
+    {
+      "navn": "Bekhruz Karimov",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jakhongir Urozov",
+      "pos": "DF"
+    },
+    {
+      "navn": "Avazbek Ulmasaliev",
+      "pos": "DF"
+    },
+    {
+      "navn": "Otabek Shukurov",
+      "pos": "MF"
+    },
+    {
+      "navn": "Odiljon Hamrobekov",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jamshid Iskanderov",
+      "pos": "MF"
+    },
+    {
+      "navn": "Akmal Mozgovoy",
+      "pos": "MF"
+    },
+    {
+      "navn": "Azizjon Ganiev",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jasurbek Jaloliddinov",
+      "pos": "MF"
+    },
+    {
+      "navn": "Umarali Rakhmonaliev",
+      "pos": "MF"
+    },
+    {
+      "navn": "Sherzod Esanov",
+      "pos": "MF"
+    },
+    {
+      "navn": "Eldor Shomurodov",
+      "pos": "FW"
+    },
+    {
+      "navn": "Igor Sergeev",
+      "pos": "FW"
+    },
+    {
+      "navn": "Jaloliddin Masharipov",
+      "pos": "FW"
+    },
+    {
+      "navn": "Oston Urunov",
+      "pos": "FW"
+    },
+    {
+      "navn": "Dostonbek Khamdamov",
+      "pos": "FW"
+    },
+    {
+      "navn": "Abbosbek Fayzullaev",
+      "pos": "FW"
+    },
+    {
+      "navn": "Azizbek Amonov",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ruslanbek Jiyanov",
+      "pos": "FW"
+    },
+    {
+      "navn": "Sherzod Temirov",
+      "pos": "FW"
+    }
+  ],
+  "Kroatia": [
+    {
+      "navn": "Dominik Livaković",
+      "pos": "GK"
+    },
+    {
+      "navn": "Dominik Kotarski",
+      "pos": "GK"
+    },
+    {
+      "navn": "Ivor Pandur",
+      "pos": "GK"
+    },
+    {
+      "navn": "Joško Gvardiol",
+      "pos": "DF"
+    },
+    {
+      "navn": "Duje Ćaleta-Car",
+      "pos": "DF"
+    },
+    {
+      "navn": "Josip Šutalo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Josip Stanišić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marin Pongračić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Martin Erlić",
+      "pos": "DF"
+    },
+    {
+      "navn": "Luka Vušković",
+      "pos": "DF"
+    },
+    {
+      "navn": "Luka Modrić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mateo Kovačić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Mario Pašalić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nikola Vlašić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Luka Sučić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Martin Baturina",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kristijan Jakić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Petar Sučić",
+      "pos": "MF"
+    },
+    {
+      "navn": "Nikola Moro",
+      "pos": "MF"
+    },
+    {
+      "navn": "Toni Fruk",
+      "pos": "MF"
+    },
+    {
+      "navn": "Ivan Perišić",
+      "pos": "FW"
+    },
+    {
+      "navn": "Andrej Kramarić",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ante Budimir",
+      "pos": "FW"
+    },
+    {
+      "navn": "Marco Pašalić",
+      "pos": "FW"
+    },
+    {
+      "navn": "Petar Musa",
+      "pos": "FW"
+    },
+    {
+      "navn": "Igor Matanović",
+      "pos": "FW"
+    }
+  ],
+  "England": [
+    {
+      "navn": "Jordan Pickford",
+      "pos": "GK"
+    },
+    {
+      "navn": "Dean Henderson",
+      "pos": "GK"
+    },
+    {
+      "navn": "James Trafford",
+      "pos": "GK"
+    },
+    {
+      "navn": "John Stones",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marc Guéhi",
+      "pos": "DF"
+    },
+    {
+      "navn": "Reece James",
+      "pos": "DF"
+    },
+    {
+      "navn": "Ezri Konsa",
+      "pos": "DF"
+    },
+    {
+      "navn": "Dan Burn",
+      "pos": "DF"
+    },
+    {
+      "navn": "Tino Livramento",
+      "pos": "DF"
+    },
+    {
+      "navn": "Djed Spence",
+      "pos": "DF"
+    },
+    {
+      "navn": "Nico O'Reilly",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jarell Quansah",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jordan Henderson",
+      "pos": "MF"
+    },
+    {
+      "navn": "Declan Rice",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jude Bellingham",
+      "pos": "MF"
+    },
+    {
+      "navn": "Morgan Rogers",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kobbie Mainoo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Elliot Anderson",
+      "pos": "MF"
+    },
+    {
+      "navn": "Harry Kane",
+      "pos": "FW"
+    },
+    {
+      "navn": "Marcus Rashford",
+      "pos": "FW"
+    },
+    {
+      "navn": "Bukayo Saka",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ollie Watkins",
+      "pos": "FW"
+    },
+    {
+      "navn": "Anthony Gordon",
+      "pos": "FW"
+    },
+    {
+      "navn": "Eberechi Eze",
+      "pos": "FW"
+    },
+    {
+      "navn": "Noni Madueke",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ivan Toney",
+      "pos": "FW"
+    }
+  ],
+  "Ghana": [
+    {
+      "navn": "Lawrence Ati-Zigi",
+      "pos": "GK"
+    },
+    {
+      "navn": "Benjamin Asare",
+      "pos": "GK"
+    },
+    {
+      "navn": "Solomon Agbasi",
+      "pos": "GK"
+    },
+    {
+      "navn": "Joseph Anang",
+      "pos": "GK"
+    },
+    {
+      "navn": "Paul Reverson",
+      "pos": "GK"
+    },
+    {
+      "navn": "Abdul Rahman Baba",
+      "pos": "DF"
+    },
+    {
+      "navn": "Gideon Mensah",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alexander Djiku",
+      "pos": "DF"
+    },
+    {
+      "navn": "Alidu Seidu",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jerome Opoku",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jonas Adjetey",
+      "pos": "DF"
+    },
+    {
+      "navn": "Abdul Mumin",
+      "pos": "DF"
+    },
+    {
+      "navn": "Kojo Peprah Oppong",
+      "pos": "DF"
+    },
+    {
+      "navn": "Marvin Senaya",
+      "pos": "DF"
+    },
+    {
+      "navn": "Thomas Partey",
+      "pos": "MF"
+    },
+    {
+      "navn": "Abdul Fatawu",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kamaldeen Sulemana",
+      "pos": "MF"
+    },
+    {
+      "navn": "Elisha Owusu",
+      "pos": "MF"
+    },
+    {
+      "navn": "Caleb Yirenkyi",
+      "pos": "MF"
+    },
+    {
+      "navn": "Kwasi Sibo",
+      "pos": "MF"
+    },
+    {
+      "navn": "Augustine Boakye",
+      "pos": "MF"
+    },
+    {
+      "navn": "Jordan Ayew",
+      "pos": "FW"
+    },
+    {
+      "navn": "Antoine Semenyo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Iñaki Williams",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ernest Nuamah",
+      "pos": "FW"
+    },
+    {
+      "navn": "Christopher Bonsu Baah",
+      "pos": "FW"
+    },
+    {
+      "navn": "Brandon Thomas-Asante",
+      "pos": "FW"
+    },
+    {
+      "navn": "Prince Kwabena Adu",
+      "pos": "FW"
+    }
+  ],
+  "Panama": [
+    {
+      "navn": "Luis Mejía",
+      "pos": "GK"
+    },
+    {
+      "navn": "Orlando Mosquera",
+      "pos": "GK"
+    },
+    {
+      "navn": "César Samudio",
+      "pos": "GK"
+    },
+    {
+      "navn": "Eric Davis",
+      "pos": "DF"
+    },
+    {
+      "navn": "Fidel Escobar",
+      "pos": "DF"
+    },
+    {
+      "navn": "Michael Amir Murillo",
+      "pos": "DF"
+    },
+    {
+      "navn": "Roderick Miller",
+      "pos": "DF"
+    },
+    {
+      "navn": "Andrés Andrade",
+      "pos": "DF"
+    },
+    {
+      "navn": "César Blackman",
+      "pos": "DF"
+    },
+    {
+      "navn": "José Córdoba",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jiovany Ramos",
+      "pos": "DF"
+    },
+    {
+      "navn": "Jorge Gutiérrez",
+      "pos": "DF"
+    },
+    {
+      "navn": "Edgardo Fariña",
+      "pos": "DF"
+    },
+    {
+      "navn": "Aníbal Godoy",
+      "pos": "MF"
+    },
+    {
+      "navn": "Alberto Quintero",
+      "pos": "MF"
+    },
+    {
+      "navn": "Yoel Bárcenas",
+      "pos": "MF"
+    },
+    {
+      "navn": "Adalberto Carrasquilla",
+      "pos": "MF"
+    },
+    {
+      "navn": "José Luis Rodríguez",
+      "pos": "MF"
+    },
+    {
+      "navn": "Cristian Martínez",
+      "pos": "MF"
+    },
+    {
+      "navn": "César Yanis",
+      "pos": "MF"
+    },
+    {
+      "navn": "Carlos Harvey",
+      "pos": "MF"
+    },
+    {
+      "navn": "Azarias Londoño",
+      "pos": "MF"
+    },
+    {
+      "navn": "José Fajardo",
+      "pos": "FW"
+    },
+    {
+      "navn": "Ismael Díaz",
+      "pos": "FW"
+    },
+    {
+      "navn": "Cecilio Waterman",
+      "pos": "FW"
+    },
+    {
+      "navn": "Tomás Rodríguez",
+      "pos": "FW"
+    }
+  ]
+}
