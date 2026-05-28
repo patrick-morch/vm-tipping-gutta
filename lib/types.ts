@@ -28,7 +28,12 @@ export type Bruker = {
   rolle: "medlem" | "admin";
   poeng: number;
   opprettet: number;
+  // Når true: bruker kan bla i appen men ikke lagre nye tipps eller endre
+  // spesialtips. Settes/oppheves av admin.
+  frosset?: boolean;
 };
+
+export type RonaldoVsMessi = "ronaldo" | "messi" | "likt" | "";
 
 export type SpesialTip = {
   uid: string;
@@ -37,6 +42,7 @@ export type SpesialTip = {
   toppscorer: string;
   toppassist: string;
   mestRødeKort: string;
+  ronaldoVsMessi: RonaldoVsMessi;
   lagretTid: number;
 };
 
@@ -49,6 +55,7 @@ export type Fasit = {
   toppscorer: string;
   toppassist: string;
   mestRødeKort: string;
+  ronaldoVsMessi: RonaldoVsMessi;
 };
 
 export function beregnPoeng(

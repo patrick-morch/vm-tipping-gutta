@@ -73,6 +73,7 @@ export const localFasit = new Store<Fasit>("vmt.fasit", {
   toppscorer: "",
   toppassist: "",
   mestRødeKort: "",
+  ronaldoVsMessi: "",
 });
 export const localCurrent = new Store<string | null>("vmt.current", null);
 export const localPassord = new Store<Record<string, string>>(

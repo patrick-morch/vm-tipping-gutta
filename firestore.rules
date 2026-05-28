@@ -13,6 +13,11 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/brukere/$(request.auth.uid))
         && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.rolle == 'admin';
     }
+    function erFrosset() {
+      return erInnlogget()
+        && exists(/databases/$(database)/documents/brukere/$(request.auth.uid))
+        && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.frosset == true;
+    }
     // Tipping på en kamp låses 1 time før kampstart.
     function kampAapen(matchId) {
       return exists(/databases/$(database)/documents/kamper/$(matchId))
@@ -33,8 +38,7 @@ service cloud.firestore {
       allow read: if erInnlogget();
       allow create: if erEier(uid)
         && request.resource.data.rolle == 'medlem'
-        && request.resource.data.poeng == 0
-        && request.resource.data.klubbRolle in ['trener', 'spiller', 'annet'];
+        && request.resource.data.poeng == 0;
       allow update: if (erEier(uid)
         && request.resource.data.rolle == resource.data.rolle
         && request.resource.data.poeng == resource.data.poeng)
@@ -49,25 +53,28 @@ service cloud.firestore {
     }
 
     // Tips: alle innloggede kan lese, eier kan opprette/oppdatere/slette
-    // egne tipps frem til kampstart.
+    // egne tipps frem til kampstart. Frosne brukere kan ikke skrive.
     match /tips/{tipId} {
       allow read: if erInnlogget();
       allow create: if erInnlogget()
+        && !erFrosset()
         && request.resource.data.uid == request.auth.uid
         && kampAapen(request.resource.data.matchId);
-      allow update: if resource.data.uid == request.auth.uid
+      allow update: if !erFrosset()
+        && resource.data.uid == request.auth.uid
         && kampAapen(resource.data.matchId);
-      allow delete: if (resource.data.uid == request.auth.uid
+      allow delete: if (!erFrosset()
+        && resource.data.uid == request.auth.uid
         && kampAapen(resource.data.matchId))
         || erAdmin();
     }
 
     // Spesialtips: alle kan lese (for ledertavle), eier skriver egen
-    // frem til 1 time før VM-start.
+    // frem til 1 time før VM-start. Frosne brukere kan ikke skrive.
     match /spesialtips/{uid} {
       allow read: if erInnlogget();
-      allow create, update: if erEier(uid) && spesialAapen();
-      allow delete: if (erEier(uid) && spesialAapen()) || erAdmin();
+      allow create, update: if erEier(uid) && !erFrosset() && spesialAapen();
+      allow delete: if (erEier(uid) && !erFrosset() && spesialAapen()) || erAdmin();
     }
 
     // Fasit: alle kan lese, bare admin skriver.

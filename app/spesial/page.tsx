@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { lagreSpesialTip, useMittSpesialTip } from "@/lib/data";
+import type { RonaldoVsMessi } from "@/lib/types";
 import {
   flagg,
   GRUPPER,
@@ -13,6 +14,7 @@ import {
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
 import SpillerVelger from "@/components/SpillerVelger";
+import { useFrosseToast } from "@/components/FrosseToast";
 
 export default function SpesialSide() {
   return (
@@ -27,16 +29,19 @@ export default function SpesialSide() {
 const ALLE_LAG = GRUPPER.flatMap((g) => g.lag).sort();
 
 function Spesial() {
-  const { user } = useAuth();
+  const { user, bruker } = useAuth();
   const lagret = useMittSpesialTip(user?.uid);
   const [vmVinner, setVmVinner] = useState("");
   const [toppscorer, setToppscorer] = useState("");
   const [toppassist, setToppassist] = useState("");
-  const [låst, setLåst] = useState(() => spesialErLåst());
+  const [ronaldoVsMessi, setRonaldoVsMessi] = useState<RonaldoVsMessi>("");
+  const [tidLåst, setTidLåst] = useState(() => spesialErLåst());
+  const frosset = bruker?.frosset === true;
+  const låst = tidLåst || frosset;
   const klar = useRef(false);
 
   useEffect(() => {
-    const sjekk = () => setLåst(spesialErLåst());
+    const sjekk = () => setTidLåst(spesialErLåst());
     sjekk();
     const t = setInterval(sjekk, 30_000);
     return () => clearInterval(t);
@@ -50,6 +55,7 @@ function Spesial() {
     setVmVinner(lagret.vmVinner);
     setToppscorer(lagret.toppscorer);
     setToppassist(lagret.toppassist);
+    setRonaldoVsMessi(lagret.ronaldoVsMessi || "");
     klar.current = true;
   }, [lagret]);
 
@@ -59,10 +65,18 @@ function Spesial() {
       lagret &&
       lagret.vmVinner === vmVinner &&
       lagret.toppscorer === toppscorer &&
-      lagret.toppassist === toppassist
+      lagret.toppassist === toppassist &&
+      (lagret.ronaldoVsMessi || "") === ronaldoVsMessi
     )
       return;
-    if (!lagret && !vmVinner && !toppscorer && !toppassist) return;
+    if (
+      !lagret &&
+      !vmVinner &&
+      !toppscorer &&
+      !toppassist &&
+      !ronaldoVsMessi
+    )
+      return;
     const t = setTimeout(() => {
       lagreSpesialTip({
         uid: user.uid,
@@ -71,19 +85,24 @@ function Spesial() {
         toppscorer,
         toppassist,
         mestRødeKort: lagret?.mestRødeKort || "",
+        ronaldoVsMessi,
         lagretTid: Date.now(),
       });
     }, 600);
     return () => clearTimeout(t);
-  }, [vmVinner, toppscorer, toppassist, user, lagret, låst]);
+  }, [vmVinner, toppscorer, toppassist, ronaldoVsMessi, user, lagret, låst]);
 
-  const tippet = [vmVinner, toppscorer, toppassist].filter(Boolean).length;
+  const tippet = [vmVinner, toppscorer, toppassist, ronaldoVsMessi].filter(
+    Boolean,
+  ).length;
   const låsTekst = new Date(SPESIAL_LÅS_TID).toLocaleString("nb-NO", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const { varsle, toast } = useFrosseToast();
 
   return (
     <div className="space-y-5">
@@ -95,7 +114,7 @@ function Spesial() {
           </p>
         </div>
         <div className="flex gap-1">
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
               className={`w-2 h-2 rounded-full transition ${
@@ -106,14 +125,33 @@ function Spesial() {
         </div>
       </div>
 
-      {låst && (
+      {frosset && (
+        <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
+          <span className="text-lg">❄️</span>
+          Du er frosset av admin. Du kan se appen, men ikke endre tipsene
+          dine.
+        </div>
+      )}
+      {låst && !frosset && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
           <span className="text-lg">🔒</span>
           Tipsene dine er låst.
         </div>
       )}
 
-      <fieldset disabled={låst} className="space-y-4">
+      <fieldset
+        disabled={låst}
+        className="space-y-4 relative"
+        onPointerDownCapture={
+          frosset
+            ? (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                varsle();
+              }
+            : undefined
+        }
+      >
         <VmVinnerKort verdi={vmVinner} onVelg={setVmVinner} />
         <SpillerKort
           tittel="Toppscorer"
@@ -135,7 +173,14 @@ function Spesial() {
           onVelg={setToppassist}
           posFilter={["FW", "MF", "DF"]}
         />
+        <RonaldoVsMessiKort
+          poeng={POENG.ronaldoVsMessi}
+          verdi={ronaldoVsMessi}
+          onVelg={setRonaldoVsMessi}
+        />
       </fieldset>
+
+      {toast}
     </div>
   );
 }
@@ -206,6 +251,95 @@ function VmVinnerKort({
             </select>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function RonaldoVsMessiKort({
+  poeng,
+  verdi,
+  onVelg,
+}: {
+  poeng: number;
+  verdi: RonaldoVsMessi;
+  onVelg: (v: RonaldoVsMessi) => void;
+}) {
+  const valg: {
+    v: Exclude<RonaldoVsMessi, "">;
+    navn: string;
+    flagg: string;
+    farge: string;
+    valgtTema: string;
+  }[] = [
+    {
+      v: "ronaldo",
+      navn: "Ronaldo",
+      flagg: "🇵🇹",
+      farge: "border-accent/30 from-accent/10",
+      valgtTema:
+        "border-accent bg-gradient-to-br from-accent/30 via-accent/10 to-transparent ring-2 ring-accent/40",
+    },
+    {
+      v: "likt",
+      navn: "Likt",
+      flagg: "🤝",
+      farge: "border-warning/30 from-warning/10",
+      valgtTema:
+        "border-warning bg-gradient-to-br from-warning/30 via-warning/10 to-transparent ring-2 ring-warning/40",
+    },
+    {
+      v: "messi",
+      navn: "Messi",
+      flagg: "🇦🇷",
+      farge: "border-primary/30 from-primary/10",
+      valgtTema:
+        "border-primary bg-gradient-to-br from-primary/30 via-primary/10 to-transparent ring-2 ring-primary/40",
+    },
+  ];
+
+  return (
+    <div className="relative rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/10 via-transparent to-transparent p-5">
+      <div className="relative space-y-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gold/20 flex items-center justify-center text-2xl">
+              🐐
+            </div>
+            <div>
+              <h3 className="text-lg font-bold leading-tight">
+                Ronaldo eller Messi?
+              </h3>
+              <p className="text-[11px] text-muted">
+                Hvem scorer flest mål i VM
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-bold text-gold bg-gold/20 px-2.5 py-1 rounded-full whitespace-nowrap">
+            {poeng} POENG
+          </span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          {valg.map((v) => {
+            const valgt = verdi === v.v;
+            return (
+              <button
+                key={v.v}
+                type="button"
+                onClick={() => onVelg(valgt ? "" : v.v)}
+                className={`relative h-24 rounded-2xl border bg-gradient-to-br to-transparent transition flex flex-col items-center justify-center gap-1 ${
+                  valgt
+                    ? v.valgtTema
+                    : `${v.farge} hover:border-text/30 active:scale-[0.98]`
+                }`}
+              >
+                <span className="text-3xl leading-none">{v.flagg}</span>
+                <span className="text-sm font-bold">{v.navn}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

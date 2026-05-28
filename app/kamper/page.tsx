@@ -15,6 +15,7 @@ import {
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
 import SideHeader from "@/components/SideHeader";
+import { useFrosseToast } from "@/components/FrosseToast";
 
 const ANTALL = 5;
 
@@ -33,6 +34,8 @@ function Kamper() {
   const kamper = useKamper();
   const tips = useMineTips(user?.uid);
   const [nå, setNå] = useState(Date.now());
+  const frosset = bruker?.frosset === true;
+  const { varsle, toast } = useFrosseToast();
 
   useEffect(() => {
     const t = setInterval(() => setNå(Date.now()), 30_000);
@@ -58,7 +61,7 @@ function Kamper() {
     .slice(0, 3);
 
   async function lagre(id: string, h: number, b: number) {
-    if (!user || !bruker) return;
+    if (!user || !bruker || frosset) return;
     await lagreTip({
       matchId: id,
       uid: user.uid,
@@ -70,7 +73,7 @@ function Kamper() {
   }
 
   async function slett(id: string) {
-    if (!user) return;
+    if (!user || frosset) return;
     await slettTip(id, user.uid);
   }
 
@@ -103,6 +106,13 @@ function Kamper() {
         }
       />
 
+      {frosset && (
+        <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
+          <span className="text-lg">❄️</span>
+          Du er frosset av admin. Du kan se kampene, men ikke tippe.
+        </div>
+      )}
+
       {neste.length === 0 && (
         <div className="bg-surface border border-border rounded-2xl p-8 text-center text-muted text-sm">
           Ingen åpne kamper akkurat nå.
@@ -112,12 +122,27 @@ function Kamper() {
       {grupperte.map(({ dato, kamper: dagsKamper }) => (
         <div key={dato} className="space-y-2">
           <DatoHeader dato={dato} nå={nå} />
-          <div className="space-y-2">
+          <div
+            className="space-y-2"
+            onPointerDownCapture={
+              frosset
+                ? (e) => {
+                    const t = e.target as HTMLElement;
+                    if (t.tagName === "INPUT" || t.closest("input")) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      varsle();
+                    }
+                  }
+                : undefined
+            }
+          >
             {dagsKamper.map((kamp) => (
               <KampKort
                 key={kamp.id}
                 kamp={kamp}
                 tip={tips[kamp.id]}
+                frosset={frosset}
                 onLagre={(h, b) => lagre(kamp.id, h, b)}
                 onSlett={() => slett(kamp.id)}
               />
@@ -147,6 +172,8 @@ function Kamper() {
           </div>
         </div>
       )}
+
+      {toast}
     </div>
   );
 }
@@ -223,11 +250,13 @@ function formatTid(ms: number): string {
 function KampKort({
   kamp,
   tip,
+  frosset,
   onLagre,
   onSlett,
 }: {
   kamp: Match;
   tip?: Prediction;
+  frosset?: boolean;
   onLagre: (h: number, b: number) => Promise<void>;
   onSlett: () => Promise<void>;
 }) {
@@ -251,7 +280,7 @@ function KampKort({
     tip && gyldig && Number(hjem) === tip.hjemme && Number(bort) === tip.borte;
 
   useEffect(() => {
-    if (uendret) return;
+    if (frosset || uendret) return;
     if (gyldig) {
       const t = setTimeout(() => onLagre(Number(hjem), Number(bort)), 500);
       return () => clearTimeout(t);
@@ -261,7 +290,7 @@ function KampKort({
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hjem, bort, gyldig, tom, uendret, Boolean(tip)]);
+  }, [hjem, bort, gyldig, tom, uendret, Boolean(tip), frosset]);
 
   const dato = new Date(kamp.starttid);
   const klokke = dato.toLocaleTimeString("nb-NO", {
@@ -305,9 +334,9 @@ function KampKort({
           <span className="text-2xl flex-shrink-0">{flagg(kamp.hjemmelag)}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Sc verdi={hjem} onChange={setHjem} />
+          <Sc verdi={hjem} onChange={setHjem} disabled={frosset} />
           <span className="text-muted/60 text-xs font-bold">:</span>
-          <Sc verdi={bort} onChange={setBort} />
+          <Sc verdi={bort} onChange={setBort} disabled={frosset} />
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-2xl flex-shrink-0">{flagg(kamp.bortelag)}</span>
@@ -380,9 +409,11 @@ function ResultatKort({ kamp, tip }: { kamp: Match; tip?: Prediction }) {
 function Sc({
   verdi,
   onChange,
+  disabled,
 }: {
   verdi: string;
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <input
@@ -391,10 +422,11 @@ function Sc({
       min={0}
       max={20}
       value={verdi}
+      disabled={disabled}
       onChange={(e) =>
         onChange(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))
       }
-      className="w-12 h-12 text-center text-xl font-bold rounded-xl bg-elevated border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+      className="w-12 h-12 text-center text-xl font-bold rounded-xl bg-elevated border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
     />
   );
 }

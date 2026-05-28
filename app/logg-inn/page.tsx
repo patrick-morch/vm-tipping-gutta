@@ -3,15 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import type { KlubbRolle } from "@/lib/types";
 
 type Modus = "logg-inn" | "registrer";
-
-const KLUBB_ROLLER: { verdi: KlubbRolle; tittel: string; ikon: string }[] = [
-  { verdi: "trener", tittel: "Trener", ikon: "🧥" },
-  { verdi: "spiller", tittel: "Spiller", ikon: "⚽" },
-  { verdi: "annet", tittel: "Annet", ikon: "👥" },
-];
 
 export default function LoggInn() {
   const { loggInn, registrer, demoModus } = useAuth();
@@ -21,7 +14,6 @@ export default function LoggInn() {
   const [passord, setPassord] = useState("");
   const [bekreft, setBekreft] = useState("");
   const [navn, setNavn] = useState("");
-  const [klubbRolle, setKlubbRolle] = useState<KlubbRolle | "">("");
   const [feil, setFeil] = useState<string | null>(null);
   const [laster, setLaster] = useState(false);
 
@@ -43,10 +35,7 @@ export default function LoggInn() {
         if (navn.trim().length < 2) {
           throw new Error("Skriv inn fullt navn.");
         }
-        if (!klubbRolle) {
-          throw new Error("Velg om du er trener, spiller eller annet.");
-        }
-        await registrer(epost.trim(), passord, navn.trim(), klubbRolle);
+        await registrer(epost.trim(), passord, navn.trim());
         router.push("/kamper");
       }
     } catch (err: any) {
@@ -67,7 +56,6 @@ export default function LoggInn() {
     setModus(m);
     setFeil(null);
     setBekreft("");
-    setKlubbRolle("");
   }
 
   const tittel = modus === "logg-inn" ? "Logg inn" : "Opprett bruker";
@@ -111,28 +99,6 @@ export default function LoggInn() {
                   autoComplete="name"
                   required
                 />
-                <div>
-                  <div className="text-xs text-muted mb-1.5">
-                    Hva er du i klubben?
-                  </div>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {KLUBB_ROLLER.map((r) => (
-                      <button
-                        key={r.verdi}
-                        type="button"
-                        onClick={() => setKlubbRolle(r.verdi)}
-                        className={`h-16 rounded-xl border text-sm font-semibold flex flex-col items-center justify-center gap-1 transition ${
-                          klubbRolle === r.verdi
-                            ? "bg-primary border-primary text-primaryFg"
-                            : "bg-elevated border-border hover:border-primary/50"
-                        }`}
-                      >
-                        <span className="text-xl">{r.ikon}</span>
-                        <span>{r.tittel}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </>
             )}
             <Felt

@@ -1,12 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   useAggregertLedertavle,
+  useAlleSpesialTips,
+  useAlleTips,
   useBrukere,
+  useFasit,
+  useKamper,
   type LedertavleRad,
 } from "@/lib/data";
+import { beregnPoeng } from "@/lib/types";
+import { POENG } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
 import SideHeader from "@/components/SideHeader";
@@ -31,45 +37,111 @@ function initialer(navn: string): string {
     .toUpperCase();
 }
 
+type RadMedStats = LedertavleRad & {
+  utfall: number;
+  feil: number;
+};
+
 function Ledertavle() {
   const { user, demoModus } = useAuth();
   const aggregert = useAggregertLedertavle();
   const brukere = useBrukere();
-  const [rolleFilter, setRolleFilter] = useState<
-    "alle" | "trener" | "spiller" | "annet"
-  >("alle");
+  const alleTips = useAlleTips();
+  const alleSpesial = useAlleSpesialTips();
+  const fasit = useFasit();
+  const kamper = useKamper();
 
-  const rader: LedertavleRad[] = useMemo(() => {
-    // Brukere er sannhetskilden for medlemskap. Aggregert gir poeng/delsummer
-    // for de som fantes ved siste aggregering — vi merger så nye registreringer
-    // dukker opp i samme natt med 0p frem til neste aggregering.
+  const liveStats = useMemo(() => {
+    const ferdige = new Map(
+      kamper.filter((k) => k.resultat).map((k) => [k.id, k]),
+    );
+    const m = new Map<
+      string,
+      { kampPoeng: number; eksakte: number; utfall: number; feil: number }
+    >();
+    for (const t of alleTips) {
+      const k = ferdige.get(t.matchId);
+      if (!k || !k.resultat) continue;
+      const bonus = k.bonusFaktor || 1;
+      const p = beregnPoeng(t, k.resultat, bonus);
+      const cur = m.get(t.uid) || {
+        kampPoeng: 0,
+        eksakte: 0,
+        utfall: 0,
+        feil: 0,
+      };
+      cur.kampPoeng += p;
+      if (p === 3 * bonus) cur.eksakte += 1;
+      else if (p === 1 * bonus) cur.utfall += 1;
+      else cur.feil += 1;
+      m.set(t.uid, cur);
+    }
+    return m;
+  }, [alleTips, kamper]);
+
+  const liveSpesial = useMemo(() => {
+    const m = new Map<string, number>();
+    const norm = (s: string) => s.trim().toLowerCase();
+    for (const s of alleSpesial) {
+      let p = 0;
+      if (fasit.vmVinner && fasit.vmVinner === s.vmVinner) p += POENG.vmVinner;
+      if (
+        fasit.toppscorer &&
+        s.toppscorer &&
+        norm(s.toppscorer) === norm(fasit.toppscorer)
+      )
+        p += POENG.toppscorer;
+      if (
+        fasit.toppassist &&
+        s.toppassist &&
+        norm(s.toppassist) === norm(fasit.toppassist)
+      )
+        p += POENG.toppassist;
+      if (
+        fasit.ronaldoVsMessi &&
+        s.ronaldoVsMessi &&
+        s.ronaldoVsMessi === fasit.ronaldoVsMessi
+      )
+        p += POENG.ronaldoVsMessi;
+      m.set(s.uid, p);
+    }
+    return m;
+  }, [alleSpesial, fasit]);
+
+  const rader: RadMedStats[] = useMemo(() => {
+    // Brukere er sannhetskilden for medlemskap. Live-stats fra tips+kamper
+    // og spesialtips+fasit gir umiddelbar oppdatering.
     const aggregertMap = new Map(
       (aggregert?.rader || []).map((r) => [r.uid, r]),
     );
     return brukere
       .map((b) => {
         const agg = aggregertMap.get(b.uid);
+        const stats = liveStats.get(b.uid) || {
+          kampPoeng: 0,
+          eksakte: 0,
+          utfall: 0,
+          feil: 0,
+        };
+        const spesialPoeng = liveSpesial.get(b.uid) ?? 0;
         return {
           uid: b.uid,
           navn: agg?.navn || b.navn,
           avdeling: "",
           klubbRolle: agg?.klubbRolle || b.klubbRolle,
-          poeng: agg?.poeng ?? 0,
-          kampPoeng: agg?.kampPoeng ?? 0,
-          spesialPoeng: agg?.spesialPoeng ?? 0,
-          eksakte: agg?.eksakte ?? 0,
+          poeng: stats.kampPoeng + spesialPoeng,
+          kampPoeng: stats.kampPoeng,
+          spesialPoeng,
+          eksakte: stats.eksakte,
+          utfall: stats.utfall,
+          feil: stats.feil,
         };
       })
       .sort((a, b) => b.poeng - a.poeng);
-  }, [aggregert, brukere]);
+  }, [aggregert, brukere, liveStats, liveSpesial]);
 
-  const synlige =
-    rolleFilter === "alle"
-      ? rader
-      : rader.filter((r) => r.klubbRolle === rolleFilter);
-
-  const top3 = synlige.slice(0, 3);
-  const resten = synlige.slice(3);
+  const top3 = rader.slice(0, 3);
+  const resten = rader.slice(3);
   const leder = top3[0]?.poeng || 0;
 
   const minRad = rader.find((r) => r.uid === user?.uid);
@@ -114,8 +186,6 @@ function Ledertavle() {
         />
       )}
 
-      <FilterBar rolleFilter={rolleFilter} onFilter={setRolleFilter} />
-
       {top3.length > 0 && (
         <Podium top3={top3} egenUid={user?.uid} ledersum={leder} />
       )}
@@ -130,46 +200,22 @@ function Ledertavle() {
   );
 }
 
-function FilterBar({
-  rolleFilter,
-  onFilter,
-}: {
-  rolleFilter: "alle" | "trener" | "spiller" | "annet";
-  onFilter: (v: "alle" | "trener" | "spiller" | "annet") => void;
-}) {
+function StatLinje({ rad }: { rad: RadMedStats }) {
   return (
-    <div className="grid grid-cols-4 gap-1.5 bg-surface border border-border rounded-2xl p-1.5">
-      {FILTRE.map((f) => (
-        <button
-          key={f.v}
-          onClick={() => onFilter(f.v)}
-          className={`h-10 rounded-xl text-xs font-semibold transition flex flex-col items-center justify-center gap-0.5 ${
-            rolleFilter === f.v
-              ? "bg-primary text-primaryFg"
-              : "text-muted hover:text-text"
-          }`}
-        >
-          <span className="text-sm leading-none">{f.ikon}</span>
-          <span className="leading-none">{f.t}</span>
-        </button>
-      ))}
+    <div className="text-[11px] flex items-center gap-2 mt-0.5 font-semibold">
+      <span className="text-success">✓ {rad.eksakte}</span>
+      <span className="text-accent">≈ {rad.utfall}</span>
+      <span className="text-muted">✗ {rad.feil}</span>
     </div>
   );
 }
-
-const FILTRE = [
-  { v: "alle", t: "Alle", ikon: "👥" },
-  { v: "trener", t: "Trener", ikon: "🧥" },
-  { v: "spiller", t: "Spiller", ikon: "⚽" },
-  { v: "annet", t: "Annet", ikon: "✨" },
-] as const;
 
 function DinPlasseringKort({
   rad,
   plass,
   total,
 }: {
-  rad: LedertavleRad;
+  rad: RadMedStats;
   plass: number;
   total: number;
 }) {
@@ -180,16 +226,10 @@ function DinPlasseringKort({
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-[10px] text-primary uppercase tracking-wider font-bold">
-          Din plassering
+          Din plassering · av {total}
         </div>
-        <div className="font-bold leading-tight flex items-center gap-2 flex-wrap">
-          <span>{rad.navn}</span>
-          {rad.klubbRolle && <RolleBadge rolle={rad.klubbRolle} />}
-        </div>
-        <div className="text-[11px] text-muted mt-0.5">
-          {rad.kampPoeng}p kamper · {rad.spesialPoeng}p spesial · av {total}{" "}
-          medlemmer
-        </div>
+        <div className="font-bold leading-tight">{rad.navn}</div>
+        <StatLinje rad={rad} />
       </div>
       <div className="text-right">
         <div className="text-2xl font-bold leading-none">{rad.poeng}</div>
@@ -201,30 +241,12 @@ function DinPlasseringKort({
   );
 }
 
-function RolleBadge({
-  rolle,
-}: {
-  rolle: "trener" | "spiller" | "annet";
-}) {
-  const v = {
-    trener: { ikon: "🧥", label: "Trener" },
-    spiller: { ikon: "⚽", label: "Spiller" },
-    annet: { ikon: "👥", label: "Annet" },
-  }[rolle];
-  return (
-    <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-elevated border border-border text-muted font-semibold uppercase tracking-wider inline-flex items-center gap-1">
-      <span>{v.ikon}</span>
-      {v.label}
-    </span>
-  );
-}
-
 function Podium({
   top3,
   egenUid,
   ledersum,
 }: {
-  top3: LedertavleRad[];
+  top3: RadMedStats[];
   egenUid: string | undefined;
   ledersum: number;
 }) {
@@ -275,7 +297,7 @@ function PodiumKort({
   egen,
   ledersum,
 }: {
-  rad: LedertavleRad;
+  rad: RadMedStats;
   plass: 1 | 2 | 3;
   egen: boolean;
   ledersum: number;
@@ -339,15 +361,6 @@ function PodiumKort({
           {rad.navn}
           {egen && <span className="text-primary text-[10px] ml-1">(deg)</span>}
         </div>
-        {rad.klubbRolle && (
-          <div className="text-[9px] text-muted uppercase tracking-wider">
-            {rad.klubbRolle === "trener"
-              ? "🧥 Trener"
-              : rad.klubbRolle === "spiller"
-                ? "⚽ Spiller"
-                : "👥 Annet"}
-          </div>
-        )}
         <div className={plass === 1 ? "text-2xl font-bold" : "text-lg font-bold"}>
           {rad.poeng}
           <span className="text-[10px] text-muted font-normal ml-0.5">p</span>
@@ -366,7 +379,7 @@ function ListeKort({
   startPlass,
   ledersum,
 }: {
-  rader: LedertavleRad[];
+  rader: RadMedStats[];
   egenUid: string | undefined;
   startPlass: number;
   ledersum: number;
@@ -398,23 +411,13 @@ function ListeKort({
             <div className="min-w-0">
               <div className="font-semibold flex items-center gap-2 flex-wrap leading-tight">
                 <span>{rad.navn}</span>
-                {rad.klubbRolle && <RolleBadge rolle={rad.klubbRolle} />}
                 {egen && (
                   <span className="text-[10px] text-primary font-bold">
                     DEG
                   </span>
                 )}
               </div>
-              <div className="text-[11px] text-muted truncate flex items-center gap-1.5 mt-0.5">
-                <span>
-                  K {rad.kampPoeng}{" "}
-                  {rad.eksakte > 0 && (
-                    <span className="text-success">({rad.eksakte}✓)</span>
-                  )}
-                </span>
-                <span>·</span>
-                <span>S {rad.spesialPoeng}</span>
-              </div>
+              <StatLinje rad={rad} />
               {ledersum > 0 && (
                 <div className="mt-1 h-1 bg-border rounded-full overflow-hidden">
                   <div

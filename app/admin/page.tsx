@@ -10,12 +10,14 @@ import {
   seedAlleKamper,
   slettBruker,
   oppdaterKlubbRolle,
+  oppdaterBrukerNavn,
+  oppdaterBrukerFrosset,
   nullstillAlleResultater,
   lagreFasit,
 } from "@/lib/data";
 import { GRUPPER } from "@/lib/vm-data";
 import SpillerVelger from "@/components/SpillerVelger";
-import type { KlubbRolle } from "@/lib/types";
+import type { KlubbRolle, RonaldoVsMessi } from "@/lib/types";
 import { Bruker, Match } from "@/lib/types";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
@@ -414,6 +416,7 @@ function FasitSeksjon() {
   const [toppscorer, setToppscorer] = useState("");
   const [toppassist, setToppassist] = useState("");
   const [vmVinner, setVmVinner] = useState("");
+  const [ronaldoVsMessi, setRonaldoVsMessi] = useState<RonaldoVsMessi>("");
   const [lagrer, setLagrer] = useState(false);
   const [klart, setKlart] = useState(false);
 
@@ -421,7 +424,13 @@ function FasitSeksjon() {
     setToppscorer(fasit.toppscorer || "");
     setToppassist(fasit.toppassist || "");
     setVmVinner(fasit.vmVinner || "");
-  }, [fasit.toppscorer, fasit.toppassist, fasit.vmVinner]);
+    setRonaldoVsMessi(fasit.ronaldoVsMessi || "");
+  }, [
+    fasit.toppscorer,
+    fasit.toppassist,
+    fasit.vmVinner,
+    fasit.ronaldoVsMessi,
+  ]);
 
   async function lagre() {
     setLagrer(true);
@@ -431,6 +440,7 @@ function FasitSeksjon() {
         vmVinner: vmVinner.trim(),
         toppscorer: toppscorer.trim(),
         toppassist: toppassist.trim(),
+        ronaldoVsMessi,
       });
       setKlart(true);
       setTimeout(() => setKlart(false), 1800);
@@ -442,7 +452,8 @@ function FasitSeksjon() {
   const endret =
     vmVinner.trim() !== (fasit.vmVinner || "") ||
     toppscorer.trim() !== (fasit.toppscorer || "") ||
-    toppassist.trim() !== (fasit.toppassist || "");
+    toppassist.trim() !== (fasit.toppassist || "") ||
+    ronaldoVsMessi !== (fasit.ronaldoVsMessi || "");
 
   const alleLag = GRUPPER.flatMap((g) => g.lag).sort();
 
@@ -499,6 +510,46 @@ function FasitSeksjon() {
             posFilter={["FW", "MF", "DF"]}
           />
         </div>
+
+        <div>
+          <label className="block text-xs text-muted mb-1.5">
+            🐐 Ronaldo eller Messi (flest mål i VM)
+          </label>
+          <div className="grid grid-cols-3 gap-1.5">
+            {(
+              [
+                { v: "", l: "Ikke satt" },
+                { v: "ronaldo", l: "Ronaldo" },
+                { v: "likt", l: "Likt" },
+                { v: "messi", l: "Messi" },
+              ] as { v: RonaldoVsMessi; l: string }[]
+            )
+              .filter((o) => o.v !== "")
+              .map((o) => (
+                <button
+                  key={o.v}
+                  type="button"
+                  onClick={() => setRonaldoVsMessi(o.v)}
+                  className={`h-10 rounded-xl text-xs font-semibold transition ${
+                    ronaldoVsMessi === o.v
+                      ? "bg-primary text-primaryFg border border-primary"
+                      : "bg-elevated border border-border hover:border-primary/50"
+                  }`}
+                >
+                  {o.l}
+                </button>
+              ))}
+          </div>
+          {ronaldoVsMessi && (
+            <button
+              type="button"
+              onClick={() => setRonaldoVsMessi("")}
+              className="mt-1.5 text-[10px] text-muted hover:text-text underline"
+            >
+              Nullstill
+            </button>
+          )}
+        </div>
       </div>
 
       <button
@@ -543,41 +594,9 @@ function MedlemmerSeksjon({
         </p>
       </div>
       <div className="space-y-1.5">
-        {sortert.map((b) => {
-          const erDeg = b.uid === egenUid;
-          return (
-            <div
-              key={b.uid}
-              className="flex items-center justify-between gap-3 bg-elevated border border-border rounded-xl px-3 py-2"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium truncate flex items-center gap-2">
-                  {b.navn}
-                  {b.rolle === "admin" && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-bold">
-                      ADMIN
-                    </span>
-                  )}
-                </div>
-                <div className="text-[11px] text-muted truncate mb-1.5">
-                  {b.epost}
-                </div>
-                <KlubbRolleVelger
-                  uid={b.uid}
-                  nåværende={b.klubbRolle}
-                />
-              </div>
-              <button
-                onClick={() => setSkalSlette(b)}
-                disabled={erDeg}
-                className="h-8 px-3 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs font-semibold hover:bg-danger/15 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-                title={erDeg ? "Du kan ikke slette deg selv" : "Slett medlem"}
-              >
-                Slett
-              </button>
-            </div>
-          );
-        })}
+        {sortert.map((b) => (
+          <MedlemRad key={b.uid} bruker={b} egenUid={egenUid} onSlett={setSkalSlette} />
+        ))}
       </div>
 
       {skalSlette && (
@@ -591,6 +610,150 @@ function MedlemmerSeksjon({
         />
       )}
     </section>
+  );
+}
+
+function MedlemRad({
+  bruker,
+  egenUid,
+  onSlett,
+}: {
+  bruker: Bruker;
+  egenUid: string;
+  onSlett: (b: Bruker) => void;
+}) {
+  const erDeg = bruker.uid === egenUid;
+  const [redigerer, setRedigerer] = useState(false);
+  const [navn, setNavn] = useState(bruker.navn);
+  const [lagrer, setLagrer] = useState(false);
+  const [frostLagrer, setFrostLagrer] = useState(false);
+
+  useEffect(() => {
+    if (!redigerer) setNavn(bruker.navn);
+  }, [bruker.navn, redigerer]);
+
+  async function lagreNavn() {
+    const nyttNavn = navn.trim();
+    if (!nyttNavn || nyttNavn === bruker.navn) {
+      setRedigerer(false);
+      setNavn(bruker.navn);
+      return;
+    }
+    setLagrer(true);
+    try {
+      await oppdaterBrukerNavn(bruker.uid, nyttNavn);
+      setRedigerer(false);
+    } finally {
+      setLagrer(false);
+    }
+  }
+
+  async function toggleFrosset() {
+    setFrostLagrer(true);
+    try {
+      await oppdaterBrukerFrosset(bruker.uid, !bruker.frosset);
+    } finally {
+      setFrostLagrer(false);
+    }
+  }
+
+  return (
+    <div
+      className={`flex items-start justify-between gap-3 border rounded-xl px-3 py-2 ${
+        bruker.frosset
+          ? "bg-warning/5 border-warning/30"
+          : "bg-elevated border-border"
+      }`}
+    >
+      <div className="min-w-0 flex-1 space-y-1.5">
+        {redigerer ? (
+          <div className="flex items-center gap-1.5">
+            <input
+              value={navn}
+              onChange={(e) => setNavn(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") lagreNavn();
+                if (e.key === "Escape") {
+                  setRedigerer(false);
+                  setNavn(bruker.navn);
+                }
+              }}
+              autoFocus
+              className="flex-1 h-8 px-2 text-sm rounded-lg bg-bg border border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+            />
+            <button
+              type="button"
+              onClick={lagreNavn}
+              disabled={lagrer || !navn.trim()}
+              className="h-8 px-2.5 rounded-lg bg-primary text-primaryFg text-xs font-semibold disabled:opacity-50"
+            >
+              {lagrer ? "…" : "Lagre"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRedigerer(false);
+                setNavn(bruker.navn);
+              }}
+              className="h-8 px-2 text-muted hover:text-text text-xs"
+            >
+              Avbryt
+            </button>
+          </div>
+        ) : (
+          <div className="text-sm font-medium truncate flex items-center gap-2">
+            <span>{bruker.navn}</span>
+            <button
+              type="button"
+              onClick={() => setRedigerer(true)}
+              className="text-[10px] text-muted hover:text-text underline"
+            >
+              Endre
+            </button>
+            {bruker.rolle === "admin" && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-bold">
+                ADMIN
+              </span>
+            )}
+            {bruker.frosset && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-warning/20 text-warning font-bold">
+                FROSSET
+              </span>
+            )}
+          </div>
+        )}
+        <div className="text-[11px] text-muted truncate">{bruker.epost}</div>
+        <KlubbRolleVelger uid={bruker.uid} nåværende={bruker.klubbRolle} />
+      </div>
+      <div className="flex flex-col gap-1.5 items-end">
+        <button
+          onClick={toggleFrosset}
+          disabled={erDeg || frostLagrer}
+          className={`h-8 px-3 rounded-lg border text-xs font-semibold whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
+            bruker.frosset
+              ? "bg-warning/15 border-warning/40 text-warning hover:bg-warning/20"
+              : "bg-elevated border-border hover:border-warning/50 text-muted hover:text-text"
+          }`}
+          title={
+            erDeg
+              ? "Du kan ikke fryse deg selv"
+              : bruker.frosset
+                ? "Tin opp brukeren"
+                : "Frys: kan se men ikke tippe"
+          }
+        >
+          {frostLagrer ? "…" : bruker.frosset ? "Tin opp" : "Frys"}
+        </button>
+        <button
+          onClick={() => onSlett(bruker)}
+          disabled={erDeg}
+          className="h-8 px-3 rounded-lg bg-danger/10 border border-danger/30 text-danger text-xs font-semibold hover:bg-danger/15 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+          title={erDeg ? "Du kan ikke slette deg selv" : "Slett medlem"}
+        >
+          Slett
+        </button>
+      </div>
+    </div>
   );
 }
 

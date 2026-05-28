@@ -15,7 +15,7 @@ import {
   updateProfile,
   User,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { fbAuth, fbDb, isFirebaseConfigured } from "./firebase";
 import {
   localBrukere,
@@ -23,7 +23,7 @@ import {
   localPassord,
   seedDemo,
 } from "./local-store";
-import { Bruker, KlubbRolle } from "./types";
+import { Bruker } from "./types";
 
 type AuthCtx = {
   user: { uid: string; email: string } | null;
@@ -31,12 +31,7 @@ type AuthCtx = {
   laster: boolean;
   demoModus: boolean;
   loggInn: (epost: string, passord: string) => Promise<void>;
-  registrer: (
-    epost: string,
-    passord: string,
-    navn: string,
-    klubbRolle: KlubbRolle,
-  ) => Promise<void>;
+  registrer: (epost: string, passord: string, navn: string) => Promise<void>;
   loggUt: () => Promise<void>;
   gjørAdmin: () => void;
 };
@@ -52,18 +47,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (fbActive) {
-      const unsub = onAuthStateChanged(fbAuth(), async (u: User | null) => {
+      let unsubBruker: (() => void) | null = null;
+      const unsub = onAuthStateChanged(fbAuth(), (u: User | null) => {
+        if (unsubBruker) {
+          unsubBruker();
+          unsubBruker = null;
+        }
         if (u) {
           setUser({ uid: u.uid, email: u.email || "" });
-          const snap = await getDoc(doc(fbDb(), "brukere", u.uid));
-          if (snap.exists()) setBruker(snap.data() as Bruker);
+          // Live-subscribe på egen brukerdoc — så endringer fra admin
+          // (f.eks. frosset-flagg eller navn) slår inn umiddelbart uten
+          // at brukeren må logge ut og inn.
+          unsubBruker = onSnapshot(doc(fbDb(), "brukere", u.uid), (snap) => {
+            if (snap.exists()) setBruker(snap.data() as Bruker);
+            setLaster(false);
+          });
         } else {
           setUser(null);
           setBruker(null);
+          setLaster(false);
         }
-        setLaster(false);
       });
-      return () => unsub();
+      return () => {
+        if (unsubBruker) unsubBruker();
+        unsub();
+      };
     }
 
     // Demo-modus
@@ -118,12 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localCurrent.set(funnet.uid);
   }
 
-  async function registrer(
-    epost: string,
-    passord: string,
-    navn: string,
-    klubbRolle: KlubbRolle,
-  ) {
+  async function registrer(epost: string, passord: string, navn: string) {
     if (fbActive) {
       const cred = await createUserWithEmailAndPassword(
         fbAuth(),
@@ -135,7 +138,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: cred.user.uid,
         epost,
         navn,
-        klubbRolle,
         rolle: "medlem",
         poeng: 0,
         opprettet: Date.now(),
@@ -158,7 +160,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       uid,
       epost,
       navn,
-      klubbRolle,
       rolle: Object.keys(localBrukere.get()).length === 0 ? "admin" : "medlem",
       poeng: 0,
       opprettet: Date.now(),

@@ -177,6 +177,7 @@ export function useFasit(): Fasit {
     toppscorer: "",
     toppassist: "",
     mestRødeKort: "",
+    ronaldoVsMessi: "",
   });
   useEffect(() => {
     if (bruker()) {
@@ -292,6 +293,43 @@ export async function oppdaterKlubbRolle(
   const b = map[uid];
   if (!b) return;
   map[uid] = { ...b, klubbRolle };
+  localBrukere.set(map);
+}
+
+/**
+ * Endrer navnet på en bruker. Krever admin eller eier.
+ */
+export async function oppdaterBrukerNavn(
+  uid: string,
+  navn: string,
+): Promise<void> {
+  if (bruker()) {
+    await updateDoc(doc(fbDb(), "brukere", uid), { navn });
+    return;
+  }
+  const map = { ...localBrukere.get() };
+  const b = map[uid];
+  if (!b) return;
+  map[uid] = { ...b, navn };
+  localBrukere.set(map);
+}
+
+/**
+ * Fryser eller tiner en bruker. Frosne brukere kan se appen men ikke
+ * lagre tipps eller spesialtipps (håndheves i firestore.rules + UI).
+ */
+export async function oppdaterBrukerFrosset(
+  uid: string,
+  frosset: boolean,
+): Promise<void> {
+  if (bruker()) {
+    await updateDoc(doc(fbDb(), "brukere", uid), { frosset });
+    return;
+  }
+  const map = { ...localBrukere.get() };
+  const b = map[uid];
+  if (!b) return;
+  map[uid] = { ...b, frosset };
   localBrukere.set(map);
 }
 

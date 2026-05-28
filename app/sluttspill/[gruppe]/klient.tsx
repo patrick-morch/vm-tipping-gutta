@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useFrosseToast } from "@/components/FrosseToast";
 import {
   useKamper,
   useMineTips,
@@ -76,8 +77,11 @@ function GruppeDetalj() {
 
   const harNorge = gruppe.lag.includes(NORGE);
 
+  const frosset = bruker?.frosset === true;
+  const { varsle, toast } = useFrosseToast();
+
   async function lagre(matchId: string, h: number, b: number) {
-    if (!user || !bruker || !gruppe) return;
+    if (!user || !bruker || !gruppe || frosset) return;
     await lagreTip({
       matchId,
       uid: user.uid,
@@ -89,7 +93,7 @@ function GruppeDetalj() {
   }
 
   async function slett(matchId: string) {
-    if (!user) return;
+    if (!user || frosset) return;
     await slettTip(matchId, user.uid);
   }
 
@@ -131,7 +135,28 @@ function GruppeDetalj() {
         />
       </div>
 
-      <div className="space-y-3">
+      {frosset && (
+        <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
+          <span className="text-lg">❄️</span>
+          Du er frosset av admin. Du kan se kampene, men ikke tippe.
+        </div>
+      )}
+
+      <div
+        className="space-y-3"
+        onPointerDownCapture={
+          frosset
+            ? (e) => {
+                const t = e.target as HTMLElement;
+                if (t.tagName === "INPUT" || t.closest("input")) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  varsle();
+                }
+              }
+            : undefined
+        }
+      >
         <h2 className="font-semibold text-sm uppercase tracking-wider text-muted">
           Kamper
         </h2>
@@ -140,11 +165,14 @@ function GruppeDetalj() {
             key={kamp.id}
             kamp={kamp}
             tip={tips[kamp.id]}
+            frosset={frosset}
             onLagre={(h, b) => lagre(kamp.id, h, b)}
             onSlett={() => slett(kamp.id)}
           />
         ))}
       </div>
+
+      {toast}
     </div>
   );
 }
@@ -211,11 +239,13 @@ function TabellKort({
 function KampRad({
   kamp,
   tip,
+  frosset,
   onLagre,
   onSlett,
 }: {
   kamp: Match;
   tip?: Prediction;
+  frosset?: boolean;
   onLagre: (h: number, b: number) => Promise<void>;
   onSlett: () => Promise<void>;
 }) {
@@ -233,7 +263,7 @@ function KampRad({
 
   const låst = kampErLåst(kamp);
   const tippbar = erTippbar(kamp);
-  const disabled = låst || !tippbar;
+  const disabled = låst || !tippbar || Boolean(frosset);
   const gyldig =
     hjem !== "" && bort !== "" && Number(hjem) >= 0 && Number(bort) >= 0;
   const tom = hjem === "" && bort === "";

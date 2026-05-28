@@ -252,4 +252,5 @@ export const POENG = {
   toppscorer: 15,
   toppassist: 10,
   mestRødeKort: 5,
+  ronaldoVsMessi: 5,
 };
