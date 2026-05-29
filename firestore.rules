@@ -16,7 +16,7 @@ service cloud.firestore {
     function erFrosset() {
       return erInnlogget()
         && exists(/databases/$(database)/documents/brukere/$(request.auth.uid))
-        && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.frosset == true;
+        && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.get('frosset', false) == true;
     }
     // Tipping på en kamp låses 1 time før kampstart.
     function kampAapen(matchId) {
