@@ -9,7 +9,6 @@ import {
   useFasit,
   seedAlleKamper,
   slettBruker,
-  oppdaterKlubbRolle,
   oppdaterBrukerNavn,
   oppdaterBrukerFrosset,
   nullstillAlleResultater,
@@ -17,7 +16,7 @@ import {
 } from "@/lib/data";
 import { GRUPPER } from "@/lib/vm-data";
 import SpillerVelger from "@/components/SpillerVelger";
-import type { KlubbRolle, RonaldoVsMessi } from "@/lib/types";
+import type { RonaldoVsMessi } from "@/lib/types";
 import { Bruker, Match } from "@/lib/types";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
@@ -723,7 +722,6 @@ function MedlemRad({
           </div>
         )}
         <div className="text-[11px] text-muted truncate">{bruker.epost}</div>
-        <KlubbRolleVelger uid={bruker.uid} nåværende={bruker.klubbRolle} />
       </div>
       <div className="flex flex-col gap-1.5 items-end">
         <button
@@ -757,55 +755,6 @@ function MedlemRad({
   );
 }
 
-function KlubbRolleVelger({
-  uid,
-  nåværende,
-}: {
-  uid: string;
-  nåværende?: KlubbRolle;
-}) {
-  const [lagrer, setLagrer] = useState<KlubbRolle | null>(null);
-
-  async function velg(r: KlubbRolle) {
-    if (r === nåværende) return;
-    setLagrer(r);
-    try {
-      await oppdaterKlubbRolle(uid, r);
-    } finally {
-      setLagrer(null);
-    }
-  }
-
-  const valg: { v: KlubbRolle; ikon: string; label: string }[] = [
-    { v: "trener", ikon: "🧥", label: "Trener" },
-    { v: "spiller", ikon: "⚽", label: "Spiller" },
-    { v: "annet", ikon: "👥", label: "Annet" },
-  ];
-
-  return (
-    <div className="flex gap-1 flex-wrap">
-      {valg.map((c) => {
-        const valgt = nåværende === c.v;
-        const lasterDenne = lagrer === c.v;
-        return (
-          <button
-            key={c.v}
-            onClick={() => velg(c.v)}
-            disabled={Boolean(lagrer)}
-            className={`h-6 px-2 rounded-md text-[10px] font-semibold uppercase tracking-wider transition flex items-center gap-1 ${
-              valgt
-                ? "bg-primary/15 text-primary border border-primary/30"
-                : "bg-elevated border border-border text-muted hover:text-text hover:border-primary/30"
-            } disabled:opacity-50`}
-          >
-            <span className="text-xs">{c.ikon}</span>
-            {lasterDenne ? "…" : c.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 function SlettModal({
   bruker,
