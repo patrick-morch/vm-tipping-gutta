@@ -113,84 +113,92 @@ function Kamper() {
         </div>
       )}
 
-      {/* Desktop-only: ikonisk Cantona-kick som flavor over kamp-listen */}
-      <div className="hidden lg:block">
-        <div className="relative overflow-hidden rounded-3xl border border-border">
-          <img
-            src="/cantona-kick.jpeg"
-            alt="Eric Cantona, Selhurst Park, 25. januar 1995"
-            className="w-full h-56 object-cover object-center"
-          />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
-            <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-white/70">
-              Selhurst Park · 25.01.1995
+      {/* På desktop: kamper venstre, Cantona-kicket sticky til høyre */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6 lg:items-start space-y-5 lg:space-y-0">
+        <div className="space-y-5">
+          {neste.length === 0 && (
+            <div className="bg-surface border border-border rounded-2xl p-8 text-center text-muted text-sm">
+              Ingen åpne kamper akkurat nå.
             </div>
-            <div className="text-white text-sm font-semibold">
-              "Au revoir."
+          )}
+
+          {grupperte.map(({ dato, kamper: dagsKamper }) => (
+            <div key={dato} className="space-y-2">
+              <DatoHeader dato={dato} nå={nå} />
+              <div
+                className="space-y-2 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-3"
+                onPointerDownCapture={
+                  frosset
+                    ? (e) => {
+                        const t = e.target as HTMLElement;
+                        if (t.tagName === "INPUT" || t.closest("input")) {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          varsle();
+                        }
+                      }
+                    : undefined
+                }
+              >
+                {dagsKamper.map((kamp) => (
+                  <KampKort
+                    key={kamp.id}
+                    kamp={kamp}
+                    tip={tips[kamp.id]}
+                    frosset={frosset}
+                    onLagre={(h, b) => lagre(kamp.id, h, b)}
+                    onSlett={() => slett(kamp.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {åpne.length > ANTALL && (
+            <Link
+              href="/sluttspill"
+              className="block text-center bg-surface border border-border hover:border-primary rounded-2xl py-3 text-sm font-medium transition"
+            >
+              Se alle {åpne.length} åpne kamper →
+            </Link>
+          )}
+
+          {sisteFerdige.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-muted px-1">
+                Siste resultater
+              </div>
+              <div className="space-y-2">
+                {sisteFerdige.map((kamp) => (
+                  <ResultatKort
+                    key={kamp.id}
+                    kamp={kamp}
+                    tip={tips[kamp.id]}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <aside className="hidden lg:block lg:sticky lg:top-20">
+          <div className="relative overflow-hidden rounded-3xl border border-border">
+            <img
+              src="/cantona-kick.jpeg"
+              alt="Eric Cantona, Selhurst Park, 25. januar 1995"
+              className="w-full aspect-[3/4] object-cover object-left"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+              <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-white/70">
+                Selhurst Park · 25.01.1995
+              </div>
+              <div className="text-white text-sm font-semibold">
+                "Au revoir."
+              </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
-
-      {neste.length === 0 && (
-        <div className="bg-surface border border-border rounded-2xl p-8 text-center text-muted text-sm">
-          Ingen åpne kamper akkurat nå.
-        </div>
-      )}
-
-      {grupperte.map(({ dato, kamper: dagsKamper }) => (
-        <div key={dato} className="space-y-2">
-          <DatoHeader dato={dato} nå={nå} />
-          <div
-            className="space-y-2 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-3"
-            onPointerDownCapture={
-              frosset
-                ? (e) => {
-                    const t = e.target as HTMLElement;
-                    if (t.tagName === "INPUT" || t.closest("input")) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      varsle();
-                    }
-                  }
-                : undefined
-            }
-          >
-            {dagsKamper.map((kamp) => (
-              <KampKort
-                key={kamp.id}
-                kamp={kamp}
-                tip={tips[kamp.id]}
-                frosset={frosset}
-                onLagre={(h, b) => lagre(kamp.id, h, b)}
-                onSlett={() => slett(kamp.id)}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
-
-      {åpne.length > ANTALL && (
-        <Link
-          href="/sluttspill"
-          className="block text-center bg-surface border border-border hover:border-primary rounded-2xl py-3 text-sm font-medium transition"
-        >
-          Se alle {åpne.length} åpne kamper →
-        </Link>
-      )}
-
-      {sisteFerdige.length > 0 && (
-        <div className="space-y-2 pt-2">
-          <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-muted px-1">
-            Siste resultater
-          </div>
-          <div className="space-y-2">
-            {sisteFerdige.map((kamp) => (
-              <ResultatKort key={kamp.id} kamp={kamp} tip={tips[kamp.id]} />
-            ))}
-          </div>
-        </div>
-      )}
 
       {toast}
     </div>
