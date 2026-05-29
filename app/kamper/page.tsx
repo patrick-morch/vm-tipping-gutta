@@ -113,8 +113,8 @@ function Kamper() {
         </div>
       )}
 
-      {/* På desktop: kamper venstre, Cantona-kicket sticky til høyre */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6 lg:items-start space-y-5 lg:space-y-0">
+      {/* På desktop: kamper venstre, Cantona-kicket fyller høyrekolonnen */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6 space-y-5 lg:space-y-0">
         <div className="space-y-5">
           {neste.length === 0 && (
             <div className="bg-surface border border-border rounded-2xl p-8 text-center text-muted text-sm">
@@ -181,12 +181,12 @@ function Kamper() {
           )}
         </div>
 
-        <aside className="hidden lg:block lg:sticky lg:top-20">
-          <div className="relative overflow-hidden rounded-3xl border border-border">
+        <aside className="hidden lg:block lg:h-full">
+          <div className="relative overflow-hidden rounded-3xl border border-border h-full">
             <img
               src="/cantona-kick.jpeg"
               alt="Eric Cantona, Selhurst Park, 25. januar 1995"
-              className="w-full aspect-[3/4] object-cover object-left"
+              className="w-full h-full object-cover object-left"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
               <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-white/70">
