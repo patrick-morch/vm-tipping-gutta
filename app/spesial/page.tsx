@@ -141,7 +141,7 @@ function Spesial() {
 
       <fieldset
         disabled={låst}
-        className="space-y-4 relative"
+        className="space-y-4 relative lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4"
         onPointerDownCapture={
           frosset
             ? (e) => {

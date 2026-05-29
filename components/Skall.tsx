@@ -35,11 +35,31 @@ export default function Skall({ children }: { children: ReactNode }) {
         </div>
       )}
       <header className="sticky top-0 z-10 bg-bg/85 backdrop-blur border-b border-border">
-        <div className="max-w-[480px] mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/kamper" className="flex items-center gap-2">
+        <div className="max-w-[480px] lg:max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <Link href="/kamper" className="flex items-center gap-2 flex-shrink-0">
             <span className="font-semibold">VM-tipping</span>
           </Link>
-          <div className="flex items-center gap-2">
+          {/* Hoved-nav inne i headeren på desktop */}
+          <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+            {nav.map((n) => {
+              const aktiv = path === n.href;
+              return (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  className={`h-9 px-3 rounded-full text-sm font-medium transition flex items-center gap-1.5 ${
+                    aktiv
+                      ? "bg-primary/15 text-primary"
+                      : "text-muted hover:text-text hover:bg-elevated"
+                  }`}
+                >
+                  <span className="text-base leading-none">{n.ikon}</span>
+                  <span>{n.tittel}</span>
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={bytt}
               className="w-9 h-9 rounded-full bg-elevated border border-border text-base hover:border-primary transition flex items-center justify-center"
@@ -75,16 +95,17 @@ export default function Skall({ children }: { children: ReactNode }) {
       </header>
 
       <main
-        className={`flex-1 w-full mx-auto px-4 py-4 pb-24 ${
+        className={`flex-1 w-full mx-auto px-4 py-4 pb-24 lg:pb-10 ${
           path === "/sluttspill" || path === "/sluttspill/"
             ? "max-w-[480px] lg:max-w-6xl"
-            : "max-w-[480px]"
+            : "max-w-[480px] lg:max-w-6xl"
         }`}
       >
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border">
+      {/* Bunn-nav på mobil — skjules når hoved-nav vises i headeren */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border lg:hidden">
         <div className="max-w-[480px] mx-auto grid grid-cols-5">
           {nav.map((n) => {
             const aktiv = path === n.href;

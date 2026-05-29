@@ -123,7 +123,7 @@ function Kamper() {
         <div key={dato} className="space-y-2">
           <DatoHeader dato={dato} nå={nå} />
           <div
-            className="space-y-2"
+            className="space-y-2 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-3"
             onPointerDownCapture={
               frosset
                 ? (e) => {
