@@ -113,6 +113,25 @@ function Kamper() {
         </div>
       )}
 
+      {/* Desktop-only: ikonisk Cantona-kick som flavor over kamp-listen */}
+      <div className="hidden lg:block">
+        <div className="relative overflow-hidden rounded-3xl border border-border">
+          <img
+            src="/cantona-kick.jpeg"
+            alt="Eric Cantona, Selhurst Park, 25. januar 1995"
+            className="w-full h-56 object-cover object-center"
+          />
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
+            <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-white/70">
+              Selhurst Park · 25.01.1995
+            </div>
+            <div className="text-white text-sm font-semibold">
+              "Au revoir."
+            </div>
+          </div>
+        </div>
+      </div>
+
       {neste.length === 0 && (
         <div className="bg-surface border border-border rounded-2xl p-8 text-center text-muted text-sm">
           Ingen åpne kamper akkurat nå.
