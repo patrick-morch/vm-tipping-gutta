@@ -13,6 +13,7 @@ import {
 } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
+import SideHeader from "@/components/SideHeader";
 import SpillerVelger from "@/components/SpillerVelger";
 import { useFrosseToast } from "@/components/FrosseToast";
 
@@ -105,25 +106,28 @@ function Spesial() {
   const { varsle, toast } = useFrosseToast();
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Spesialtips</h1>
-          <p className="text-muted text-sm">
-            {låst ? "Låst" : `Stenger ${låsTekst}`}
-          </p>
-        </div>
-        <div className="flex gap-1">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className={`w-2 h-2 rounded-full transition ${
-                i < tippet ? "bg-primary" : "bg-border"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
+    <div className="space-y-4">
+      <SideHeader
+        tittel="Spesialtips"
+        undertittel={låst ? "Låst" : `Stenger ${låsTekst}`}
+        høyre={
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-muted tabular-nums">
+              {tippet}/4
+            </span>
+            <div className="flex gap-1">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-full transition ${
+                    i < tippet ? "bg-primary" : "bg-border"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        }
+      />
 
       {frosset && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">

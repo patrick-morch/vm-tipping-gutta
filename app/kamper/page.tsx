@@ -10,7 +10,6 @@ import {
   erTippbar,
   flagg,
   kortLagNavn,
-  LÅS_FØR_KAMP_MS,
 } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
@@ -50,7 +49,7 @@ function Kamper() {
   }, []);
 
   const åpne = kamper
-    .filter((k) => k.starttid - LÅS_FØR_KAMP_MS > nå && erTippbar(k))
+    .filter((k) => k.starttid > nå && erTippbar(k))
     .sort((a, b) => a.starttid - b.starttid);
   const neste = åpne.slice(0, ANTALL);
   const utenTip = neste.filter((k) => !tips[k.id]).length;

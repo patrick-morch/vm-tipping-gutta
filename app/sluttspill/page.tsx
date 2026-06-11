@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useKamper, useMineTips } from "@/lib/data";
+import { useKamper, useMineTips, useFasit } from "@/lib/data";
 import { GRUPPER, NORGE, erTippbar, flagg, kortLagNavn } from "@/lib/vm-data";
 import { beregnTabell, kamperMedMineTips } from "@/lib/standings";
 import Skall from "@/components/Skall";
@@ -42,7 +42,7 @@ function Sluttspill() {
       <div className="grid grid-cols-2 gap-1.5 bg-surface border border-border rounded-2xl p-1.5">
         <button
           onClick={() => router.push("/sluttspill")}
-          className={`h-10 rounded-xl text-sm font-semibold transition ${
+          className={`h-10 rounded-xl text-sm font-semibold transition active:scale-[0.98] ${
             fane === "grupper"
               ? "bg-primary text-primaryFg"
               : "text-muted hover:text-text"
@@ -52,7 +52,7 @@ function Sluttspill() {
         </button>
         <button
           onClick={() => router.push("/sluttspill?fane=knockout")}
-          className={`h-10 rounded-xl text-sm font-semibold transition ${
+          className={`h-10 rounded-xl text-sm font-semibold transition active:scale-[0.98] ${
             fane === "knockout"
               ? "bg-primary text-primaryFg"
               : "text-muted hover:text-text"
@@ -151,111 +151,48 @@ function GrupperFane() {
   );
 }
 
+// Antall spor (rader) per halvdel = antall kamper i ytterste runde.
+const SPOR = 8;
+// Radhøyden tilpasser seg skjermhøyden (clamp), men holdes lesbar.
+const RAD = "clamp(50px, 7.4vh, 74px)";
+const STUB = 10; // lengde på horisontale connector-stubber
+
+type Runde = { id: string; kort: string; periode: string; kamper: number };
+
+// Rundenavn følger de kanoniske `runde`-strengene fra auto-sync
+// (scripts/sync-resultater.mjs) slik at brackettet matcher /kamper-siden.
+// Ytre runde har 8 kamper per halvdel (= 16 totalt).
+const RUNDER_YTRE_TIL_INDRE: Runde[] = [
+  { id: "32del", kort: "32-delsfinale", periode: "28/6 – 3/7", kamper: 8 },
+  { id: "16del", kort: "16-delsfinale", periode: "4 – 7/7", kamper: 4 },
+  { id: "kvart", kort: "Kvartfinale", periode: "9 – 11/7", kamper: 2 },
+  { id: "semi", kort: "Semifinale", periode: "14 – 15/7", kamper: 1 },
+];
+
+// Hele runder (begge halvdeler slått sammen) — brukes i mobil-visningen.
+const HELE_RUNDER: Runde[] = [
+  { id: "32del", kort: "32-delsfinale", periode: "28/6 – 3/7", kamper: 16 },
+  { id: "16del", kort: "16-delsfinale", periode: "4 – 7/7", kamper: 8 },
+  { id: "kvart", kort: "Kvartfinale", periode: "9 – 11/7", kamper: 4 },
+  { id: "semi", kort: "Semifinale", periode: "14 – 15/7", kamper: 2 },
+];
+
 function KnockoutFane() {
-  const SPOR = 16;
-  const RAD_PX = 60;
-
-  const runder = [
-    { id: "32del", kort: "Sekstendedels", periode: "28. jun – 3. jul", kamper: 16 },
-    { id: "16del", kort: "Åttendedels", periode: "4 – 7. jul", kamper: 8 },
-    { id: "kvart", kort: "Kvartfinale", periode: "9 – 11. jul", kamper: 4 },
-    { id: "semi", kort: "Semifinale", periode: "14 – 15. jul", kamper: 2 },
-    { id: "finale", kort: "Finale", periode: "19. juli", kamper: 1 },
-  ];
-
   return (
     <div className="space-y-3">
-      <div className="relative bg-gradient-to-br from-surface via-surface to-elevated/30 border border-border rounded-3xl p-4 overflow-x-auto">
-        {/* Subtle bakgrunnsmønster */}
-        <div className="absolute inset-0 pointer-events-none opacity-30 [background-image:radial-gradient(circle_at_center,rgb(var(--primary)/0.08)_0,transparent_70%)]" />
+      {/* Desktop: konvergerende to-sidig bracket */}
+      <div className="hidden lg:block">
+        <BracketDesktop />
+      </div>
 
-        <div className="relative flex gap-3 min-w-max">
-          {runder.map((r, ri) => {
-            const radPerKamp = SPOR / r.kamper;
-            return (
-              <div key={r.id} className="flex-shrink-0 w-[156px]">
-                <div className="mb-3 text-center">
-                  <div className="text-[10px] font-bold text-muted uppercase tracking-[0.12em]">
-                    {r.kort}
-                  </div>
-                  <div className="text-[9px] text-muted/70 mt-0.5">
-                    {r.periode}
-                  </div>
-                </div>
-                <div
-                  className="grid"
-                  style={{
-                    gridTemplateRows: `repeat(${SPOR}, ${RAD_PX}px)`,
-                  }}
-                >
-                  {Array.from({ length: r.kamper }).map((_, i) => {
-                    const erFinale = ri === runder.length - 1;
-                    return (
-                      <div
-                        key={i}
-                        style={{
-                          gridRow: `${i * radPerKamp + 1} / span ${radPerKamp}`,
-                        }}
-                        className="flex items-center px-1 relative"
-                      >
-                        {/* Connector-linje til neste runde */}
-                        {ri < runder.length - 1 && (
-                          <div className="absolute right-[-12px] top-1/2 w-3 h-px bg-border/60" />
-                        )}
-                        {/* Vertikal connector mellom pair-kamper */}
-                        {ri > 0 && i % 2 === 0 && (
-                          <div
-                            className="absolute left-[-12px] w-px bg-border/60"
-                            style={{
-                              top: `${RAD_PX * (radPerKamp / 2) / 2 + 30}px`,
-                              height: `${RAD_PX * radPerKamp / 2}px`,
-                            }}
-                          />
-                        )}
-                        {ri > 0 && (
-                          <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-border/60" />
-                        )}
-                        <KampKort fremhevet={erFinale} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Verdensmester-kolonne */}
-          <div className="flex-shrink-0 w-[180px]">
-            <div className="mb-3 text-center">
-              <div className="text-[10px] font-bold text-gold uppercase tracking-[0.12em]">
-                Verdensmester
-              </div>
-              <div className="text-[9px] text-gold/70 mt-0.5">19. juli</div>
-            </div>
-            <div
-              className="grid"
-              style={{
-                gridTemplateRows: `repeat(${SPOR}, ${RAD_PX}px)`,
-              }}
-            >
-              <div
-                style={{ gridRow: `1 / span ${SPOR}` }}
-                className="flex items-center px-1 relative"
-              >
-                <div className="absolute left-[-12px] top-1/2 w-3 h-px bg-gold/40" />
-                <VinnerKort />
-              </div>
-            </div>
-          </div>
-
-          {/* Bronsefinale — off-bracket kolonne */}
-          <BronseKolonne sporHøyde={SPOR * RAD_PX} />
-        </div>
+      {/* Mobil/tablet: vertikal runde-for-runde — ingen horisontal scroll */}
+      <div className="lg:hidden">
+        <RunderMobil />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="bg-surface border border-border rounded-2xl p-3 text-center text-xs text-muted">
-          Kampene fylles automatisk inn etter 27. juni.
+          Lagene fylles automatisk inn etter trekningen 27. juni.
         </div>
         <Link
           href="/kamper"
@@ -268,22 +205,180 @@ function KnockoutFane() {
   );
 }
 
-function BronseKolonne({ sporHøyde }: { sporHøyde: number }) {
+function BracketDesktop() {
+  const venstre = RUNDER_YTRE_TIL_INDRE;
+  const høyre = [...RUNDER_YTRE_TIL_INDRE].reverse();
+
+  return (
+    <div className="relative bg-gradient-to-br from-surface via-surface to-elevated/30 border border-border rounded-3xl p-4 overflow-x-auto">
+      {/* Subtilt bakgrunnsglød bak finalen */}
+      <div className="absolute inset-0 pointer-events-none opacity-40 [background-image:radial-gradient(circle_at_center,rgb(var(--gold)/0.07)_0,transparent_60%)]" />
+
+      <div
+        className="relative flex items-stretch w-full min-w-[860px]"
+        style={{ "--rad": RAD } as CSSProperties}
+      >
+        {/* Venstre halvdel: ytre → indre (flyt mot høyre) */}
+        <Halvdel side="venstre" runder={venstre} />
+
+        {/* Sentrum: pokal, finale og bronse */}
+        <SentrumKolonne />
+
+        {/* Høyre halvdel: indre → ytre (flyt mot venstre) */}
+        <Halvdel side="høyre" runder={høyre} />
+      </div>
+    </div>
+  );
+}
+
+// Mobil: rundene stablet vertikalt, kamper i kompakt 2-kolonners rutenett.
+function RunderMobil() {
   const kamper = useKamper();
+  const fasit = useFasit();
+  const finale = kamper.find((k) => k.runde === "Finale");
   const bronse = kamper.find((k) => k.runde === "Bronsefinale");
 
   return (
-    <div className="flex-shrink-0 w-[150px]">
-      <div className="mb-3 text-center">
-        <div className="text-[10px] font-bold text-warning uppercase tracking-[0.12em]">
-          Bronse
+    <div className="space-y-3">
+      {HELE_RUNDER.map((r) => (
+        <div
+          key={r.id}
+          className="bg-gradient-to-br from-surface to-elevated/30 border border-border rounded-2xl p-3"
+        >
+          <div className="flex items-baseline justify-between mb-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-muted">
+              {r.kort}
+            </h3>
+            <span className="text-[10px] text-muted/70">{r.periode}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {Array.from({ length: r.kamper }).map((_, i) => (
+              <KampKort key={i} />
+            ))}
+          </div>
         </div>
-        <div className="text-[9px] text-warning/70 mt-0.5">18. juli</div>
+      ))}
+
+      {/* Finale */}
+      <div className="relative bg-gradient-to-br from-gold/12 via-gold/5 to-transparent border border-gold/30 rounded-2xl p-4">
+        <div className="flex items-baseline justify-between mb-3">
+          <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-gold">
+            Finale
+          </h3>
+          <span className="text-[10px] text-gold/70">19. juli</span>
+        </div>
+        <div className="max-w-[260px] mx-auto flex flex-col items-center gap-3">
+          <VinnerKort mester={fasit.vmVinner} />
+          <FinaleKort kamp={finale} />
+        </div>
+      </div>
+
+      {/* Bronsefinale */}
+      <div className="bg-gradient-to-br from-surface to-elevated/30 border border-border rounded-2xl p-3">
+        <div className="flex items-baseline justify-between mb-2.5">
+          <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-warning">
+            Bronsefinale
+          </h3>
+          <span className="text-[10px] text-warning/70">18. juli</span>
+        </div>
+        <div className="max-w-[200px] mx-auto">
+          <BronseKort kamp={bronse} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Halvdel({ side, runder }: { side: "venstre" | "høyre"; runder: Runde[] }) {
+  const erVenstre = side === "venstre";
+  // Indre side = mot sentrum. Ytre side = mot kanten.
+  const indreSide = erVenstre ? "right" : "left";
+  const ytreSide = erVenstre ? "left" : "right";
+
+  return (
+    <div className="flex items-stretch flex-1">
+      {runder.map((r, ri) => {
+        const radPerKamp = SPOR / r.kamper;
+        // Mottar denne kolonnen et par fra runden lenger ut?
+        // Venstre: ytre er til venstre → kolonner etter den første (ri>0).
+        // Høyre: ytre er til høyre → kolonner før den siste (ri<lengde-1).
+        const mottar = erVenstre ? ri > 0 : ri < runder.length - 1;
+
+        return (
+          <div key={r.id} className="flex-1 min-w-0">
+            <div className="mb-3 text-center">
+              <div className="text-[10px] font-bold text-muted uppercase tracking-[0.08em]">
+                {r.kort}
+              </div>
+              <div className="text-[9px] text-muted/70 mt-0.5">{r.periode}</div>
+            </div>
+            <div
+              className="grid"
+              style={{ gridTemplateRows: `repeat(${SPOR}, var(--rad))` }}
+            >
+              {Array.from({ length: r.kamper }).map((_, i) => (
+                <div
+                  key={i}
+                  style={{ gridRow: `${i * radPerKamp + 1} / span ${radPerKamp}` }}
+                  className="flex items-center px-1 relative"
+                >
+                  {/* Stub mot sentrum (mater neste runde) */}
+                  <div
+                    className="absolute top-1/2 h-px bg-border/60"
+                    style={{ [indreSide]: -STUB, width: STUB }}
+                  />
+                  {/* Mottak fra ytre runde: stub + vertikal som binder paret */}
+                  {mottar && (
+                    <>
+                      <div
+                        className="absolute top-1/2 h-px bg-border/60"
+                        style={{ [ytreSide]: -STUB, width: STUB }}
+                      />
+                      <div
+                        className="absolute w-px bg-border/60"
+                        style={{
+                          [ytreSide]: -STUB,
+                          top: `calc(var(--rad) * ${radPerKamp / 4})`,
+                          height: `calc(var(--rad) * ${radPerKamp / 2})`,
+                        }}
+                      />
+                    </>
+                  )}
+                  <KampKort />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SentrumKolonne() {
+  const kamper = useKamper();
+  const fasit = useFasit();
+  const finale = kamper.find((k) => k.runde === "Finale");
+  const bronse = kamper.find((k) => k.runde === "Bronsefinale");
+
+  return (
+    <div className="flex-none w-[150px] xl:w-[168px] px-1">
+      <div className="mb-3 text-center">
+        <div className="text-[10px] font-bold text-gold uppercase tracking-[0.1em]">
+          Finale
+        </div>
+        <div className="text-[9px] text-gold/70 mt-0.5">19. juli</div>
       </div>
       <div
-        className="flex items-center justify-center"
-        style={{ height: sporHøyde }}
+        className="flex flex-col items-center justify-center gap-3 relative"
+        style={{ height: `calc(var(--rad) * ${SPOR})` }}
       >
+        {/* Stubber inn fra begge semifinaler */}
+        <div className="absolute left-[-14px] top-1/2 w-3.5 h-px bg-gold/40" />
+        <div className="absolute right-[-14px] top-1/2 w-3.5 h-px bg-gold/40" />
+
+        <VinnerKort mester={fasit.vmVinner} />
+        <FinaleKort kamp={finale} />
         <BronseKort kamp={bronse} />
       </div>
     </div>
@@ -329,57 +424,106 @@ function BronseKort({
   );
 }
 
-function KampKort({ fremhevet }: { fremhevet?: boolean }) {
+// Én lag-rad i et bracket-kort.
+function LagRad({ medSkille }: { medSkille?: boolean }) {
   return (
     <div
-      className={`w-full rounded-xl overflow-hidden transition-all ${
-        fremhevet
-          ? "bg-gradient-to-br from-gold/15 to-transparent border border-gold/30 shadow-[0_0_20px_rgb(var(--gold)/0.08)]"
-          : "bg-elevated border border-border hover:border-primary/30"
+      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 ${
+        medSkille ? "border-b border-border/40" : ""
       }`}
     >
-      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border/40">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="w-5 h-5 rounded-full bg-border/60 border border-border flex-shrink-0" />
-          <span className="text-[11px] text-muted truncate">TBD</span>
-        </div>
-        <span className="text-xs text-muted font-mono tabular-nums w-4 text-right">
-          –
-        </span>
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="w-4 h-4 rounded-full bg-border/60 border border-border flex-shrink-0" />
+        <span className="text-[11px] text-muted truncate">TBD</span>
       </div>
-      <div className="flex items-center justify-between gap-2 px-3 py-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="w-5 h-5 rounded-full bg-border/60 border border-border flex-shrink-0" />
-          <span className="text-[11px] text-muted truncate">TBD</span>
-        </div>
-        <span className="text-xs text-muted font-mono tabular-nums w-4 text-right">
-          –
-        </span>
-      </div>
+      <span className="text-xs text-muted font-mono tabular-nums w-4 text-right">
+        –
+      </span>
     </div>
   );
 }
 
-function VinnerKort() {
+function KampKort() {
+  return (
+    <div className="w-full rounded-lg overflow-hidden bg-elevated border border-border hover:border-primary/40 transition-colors">
+      <LagRad medSkille />
+      <LagRad />
+    </div>
+  );
+}
+
+// Én lag-rad i finale-kortet — gull-tonet, viser ekte lag når det finnes.
+function FinaleRad({
+  flagg: f,
+  navn,
+  score,
+  medSkille,
+}: {
+  flagg: string;
+  navn: string;
+  score: number | string;
+  medSkille?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between gap-2 px-2.5 py-2 ${
+        medSkille ? "border-b border-gold/20" : ""
+      }`}
+    >
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <span className="text-sm flex-shrink-0">{f}</span>
+        <span className="text-[11px] text-gold/80 truncate">{navn}</span>
+      </div>
+      <span className="text-xs text-gold/70 font-mono tabular-nums w-4 text-right">
+        {score}
+      </span>
+    </div>
+  );
+}
+
+// Finale-kampen i sentrum — gull-fremhevet. Synker med live kampdata.
+function FinaleKort({
+  kamp,
+}: {
+  kamp?: { hjemmelag: string; bortelag: string; resultat?: { hjemme: number; borte: number } | null };
+}) {
+  const lagH = kamp ? kortLagNavn(kamp.hjemmelag) : "TBD";
+  const lagB = kamp ? kortLagNavn(kamp.bortelag) : "TBD";
+  const fH = kamp ? flagg(kamp.hjemmelag) : "🏳";
+  const fB = kamp ? flagg(kamp.bortelag) : "🏳";
+  const scoreH = kamp?.resultat?.hjemme ?? "–";
+  const scoreB = kamp?.resultat?.borte ?? "–";
+
+  return (
+    <div className="w-full rounded-xl overflow-hidden border border-gold/40 bg-gradient-to-br from-gold/15 via-gold/5 to-transparent shadow-[0_0_24px_rgb(var(--gold)/0.1)]">
+      <FinaleRad flagg={fH} navn={lagH} score={scoreH} medSkille />
+      <FinaleRad flagg={fB} navn={lagB} score={scoreB} />
+    </div>
+  );
+}
+
+// Mester/pokal-kortet som kroner sentrum. Synker med fasit.vmVinner.
+function VinnerKort({ mester }: { mester?: string }) {
+  const harMester = !!mester;
   return (
     <div className="relative w-full rounded-2xl overflow-hidden">
-      {/* Glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gold/30 via-gold/10 to-transparent" />
-      <div className="absolute -inset-4 bg-gold/10 blur-2xl pointer-events-none" />
-
-      <div className="relative border-2 border-gold/50 rounded-2xl p-4 text-center bg-bg/40 backdrop-blur">
-        <div className="text-4xl mb-2 drop-shadow-[0_2px_8px_rgb(var(--gold)/0.4)]">
+      <div className="absolute -inset-3 bg-gold/10 blur-2xl pointer-events-none" />
+      <div className="relative border-2 border-gold/50 rounded-2xl px-3 py-3 text-center bg-bg/40 backdrop-blur">
+        <div className="text-3xl mb-1 drop-shadow-[0_2px_8px_rgb(var(--gold)/0.4)]">
           🏆
         </div>
         <div className="text-[9px] text-gold uppercase tracking-[0.15em] font-bold mb-1">
           Verdensmester
         </div>
-        <div className="text-sm font-bold text-gold/80">TBD</div>
-        <div className="mt-2 pt-2 border-t border-gold/20">
-          <div className="text-[9px] text-gold/60 uppercase tracking-wider">
-            Finale
-          </div>
-          <div className="text-[10px] text-muted">19. juli</div>
+        <div className="text-sm font-bold text-gold/80">
+          {harMester ? (
+            <span>
+              <span className="mr-1">{flagg(mester!)}</span>
+              {kortLagNavn(mester!)}
+            </span>
+          ) : (
+            "TBD"
+          )}
         </div>
       </div>
     </div>

@@ -216,17 +216,17 @@ export function alleGruppekamper(): Match[] {
   });
 }
 
-// Tipping på en kamp låses 1 time før kampstart.
-export const LÅS_FØR_KAMP_MS = 60 * 60 * 1000;
-
 // Spesialtips låses 1 time før første VM-kamp (11. juni 20:00 norsk tid).
+const SPESIAL_LÅS_FØR_MS = 60 * 60 * 1000;
+
 export const SPESIAL_LÅS_TID = (() => {
   const kamper = alleGruppekamper();
-  return Math.min(...kamper.map((k) => k.starttid)) - LÅS_FØR_KAMP_MS;
+  return Math.min(...kamper.map((k) => k.starttid)) - SPESIAL_LÅS_FØR_MS;
 })();
 
+// Tipping på en kamp låses i det kampen starter (avspark).
 export function kampErLåst(kamp: { starttid: number }, nå = Date.now()): boolean {
-  return nå >= kamp.starttid - LÅS_FØR_KAMP_MS;
+  return nå >= kamp.starttid;
 }
 
 export function spesialErLåst(nå = Date.now()): boolean {

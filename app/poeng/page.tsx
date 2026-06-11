@@ -97,7 +97,7 @@ function Poeng() {
             <div>
               <div className="font-semibold">Kampresultat</div>
               <div className="text-muted text-xs">
-                Låses 1 time før kickoff for hver kamp.
+                Låses ved kampstart (avspark) for hver kamp.
               </div>
             </div>
           </div>

@@ -97,7 +97,7 @@ export default function Skall({ children }: { children: ReactNode }) {
       <main
         className={`flex-1 w-full mx-auto px-4 py-4 pb-24 lg:pb-10 ${
           path === "/sluttspill" || path === "/sluttspill/"
-            ? "max-w-[480px] lg:max-w-6xl"
+            ? "max-w-[480px] lg:max-w-none lg:px-8"
             : "max-w-[480px] lg:max-w-6xl"
         }`}
       >
@@ -105,7 +105,7 @@ export default function Skall({ children }: { children: ReactNode }) {
       </main>
 
       {/* Bunn-nav på mobil — skjules når hoved-nav vises i headeren */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur border-t border-border lg:hidden pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-[480px] mx-auto grid grid-cols-5">
           {nav.map((n) => {
             const aktiv = path === n.href;
@@ -113,11 +113,18 @@ export default function Skall({ children }: { children: ReactNode }) {
               <Link
                 key={n.href}
                 href={n.href}
-                className={`py-2.5 text-center text-[10px] font-medium transition flex flex-col items-center gap-0.5 ${
+                aria-current={aktiv ? "page" : undefined}
+                className={`pt-1.5 pb-2 flex flex-col items-center gap-1 text-[10px] font-medium transition active:scale-95 ${
                   aktiv ? "text-primary" : "text-muted hover:text-text"
                 }`}
               >
-                <span className="text-lg leading-none">{n.ikon}</span>
+                <span
+                  className={`flex items-center justify-center w-11 h-7 rounded-full text-lg leading-none transition ${
+                    aktiv ? "bg-primary/12" : "bg-transparent"
+                  }`}
+                >
+                  {n.ikon}
+                </span>
                 <span>{n.tittel}</span>
               </Link>
             );

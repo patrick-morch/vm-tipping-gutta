@@ -21,7 +21,7 @@ service cloud.firestore {
     // Tipping på en kamp låses 1 time før kampstart.
     function kampAapen(matchId) {
       return exists(/databases/$(database)/documents/kamper/$(matchId))
-        && get(/databases/$(database)/documents/kamper/$(matchId)).data.starttid - 3600000 > request.time.toMillis();
+        && get(/databases/$(database)/documents/kamper/$(matchId)).data.starttid > request.time.toMillis();
     }
 
     // Spesialtips låses 1 time før første VM-kamp (11. juni 2026 18:00 UTC = 20:00 norsk tid).
