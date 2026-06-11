@@ -335,8 +335,10 @@ function KampKort({
 
   return (
     <div
-      className={`relative bg-surface border rounded-2xl p-3 transition ${
-        erNorge ? "border-norge/40" : "border-border"
+      className={`relative bg-surface border rounded-2xl p-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-card ${
+        erNorge
+          ? "border-norge/40 bg-gradient-to-br from-norge/10 via-surface to-surface hover:border-norge/60"
+          : "border-border hover:border-primary/40"
       }`}
     >
       <div className="flex items-center justify-between text-[10px] mb-2.5">
@@ -452,7 +454,7 @@ function Sc({
       onChange={(e) =>
         onChange(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))
       }
-      className="w-12 h-12 text-center text-xl font-bold rounded-xl bg-elevated border border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-12 h-12 text-center text-xl font-bold tabular-nums rounded-xl bg-elevated border border-border focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15 focus:shadow-glow transition disabled:opacity-50 disabled:cursor-not-allowed"
     />
   );
 }

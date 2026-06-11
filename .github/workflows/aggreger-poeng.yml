@@ -2,8 +2,8 @@ name: Aggreger poeng
 
 on:
   schedule:
-    # 03:00 Europe/Oslo = 01:00 UTC (CEST sommer, 02:00 UTC vinter)
-    - cron: "0 1 * * *"
+    # 10:00 Europe/Oslo = 08:00 UTC (CEST sommer — gjelder hele VM-perioden)
+    - cron: "0 8 * * *"
   workflow_dispatch: {}
 
 permissions:

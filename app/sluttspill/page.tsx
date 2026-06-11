@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, type CSSProperties } from "react";
+import { Suspense, useMemo, type CSSProperties } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useKamper, useMineTips, useFasit } from "@/lib/data";
-import { GRUPPER, NORGE, erTippbar, flagg, kortLagNavn } from "@/lib/vm-data";
+import type { Match } from "@/lib/types";
+import {
+  GRUPPER,
+  NORGE,
+  erNorgeKamp,
+  erTippbar,
+  flagg,
+  kortLagNavn,
+} from "@/lib/vm-data";
 import { beregnTabell, kamperMedMineTips } from "@/lib/standings";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
@@ -44,7 +52,7 @@ function Sluttspill() {
           onClick={() => router.push("/sluttspill")}
           className={`h-10 rounded-xl text-sm font-semibold transition active:scale-[0.98] ${
             fane === "grupper"
-              ? "bg-primary text-primaryFg"
+              ? "bg-primary text-primaryFg shadow-glow"
               : "text-muted hover:text-text"
           }`}
         >
@@ -54,7 +62,7 @@ function Sluttspill() {
           onClick={() => router.push("/sluttspill?fane=knockout")}
           className={`h-10 rounded-xl text-sm font-semibold transition active:scale-[0.98] ${
             fane === "knockout"
-              ? "bg-primary text-primaryFg"
+              ? "bg-primary text-primaryFg shadow-glow"
               : "text-muted hover:text-text"
           }`}
         >
@@ -90,8 +98,10 @@ function GrupperFane() {
           <Link
             key={g.id}
             href={`/sluttspill/${g.id}`}
-            className={`bg-surface border rounded-2xl p-3 transition hover:border-primary ${
-              harNorge ? "border-norge/40" : "border-border"
+            className={`bg-surface border rounded-2xl p-3 transition-all duration-150 hover:border-primary hover:-translate-y-0.5 hover:shadow-card ${
+              harNorge
+                ? "border-norge/40 bg-gradient-to-br from-norge/10 via-surface to-surface"
+                : "border-border"
             }`}
           >
             <div className="flex items-center justify-between mb-2">
@@ -177,9 +187,27 @@ const HELE_RUNDER: Runde[] = [
   { id: "semi", kort: "Semifinale", periode: "14 – 15/7", kamper: 2 },
 ];
 
+// Grupperer knockout-kamper per runde, sortert på avspark. Brukes til å
+// fylle bracket-sporene med ekte lag etterhvert som sync-jobben oppretter dem.
+function useKnockoutKamper(): Record<string, Match[]> {
+  const kamper = useKamper();
+  return useMemo(() => {
+    const m: Record<string, Match[]> = {};
+    for (const k of kamper) {
+      if (k.runde.startsWith("Gruppe")) continue;
+      (m[k.runde] ||= []).push(k);
+    }
+    Object.values(m).forEach((l) => l.sort((a, b) => a.starttid - b.starttid));
+    return m;
+  }, [kamper]);
+}
+
 function KnockoutFane() {
   return (
     <div className="space-y-3">
+      {/* Live-prognose mens gruppespillet pågår */}
+      <KvalifisertNå />
+
       {/* Desktop: konvergerende to-sidig bracket */}
       <div className="hidden lg:block">
         <BracketDesktop />
@@ -192,7 +220,7 @@ function KnockoutFane() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="bg-surface border border-border rounded-2xl p-3 text-center text-xs text-muted">
-          Lagene fylles automatisk inn etter trekningen 27. juni.
+          Braketten fylles inn automatisk så snart lag og kamptider er klare.
         </div>
         <Link
           href="/kamper"
@@ -205,9 +233,124 @@ function KnockoutFane() {
   );
 }
 
+// Viser hvem som er kvalifisert akkurat nå basert på spilte gruppekamper.
+// Oppdateres live mens gruppespillet pågår; forsvinner når braketten er full.
+function KvalifisertNå() {
+  const kamper = useKamper();
+
+  const data = useMemo(() => {
+    const grupper = GRUPPER.map((g) => {
+      const gk = kamper.filter((k) => k.runde === `Gruppe ${g.id}`);
+      const spilt = gk.filter((k) => k.resultat).length;
+      return { id: g.id, spilt, total: gk.length, tabell: beregnTabell(g.lag, gk) };
+    });
+    const spiltTotalt = grupper.reduce((s, g) => s + g.spilt, 0);
+    const totalKamper = grupper.reduce((s, g) => s + g.total, 0);
+    // 8 beste treere går videre i 48-lags-formatet
+    const treere = grupper
+      .filter((g) => g.spilt > 0)
+      .map((g) => ({ gruppe: g.id, ...g.tabell[2] }))
+      .sort(
+        (a, b) =>
+          b.poeng - a.poeng || b.målDiff - a.målDiff || b.målFor - a.målFor,
+      );
+    return { grupper, spiltTotalt, totalKamper, treere };
+  }, [kamper]);
+
+  const brakettFull =
+    kamper.filter((k) => k.runde === "32-delsfinale").length >= 16;
+  if (data.spiltTotalt === 0 || brakettFull) return null;
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface to-elevated/30 p-4">
+      <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
+      <div className="relative">
+        <div className="flex items-baseline justify-between gap-2 mb-3">
+          <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-primary">
+            Kvalifisert akkurat nå
+          </h3>
+          <span className="text-[10px] text-muted">
+            prognose · {data.spiltTotalt}/{data.totalKamper} kamper spilt
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {data.grupper.map((g) => (
+            <div
+              key={g.id}
+              className="bg-elevated/60 border border-border rounded-xl px-2.5 py-2 min-w-0"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold text-muted">
+                  GRUPPE {g.id}
+                </span>
+                <span className="text-[9px] text-muted/70 tabular-nums">
+                  {g.spilt}/{g.total}
+                </span>
+              </div>
+              {g.spilt === 0 ? (
+                <div className="text-[11px] text-muted/60 py-1">
+                  Ikke startet
+                </div>
+              ) : (
+                g.tabell.slice(0, 2).map((s, i) => (
+                  <div
+                    key={s.lag}
+                    className={`flex items-center gap-1.5 text-[11px] leading-5 min-w-0 ${
+                      s.lag === NORGE ? "text-norge font-bold" : ""
+                    }`}
+                  >
+                    <span
+                      className={`w-3 text-right font-bold text-[10px] flex-shrink-0 ${
+                        i === 0 ? "text-success" : "text-accent"
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="flex-shrink-0">{flagg(s.lag)}</span>
+                    <span className="truncate font-medium">
+                      {kortLagNavn(s.lag)}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          ))}
+        </div>
+
+        {data.treere.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-border/60">
+            <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted mb-1.5">
+              Beste treere — 8 går videre
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {data.treere.map((t, i) => (
+                <span
+                  key={t.lag}
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-semibold ${
+                    i < 8
+                      ? t.lag === NORGE
+                        ? "border-norge/50 bg-norge/15 text-norge"
+                        : "border-success/40 bg-success/10"
+                      : "border-border text-muted opacity-60"
+                  }`}
+                >
+                  {flagg(t.lag)} {kortLagNavn(t.lag)}
+                  <span className="text-muted/70 tabular-nums">{t.poeng}p</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BracketDesktop() {
   const venstre = RUNDER_YTRE_TIL_INDRE;
   const høyre = [...RUNDER_YTRE_TIL_INDRE].reverse();
+  const knockout = useKnockoutKamper();
 
   return (
     <div className="relative bg-gradient-to-br from-surface via-surface to-elevated/30 border border-border rounded-3xl p-4 overflow-x-auto">
@@ -219,13 +362,13 @@ function BracketDesktop() {
         style={{ "--rad": RAD } as CSSProperties}
       >
         {/* Venstre halvdel: ytre → indre (flyt mot høyre) */}
-        <Halvdel side="venstre" runder={venstre} />
+        <Halvdel side="venstre" runder={venstre} knockout={knockout} />
 
         {/* Sentrum: pokal, finale og bronse */}
         <SentrumKolonne />
 
         {/* Høyre halvdel: indre → ytre (flyt mot venstre) */}
-        <Halvdel side="høyre" runder={høyre} />
+        <Halvdel side="høyre" runder={høyre} knockout={knockout} />
       </div>
     </div>
   );
@@ -235,6 +378,7 @@ function BracketDesktop() {
 function RunderMobil() {
   const kamper = useKamper();
   const fasit = useFasit();
+  const knockout = useKnockoutKamper();
   const finale = kamper.find((k) => k.runde === "Finale");
   const bronse = kamper.find((k) => k.runde === "Bronsefinale");
 
@@ -253,7 +397,7 @@ function RunderMobil() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {Array.from({ length: r.kamper }).map((_, i) => (
-              <KampKort key={i} />
+              <KampKort key={i} kamp={knockout[r.kort]?.[i]} visTid />
             ))}
           </div>
         </div>
@@ -289,7 +433,15 @@ function RunderMobil() {
   );
 }
 
-function Halvdel({ side, runder }: { side: "venstre" | "høyre"; runder: Runde[] }) {
+function Halvdel({
+  side,
+  runder,
+  knockout,
+}: {
+  side: "venstre" | "høyre";
+  runder: Runde[];
+  knockout: Record<string, Match[]>;
+}) {
   const erVenstre = side === "venstre";
   // Indre side = mot sentrum. Ytre side = mot kanten.
   const indreSide = erVenstre ? "right" : "left";
@@ -344,7 +496,9 @@ function Halvdel({ side, runder }: { side: "venstre" | "høyre"; runder: Runde[]
                       />
                     </>
                   )}
-                  <KampKort />
+                  <KampKort
+                    kamp={knockout[r.kort]?.[erVenstre ? i : r.kamper + i]}
+                  />
                 </div>
               ))}
             </div>
@@ -443,11 +597,97 @@ function LagRad({ medSkille }: { medSkille?: boolean }) {
   );
 }
 
-function KampKort() {
+// Bracket-kort: TBD-placeholder til kampen er synket inn, deretter ekte
+// lag, kamptid og resultat. `visTid` brukes i mobil-visningen der det er
+// plass til en tidslinje; på desktop ligger tiden i title-tooltip.
+function KampKort({ kamp, visTid }: { kamp?: Match; visTid?: boolean }) {
+  if (!kamp) {
+    return (
+      <div className="w-full rounded-lg overflow-hidden bg-elevated border border-border hover:border-primary/40 transition-colors">
+        <LagRad medSkille />
+        <LagRad />
+      </div>
+    );
+  }
+
+  const d = new Date(kamp.starttid);
+  const tidTekst = `${d.getDate()}/${d.getMonth() + 1} kl ${d.toLocaleTimeString(
+    "nb-NO",
+    { hour: "2-digit", minute: "2-digit" },
+  )}`;
+  const norge = erNorgeKamp(kamp);
+  const res = kamp.resultat;
+  const vinner = res
+    ? res.hjemme > res.borte
+      ? "h"
+      : res.borte > res.hjemme
+        ? "b"
+        : null
+    : null;
+
   return (
-    <div className="w-full rounded-lg overflow-hidden bg-elevated border border-border hover:border-primary/40 transition-colors">
-      <LagRad medSkille />
-      <LagRad />
+    <div
+      title={`${kamp.hjemmelag} – ${kamp.bortelag} · ${tidTekst}`}
+      className={`w-full rounded-lg overflow-hidden bg-elevated border transition-colors ${
+        norge
+          ? "border-norge/50 shadow-[0_0_16px_rgb(var(--norge)/0.15)]"
+          : "border-border hover:border-primary/40"
+      }`}
+    >
+      {visTid && !res && (
+        <div className="px-2.5 pt-1.5 text-[9px] font-semibold text-muted/80 tabular-nums">
+          {tidTekst}
+        </div>
+      )}
+      <EkteLagRad
+        lag={kamp.hjemmelag}
+        score={res?.hjemme}
+        vant={vinner === "h"}
+        medSkille
+      />
+      <EkteLagRad lag={kamp.bortelag} score={res?.borte} vant={vinner === "b"} />
+    </div>
+  );
+}
+
+function EkteLagRad({
+  lag,
+  score,
+  vant,
+  medSkille,
+}: {
+  lag: string;
+  score?: number;
+  vant?: boolean;
+  medSkille?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 ${
+        medSkille ? "border-b border-border/40" : ""
+      }`}
+    >
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        <span className="text-sm flex-shrink-0">{flagg(lag)}</span>
+        <span
+          className={`text-[11px] truncate ${
+            vant
+              ? "font-bold"
+              : score != null
+                ? "text-muted"
+                : `font-medium ${lag === NORGE ? "text-norge" : ""}`
+          }`}
+        >
+          {kortLagNavn(lag)}
+        </span>
+      </div>
+      <span
+        className={`text-xs font-mono tabular-nums w-4 text-right ${
+          vant ? "font-bold" : "text-muted"
+        }`}
+      >
+        {score ?? "–"}
+      </span>
     </div>
   );
 }

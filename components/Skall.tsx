@@ -34,13 +34,21 @@ export default function Skall({ children }: { children: ReactNode }) {
           Demo-modus — data lagres bare i nettleseren
         </div>
       )}
-      <header className="sticky top-0 z-10 bg-bg/85 backdrop-blur border-b border-border">
-        <div className="max-w-[480px] lg:max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <Link href="/kamper" className="flex items-center gap-2 flex-shrink-0">
-            <span className="font-semibold">VM-tipping</span>
+      <header className="sticky top-0 z-10 bg-bg/80 backdrop-blur-xl border-b border-border">
+        <div className="max-w-[480px] md:max-w-2xl lg:max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <Link href="/kamper" className="flex items-center gap-2.5 flex-shrink-0">
+            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-base shadow-glow">
+              ⚽
+            </span>
+            <span className="leading-none">
+              <span className="block font-bold tracking-tight">VM-tipping</span>
+              <span className="block text-[9px] uppercase tracking-[0.2em] font-bold text-muted mt-0.5">
+                Gutta · 2026
+              </span>
+            </span>
           </Link>
           {/* Hoved-nav inne i headeren på desktop */}
-          <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
             {nav.map((n) => {
               const aktiv = path === n.href;
               return (
@@ -49,11 +57,13 @@ export default function Skall({ children }: { children: ReactNode }) {
                   href={n.href}
                   className={`h-9 px-3 rounded-full text-sm font-medium transition flex items-center gap-1.5 ${
                     aktiv
-                      ? "bg-primary/15 text-primary"
+                      ? "bg-primary/15 text-primary shadow-[inset_0_0_0_1px_rgb(var(--primary)/0.3)]"
                       : "text-muted hover:text-text hover:bg-elevated"
                   }`}
                 >
-                  <span className="text-base leading-none">{n.ikon}</span>
+                  <span className="hidden lg:inline text-base leading-none">
+                    {n.ikon}
+                  </span>
                   <span>{n.tittel}</span>
                 </Link>
               );
@@ -95,17 +105,17 @@ export default function Skall({ children }: { children: ReactNode }) {
       </header>
 
       <main
-        className={`flex-1 w-full mx-auto px-4 py-4 pb-24 lg:pb-10 ${
+        className={`anim-fade-up flex-1 w-full mx-auto px-4 py-4 pb-24 md:pb-10 ${
           path === "/sluttspill" || path === "/sluttspill/"
-            ? "max-w-[480px] lg:max-w-none lg:px-8"
-            : "max-w-[480px] lg:max-w-6xl"
+            ? "max-w-[480px] md:max-w-2xl lg:max-w-none lg:px-8"
+            : "max-w-[480px] md:max-w-2xl lg:max-w-6xl"
         }`}
       >
         {children}
       </main>
 
       {/* Bunn-nav på mobil — skjules når hoved-nav vises i headeren */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur border-t border-border lg:hidden pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface/85 backdrop-blur-xl border-t border-border md:hidden pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-[480px] mx-auto grid grid-cols-5">
           {nav.map((n) => {
             const aktiv = path === n.href;
@@ -120,7 +130,9 @@ export default function Skall({ children }: { children: ReactNode }) {
               >
                 <span
                   className={`flex items-center justify-center w-11 h-7 rounded-full text-lg leading-none transition ${
-                    aktiv ? "bg-primary/12" : "bg-transparent"
+                    aktiv
+                      ? "bg-primary/15 shadow-[0_0_14px_rgb(var(--primary)/0.35)]"
+                      : "bg-transparent"
                   }`}
                 >
                   {n.ikon}

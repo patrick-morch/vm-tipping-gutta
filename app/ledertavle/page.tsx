@@ -173,8 +173,8 @@ function Ledertavle() {
       {!aggregert && !demoModus && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-xs rounded-2xl px-3 py-2.5 flex items-center gap-2">
           <span>⏳</span>
-          Ledertavlen oppdateres nattlig kl 03. Første aggregering kommer
-          neste natt.
+          Ledertavlen oppdateres hver morgen kl 10. Første aggregering kommer
+          i morgen tidlig.
         </div>
       )}
 
@@ -256,37 +256,41 @@ function Podium({
   const har3 = top3[2];
 
   return (
-    <div className="grid grid-cols-3 gap-2 items-end">
-      {har2 ? (
-        <PodiumKort
-          rad={har2}
-          plass={2}
-          egen={har2.uid === egenUid}
-          ledersum={ledersum}
-        />
-      ) : (
-        <div />
-      )}
-      {har1 ? (
-        <PodiumKort
-          rad={har1}
-          plass={1}
-          egen={har1.uid === egenUid}
-          ledersum={ledersum}
-        />
-      ) : (
-        <div />
-      )}
-      {har3 ? (
-        <PodiumKort
-          rad={har3}
-          plass={3}
-          egen={har3.uid === egenUid}
-          ledersum={ledersum}
-        />
-      ) : (
-        <div />
-      )}
+    <div className="relative">
+      {/* Gulvglød under pallen */}
+      <div className="absolute inset-x-8 bottom-0 h-20 bg-gold/10 blur-3xl pointer-events-none" />
+      <div className="relative grid grid-cols-3 gap-2 items-end border-b-2 border-border/70">
+        {har2 ? (
+          <PodiumKort
+            rad={har2}
+            plass={2}
+            egen={har2.uid === egenUid}
+            ledersum={ledersum}
+          />
+        ) : (
+          <div />
+        )}
+        {har1 ? (
+          <PodiumKort
+            rad={har1}
+            plass={1}
+            egen={har1.uid === egenUid}
+            ledersum={ledersum}
+          />
+        ) : (
+          <div />
+        )}
+        {har3 ? (
+          <PodiumKort
+            rad={har3}
+            plass={3}
+            egen={har3.uid === egenUid}
+            ledersum={ledersum}
+          />
+        ) : (
+          <div />
+        )}
+      </div>
     </div>
   );
 }
@@ -304,70 +308,97 @@ function PodiumKort({
 }) {
   const stil = {
     1: {
-      tema: "bg-gradient-to-br from-gold/35 via-gold/15 to-transparent border-gold/50",
-      tag: "bg-gold/25 text-gold",
-      medalje: "🥇",
-      glow: "shadow-[0_0_40px_rgb(var(--gold)/0.15)]",
-      tagTekst: "VINNER",
-      paddingTop: "pt-5",
+      topp: "👑",
+      toppKlasse: "text-4xl drop-shadow-[0_2px_12px_rgb(var(--gold)/0.6)]",
+      avatar:
+        "w-16 h-16 border-2 border-gold/70 shadow-[0_0_28px_rgb(var(--gold)/0.45)]",
+      pall: "h-24 md:h-28 border-gold/60 bg-gradient-to-b from-gold/45 via-gold/20 to-gold/5 shadow-[0_-8px_40px_rgb(var(--gold)/0.25)]",
+      tall: "text-gold text-3xl",
+      poengKlasse: "text-3xl text-gold",
+      tag: "MESTERTIPPEREN",
+      tagKlasse: "bg-gold/20 text-gold border border-gold/40",
     },
     2: {
-      tema: "bg-gradient-to-br from-accent/20 via-accent/8 to-transparent border-accent/30",
-      tag: "bg-accent/20 text-accent",
-      medalje: "🥈",
-      glow: "",
-      tagTekst: "2. PLASS",
-      paddingTop: "pt-3",
+      topp: "🥈",
+      toppKlasse: "text-2xl",
+      avatar: "w-11 h-11 border border-accent/50",
+      pall: "h-14 md:h-16 border-accent/40 bg-gradient-to-b from-accent/25 via-accent/10 to-transparent",
+      tall: "text-accent text-2xl",
+      poengKlasse: "text-lg",
+      tag: null,
+      tagKlasse: "",
     },
     3: {
-      tema: "bg-gradient-to-br from-warning/15 via-warning/5 to-transparent border-warning/30",
-      tag: "bg-warning/15 text-warning",
-      medalje: "🥉",
-      glow: "",
-      tagTekst: "3. PLASS",
-      paddingTop: "pt-3",
+      topp: "🥉",
+      toppKlasse: "text-2xl",
+      avatar: "w-11 h-11 border border-warning/50",
+      pall: "h-9 md:h-11 border-warning/40 bg-gradient-to-b from-warning/25 via-warning/10 to-transparent",
+      tall: "text-warning text-2xl",
+      poengKlasse: "text-lg",
+      tag: null,
+      tagKlasse: "",
     },
   }[plass];
 
   const prosent = ledersum > 0 ? Math.round((rad.poeng / ledersum) * 100) : 100;
+  const er1 = plass === 1;
 
   return (
-    <div
-      className={`relative ${stil.paddingTop} pb-3 px-2 rounded-2xl border ${stil.tema} ${stil.glow} ${
-        egen ? "ring-2 ring-primary/50" : ""
-      }`}
-    >
-      <div className="text-center space-y-1.5">
-        <div className={plass === 1 ? "text-3xl" : "text-2xl"}>
-          {stil.medalje}
-        </div>
+    <div className="flex flex-col items-center justify-end min-w-0">
+      {/* Personen på pallen */}
+      <div className="flex flex-col items-center gap-1.5 pb-2.5 px-1 min-w-0 w-full">
+        <div className={`leading-none ${stil.toppKlasse}`}>{stil.topp}</div>
         <div
-          className="w-10 h-10 mx-auto rounded-full bg-elevated border border-border flex items-center justify-center font-bold px-1"
+          className={`rounded-full bg-elevated flex items-center justify-center font-bold ${stil.avatar} ${
+            egen ? "ring-2 ring-primary/60 ring-offset-2 ring-offset-bg" : ""
+          }`}
           style={{
             fontSize:
               initialer(rad.navn).length <= 2
-                ? "12px"
+                ? er1
+                  ? "18px"
+                  : "13px"
                 : initialer(rad.navn).length === 3
-                  ? "11px"
+                  ? er1
+                    ? "14px"
+                    : "11px"
                   : "9px",
           }}
         >
           {initialer(rad.navn)}
         </div>
+        {stil.tag && (
+          <span
+            className={`text-[8px] font-bold tracking-[0.14em] px-2 py-0.5 rounded-full ${stil.tagKlasse}`}
+          >
+            {stil.tag}
+          </span>
+        )}
         <div
-          className="font-bold text-xs px-1 leading-tight break-words"
+          className="font-bold text-xs text-center leading-tight break-words w-full"
           title={rad.navn}
         >
           {rad.navn}
           {egen && <span className="text-primary text-[10px] ml-1">(deg)</span>}
         </div>
-        <div className={plass === 1 ? "text-2xl font-bold" : "text-lg font-bold"}>
+        <div
+          className={`font-extrabold leading-none tabular-nums ${stil.poengKlasse}`}
+        >
           {rad.poeng}
           <span className="text-[10px] text-muted font-normal ml-0.5">p</span>
         </div>
-        {plass !== 1 && (
+        {!er1 && (
           <div className="text-[9px] text-muted">{prosent}% av leder</div>
         )}
+      </div>
+
+      {/* Selve pallen */}
+      <div
+        className={`w-full rounded-t-2xl border border-b-0 flex items-start justify-center pt-1.5 ${stil.pall}`}
+      >
+        <span className={`font-extrabold opacity-90 ${stil.tall}`}>
+          {plass}
+        </span>
       </div>
     </div>
   );

@@ -64,12 +64,17 @@ export default function LoggInn() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+      <div className="anim-fade-up w-full max-w-sm">
         <div className="flex flex-col items-center gap-3 mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl shadow-glow">
+            ⚽
+          </div>
           <div className="text-center">
-            <div className="text-xl font-bold leading-tight">VM-tipping</div>
-            <div className="text-[11px] text-muted uppercase tracking-[0.15em] font-semibold">
-              Gutta
+            <div className="text-2xl font-extrabold tracking-tight leading-tight">
+              VM-tipping
+            </div>
+            <div className="text-[11px] text-muted uppercase tracking-[0.2em] font-bold">
+              Gutta · 2026
             </div>
           </div>
         </div>
@@ -80,7 +85,8 @@ export default function LoggInn() {
           </div>
         )}
 
-        <div className="bg-surface border border-border rounded-2xl p-6">
+        <div className="relative overflow-hidden bg-surface/80 backdrop-blur-xl border border-border rounded-3xl p-6 shadow-card">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent pointer-events-none" />
           <h1 className="text-2xl font-semibold mb-1">{tittel}</h1>
           <p className="text-muted text-sm mb-6">
             {modus === "logg-inn"
@@ -137,7 +143,7 @@ export default function LoggInn() {
             <button
               type="submit"
               disabled={laster || bekreftFeil}
-              className="w-full h-11 rounded-xl bg-primary text-primaryFg font-semibold hover:bg-primaryDark transition disabled:opacity-50 active:scale-[0.98]"
+              className="w-full h-11 rounded-xl bg-primary text-primaryFg font-semibold hover:bg-primaryDark shadow-glow transition disabled:opacity-50 disabled:shadow-none active:scale-[0.98]"
             >
               {laster
                 ? "Vent…"

@@ -50,6 +50,73 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+::selection {
+  background: rgb(var(--primary) / 0.25);
+}
+
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--border));
+    border-radius: 8px;
+    border: 2px solid rgb(var(--bg));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--muted) / 0.5);
+  }
+}
+
+/* Ambient "stadionlys" bak alt innhold */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      1100px 700px at 85% -10%,
+      rgb(var(--primary) / 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 600px at -10% 30%,
+      rgb(var(--accent) / 0.07),
+      transparent 55%
+    ),
+    radial-gradient(
+      700px 500px at 50% 110%,
+      rgb(var(--gold) / 0.05),
+      transparent 60%
+    );
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-fade-up {
+  animation: fade-up 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up {
+    animation: none;
+  }
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;

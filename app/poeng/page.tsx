@@ -160,7 +160,7 @@ function Poeng() {
       </Kort>
 
       <div className="text-center text-xs text-muted px-4 pt-2">
-        Ledertavlen oppdateres automatisk hver natt.
+        Ledertavlen oppdateres automatisk hver morgen kl 10.
       </div>
     </div>
   );

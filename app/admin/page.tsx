@@ -73,7 +73,7 @@ function SyncSeksjon() {
         <p className="text-xs text-muted mt-0.5">
           To GitHub Actions kjører automatisk: <strong>sync</strong> henter nye
           resultater fra TheSportsDB hvert 10. min, og{" "}
-          <strong>aggreger poeng</strong> regner ut ledertavlen kl 03 hver natt.
+          <strong>aggreger poeng</strong> regner ut ledertavlen kl 10 hver morgen.
           Trykk knappene for å trigge dem manuelt.
         </p>
       </div>

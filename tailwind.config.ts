@@ -33,6 +33,8 @@ const config: Config = {
       borderRadius: { xl: "14px", "2xl": "20px" },
       boxShadow: {
         card: "0 1px 2px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.08)",
+        glow: "0 0 20px rgb(var(--primary) / 0.3)",
+        "glow-gold": "0 0 32px rgb(var(--gold) / 0.2)",
       },
     },
   },
