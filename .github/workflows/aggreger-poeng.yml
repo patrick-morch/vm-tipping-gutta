@@ -2,7 +2,9 @@ name: Aggreger poeng
 
 on:
   schedule:
-    # 10:00 Europe/Oslo = 08:00 UTC (CEST sommer — gjelder hele VM-perioden)
+    # Daglig backup kl 10:00 Oslo (08:00 UTC, CEST). Hovedaggregeringen skjer
+    # automatisk i sync-jobben straks en kamp er ferdigspilt; denne fanger opp
+    # alt som måtte ha glippet (f.eks. uventet kampstatus fra TheSportsDB).
     - cron: "0 8 * * *"
   workflow_dispatch: {}
 

@@ -2,16 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+const STANDARD_MELDING = "Du er frosset — kan ikke endre tips.";
+
 /**
- * Liten toast for frosne brukere som prøver å skrive inn tipps.
- * Returnerer en `varsle()`-funksjon å trigge på pointer-events, og
- * en `<Toast />` å rendre ett sted i layoutet.
+ * Liten toast for når et felt ikke kan endres — enten fordi brukeren er
+ * frosset, eller fordi tipsene/kampen er låst. Returnerer en `varsle(melding?)`
+ * å trigge på pointer-events, og en `<Toast />` å rendre ett sted i layoutet.
  */
 export function useFrosseToast() {
   const [vises, setVises] = useState(false);
+  const [melding, setMelding] = useState(STANDARD_MELDING);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const varsle = useCallback(() => {
+  const varsle = useCallback((tekst: string = STANDARD_MELDING) => {
+    setMelding(tekst);
     setVises(true);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setVises(false), 2400);
@@ -36,8 +40,8 @@ export function useFrosseToast() {
       role="status"
       aria-live="polite"
     >
-      <span>❄️</span>
-      Du er frosset — kan ikke endre tips.
+      <span>🔒</span>
+      {melding}
     </div>
   );
 

@@ -9,6 +9,7 @@ import {
   erNorgeKamp,
   erTippbar,
   flagg,
+  kampErLåst,
   kortLagNavn,
 } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
@@ -54,6 +55,13 @@ function Kamper() {
   const neste = åpne.slice(0, ANTALL);
   const utenTip = neste.filter((k) => !tips[k.id]).length;
 
+  // Kamper som har startet men ikke har resultat ennå — vises som låst
+  // til de er ferdigspilt og dukker opp under "Siste resultater".
+  const pågår = kamper
+    .filter((k) => kampErLåst(k, nå) && !k.resultat && erTippbar(k))
+    .sort((a, b) => a.starttid - b.starttid);
+  const visKamper = [...pågår, ...neste].sort((a, b) => a.starttid - b.starttid);
+
   const sisteFerdige = kamper
     .filter((k) => k.resultat && k.starttid < nå)
     .sort((a, b) => b.starttid - a.starttid)
@@ -61,6 +69,8 @@ function Kamper() {
 
   async function lagre(id: string, h: number, b: number) {
     if (!user || !bruker || frosset) return;
+    const kamp = kamper.find((k) => k.id === id);
+    if (kamp && kampErLåst(kamp)) return;
     await lagreTip({
       matchId: id,
       uid: user.uid,
@@ -77,7 +87,7 @@ function Kamper() {
   }
 
   // Grupperer kamper etter dag
-  const grupperte = grupperEtterDag(neste, nå);
+  const grupperte = grupperEtterDag(visKamper, nå);
 
   const førsteKamp = neste[0];
   const nedTekst = førsteKamp ? formatTid(førsteKamp.starttid - nå) : null;
@@ -115,7 +125,7 @@ function Kamper() {
       {/* På desktop: kamper venstre (smalere), Cantona-kicket fyller høyrekolonnen */}
       <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6 space-y-5 lg:space-y-0">
         <div className="space-y-5">
-          {neste.length === 0 && (
+          {visKamper.length === 0 && (
             <div className="bg-surface border border-border rounded-2xl p-8 text-center text-muted text-sm">
               Ingen åpne kamper akkurat nå.
             </div>
@@ -124,29 +134,17 @@ function Kamper() {
           {grupperte.map(({ dato, kamper: dagsKamper }) => (
             <div key={dato} className="space-y-2">
               <DatoHeader dato={dato} nå={nå} />
-              <div
-                className="space-y-2"
-                onPointerDownCapture={
-                  frosset
-                    ? (e) => {
-                        const t = e.target as HTMLElement;
-                        if (t.tagName === "INPUT" || t.closest("input")) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          varsle();
-                        }
-                      }
-                    : undefined
-                }
-              >
+              <div className="space-y-2">
                 {dagsKamper.map((kamp) => (
                   <KampKort
                     key={kamp.id}
                     kamp={kamp}
                     tip={tips[kamp.id]}
                     frosset={frosset}
+                    låst={kampErLåst(kamp, nå)}
                     onLagre={(h, b) => lagre(kamp.id, h, b)}
                     onSlett={() => slett(kamp.id)}
+                    varsle={varsle}
                   />
                 ))}
               </div>
@@ -277,15 +275,20 @@ function KampKort({
   kamp,
   tip,
   frosset,
+  låst,
   onLagre,
   onSlett,
+  varsle,
 }: {
   kamp: Match;
   tip?: Prediction;
   frosset?: boolean;
+  låst?: boolean;
   onLagre: (h: number, b: number) => Promise<void>;
   onSlett: () => Promise<void>;
+  varsle: (melding?: string) => void;
 }) {
+  const blokkert = Boolean(frosset || låst);
   const [hjem, setHjem] = useState(tip ? String(tip.hjemme) : "");
   const [bort, setBort] = useState(tip ? String(tip.borte) : "");
   useEffect(() => {
@@ -306,7 +309,7 @@ function KampKort({
     tip && gyldig && Number(hjem) === tip.hjemme && Number(bort) === tip.borte;
 
   useEffect(() => {
-    if (frosset || uendret) return;
+    if (blokkert || uendret) return;
     if (gyldig) {
       const t = setTimeout(() => onLagre(Number(hjem), Number(bort)), 500);
       return () => clearTimeout(t);
@@ -316,7 +319,7 @@ function KampKort({
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hjem, bort, gyldig, tom, uendret, Boolean(tip), frosset]);
+  }, [hjem, bort, gyldig, tom, uendret, Boolean(tip), blokkert]);
 
   const dato = new Date(kamp.starttid);
   const klokke = dato.toLocaleTimeString("nb-NO", {
@@ -347,11 +350,18 @@ function KampKort({
           <span className="text-muted/60">·</span>
           <span className="text-muted">{kamp.runde}</span>
         </div>
-        {kamp.bonusFaktor > 1 && (
-          <span className="px-2 py-0.5 rounded-full bg-norge/15 text-norge font-bold tracking-wider">
-            ×{kamp.bonusFaktor} POENG
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {kamp.bonusFaktor > 1 && (
+            <span className="px-2 py-0.5 rounded-full bg-norge/15 text-norge font-bold tracking-wider">
+              ×{kamp.bonusFaktor} POENG
+            </span>
+          )}
+          {låst && !kamp.resultat && (
+            <span className="px-2 py-0.5 rounded-full bg-warning/15 text-warning font-bold tracking-wider">
+              🔒 LÅST
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -361,10 +371,24 @@ function KampKort({
           </span>
           <span className="text-2xl flex-shrink-0">{flagg(kamp.hjemmelag)}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Sc verdi={hjem} onChange={setHjem} disabled={frosset} />
+        <div className="relative flex items-center gap-1.5">
+          <Sc verdi={hjem} onChange={setHjem} disabled={blokkert} />
           <span className="text-muted/60 text-xs font-bold">:</span>
-          <Sc verdi={bort} onChange={setBort} disabled={frosset} />
+          <Sc verdi={bort} onChange={setBort} disabled={blokkert} />
+          {blokkert && (
+            <div
+              className="absolute inset-0 cursor-not-allowed"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                varsle(
+                  frosset
+                    ? "Du er frosset — kan ikke endre tips."
+                    : "Kampen er låst.",
+                );
+              }}
+            />
+          )}
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-2xl flex-shrink-0">{flagg(kamp.bortelag)}</span>

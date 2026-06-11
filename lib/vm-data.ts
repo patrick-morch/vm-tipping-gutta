@@ -216,8 +216,8 @@ export function alleGruppekamper(): Match[] {
   });
 }
 
-// Spesialtips låses 1 time før første VM-kamp (11. juni 20:00 norsk tid).
-const SPESIAL_LÅS_FØR_MS = 60 * 60 * 1000;
+// Spesialtips låses når første VM-kamp starter (avspark, 11. juni norsk tid).
+const SPESIAL_LÅS_FØR_MS = 0;
 
 export const SPESIAL_LÅS_TID = (() => {
   const kamper = alleGruppekamper();

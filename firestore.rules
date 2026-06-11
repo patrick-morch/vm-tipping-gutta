@@ -18,16 +18,16 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/brukere/$(request.auth.uid))
         && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.get('frosset', false) == true;
     }
-    // Tipping på en kamp låses 1 time før kampstart.
+    // Tipping på en kamp låses i det kampen starter (avspark).
     function kampAapen(matchId) {
       return exists(/databases/$(database)/documents/kamper/$(matchId))
         && get(/databases/$(database)/documents/kamper/$(matchId)).data.starttid > request.time.toMillis();
     }
 
-    // Spesialtips låses 1 time før første VM-kamp (11. juni 2026 18:00 UTC = 20:00 norsk tid).
-    // Konstanten = new Date('2026-06-11T15:00:00-04:00').getTime() - 3600000 = 1781200800000
+    // Spesialtips låses når første VM-kamp starter (avspark 11. juni 2026 = 21:00 norsk tid).
+    // Konstanten = new Date('2026-06-11T15:00:00-04:00').getTime() = 1781204400000
     function spesialAapen() {
-      return request.time.toMillis() < 1781200800000;
+      return request.time.toMillis() < 1781204400000;
     }
 
     // Brukere: alle innloggede kan lese (ledertavle).
@@ -70,7 +70,7 @@ service cloud.firestore {
     }
 
     // Spesialtips: alle kan lese (for ledertavle), eier skriver egen
-    // frem til 1 time før VM-start. Frosne brukere kan ikke skrive.
+    // frem til første VM-kamp starter (avspark). Frosne brukere kan ikke skrive.
     match /spesialtips/{uid} {
       allow read: if erInnlogget();
       allow create, update: if erEier(uid) && !erFrosset() && spesialAapen();

@@ -109,7 +109,7 @@ function Spesial() {
     <div className="space-y-4">
       <SideHeader
         tittel="Spesialtips"
-        undertittel={låst ? "Låst" : `Stenger ${låsTekst}`}
+        undertittel={låst ? `🔒 Låst ${låsTekst}` : `Stenger ${låsTekst}`}
         høyre={
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-muted tabular-nums">
@@ -136,10 +136,10 @@ function Spesial() {
           dine.
         </div>
       )}
-      {låst && !frosset && (
+      {tidLåst && !frosset && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
           <span className="text-lg">🔒</span>
-          Tipsene dine er låst.
+          Spesialtipsene er låst — stengte {låsTekst}. Tipsene er nå spikret.
         </div>
       )}
 
@@ -147,11 +147,15 @@ function Spesial() {
         disabled={låst}
         className="space-y-4 relative lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4"
         onPointerDownCapture={
-          frosset
+          låst
             ? (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                varsle();
+                varsle(
+                  frosset
+                    ? "Du er frosset — kan ikke endre tips."
+                    : "Spesialtipsene er låst.",
+                );
               }
             : undefined
         }

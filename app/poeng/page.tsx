@@ -106,7 +106,7 @@ function Poeng() {
             <div>
               <div className="font-semibold">Spesialtips</div>
               <div className="text-muted text-xs">
-                Låses 11. juni kl 20:00 (1 time før første VM-kamp).
+                Låses 11. juni kl 21:00 (når første VM-kamp starter).
               </div>
             </div>
           </div>
