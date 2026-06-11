@@ -10,42 +10,8 @@ const POENG = {
   vmVinner: 25,
   toppscorer: 15,
   toppassist: 10,
+  ronaldoVsMessi: 5,
 };
-
-// Speil av lib/vm-data.ts TIPPBARE_GRUPPE_LAG. Tipps på gruppekamper
-// utenfor denne lista (og utenfor Gruppe I) gir 0 poeng, så folk som
-// tilfeldigvis tippet på Australia-Tyrkia før kuratorlista ble lagt
-// til ikke får urettferdig fordel.
-const TIPPBARE_GRUPPE_LAG = new Set([
-  "Mexico",
-  "Tyskland",
-  "Sveits",
-  "Sverige",
-  "Nederland",
-  "Argentina",
-  "Østerrike",
-  "Brasil",
-  "Skottland",
-  "Belgia",
-  "Portugal",
-  "USA",
-  "Spania",
-  "Uruguay",
-  "England",
-  "Kroatia",
-  "Frankrike",
-  "Senegal",
-  "Norge",
-  "Irak",
-]);
-
-function erTippbar(kamp) {
-  if (!kamp.runde?.startsWith("Gruppe")) return true; // knockout = alle
-  return (
-    TIPPBARE_GRUPPE_LAG.has(kamp.hjemmelag) ||
-    TIPPBARE_GRUPPE_LAG.has(kamp.bortelag)
-  );
-}
 
 function init() {
   if (admin.apps.length) return;
@@ -106,40 +72,43 @@ async function aggreger() {
       kampPoeng: 0,
       spesialPoeng: 0,
       eksakte: 0,
+      utfall: 0,
+      feil: 0,
     });
   }
 
-  // Kamp-poeng (bare tippbare kamper teller — kuraterte gruppekamper
-  // + alle knockout)
+  // Kamp-poeng — alle ferdigspilte kamper teller (samme regler som i appen
+  // og live-ledertavlen: alle lag er tippbare).
   for (const t of tips) {
     const rad = rader.get(t.uid);
     if (!rad) continue;
     const kamp = kampMap.get(t.matchId);
     if (!kamp || !kamp.resultat) continue;
-    if (!erTippbar(kamp)) continue;
-    const p = beregnPoeng(t, kamp.resultat, kamp.bonusFaktor || 1);
+    const bonus = kamp.bonusFaktor || 1;
+    const p = beregnPoeng(t, kamp.resultat, bonus);
     rad.kampPoeng += p;
-    if (p >= 3 * (kamp.bonusFaktor || 1)) rad.eksakte += 1;
+    if (p >= 3 * bonus) rad.eksakte += 1;
+    else if (p >= 1 * bonus) rad.utfall += 1;
+    else rad.feil += 1;
   }
 
-  // Spesial-poeng
+  // Spesial-poeng (samme fire bets som i appen)
+  const norm = (s) => s.trim().toLowerCase();
   for (const s of spesial) {
     const rad = rader.get(s.uid);
     if (!rad) continue;
     if (fasit.vmVinner && fasit.vmVinner === s.vmVinner)
       rad.spesialPoeng += POENG.vmVinner;
-    if (
-      fasit.toppscorer &&
-      s.toppscorer.trim().toLowerCase() ===
-        fasit.toppscorer.trim().toLowerCase()
-    )
+    if (fasit.toppscorer && s.toppscorer && norm(s.toppscorer) === norm(fasit.toppscorer))
       rad.spesialPoeng += POENG.toppscorer;
-    if (
-      fasit.toppassist &&
-      s.toppassist.trim().toLowerCase() ===
-        fasit.toppassist.trim().toLowerCase()
-    )
+    if (fasit.toppassist && s.toppassist && norm(s.toppassist) === norm(fasit.toppassist))
       rad.spesialPoeng += POENG.toppassist;
+    if (
+      fasit.ronaldoVsMessi &&
+      s.ronaldoVsMessi &&
+      s.ronaldoVsMessi === fasit.ronaldoVsMessi
+    )
+      rad.spesialPoeng += POENG.ronaldoVsMessi;
   }
 
   const liste = Array.from(rader.values())

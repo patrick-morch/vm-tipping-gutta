@@ -37,9 +37,10 @@ function bruker() {
   return isFirebaseConfigured();
 }
 
-export function useKamper(): Match[] {
+export function useKamper(enabled = true): Match[] {
   const [kamper, setKamper] = useState<Match[]>([]);
   useEffect(() => {
+    if (!enabled) return;
     if (bruker()) {
       const q = query(collection(fbDb(), "kamper"), orderBy("starttid", "asc"));
       return onSnapshot(q, (snap) => {
@@ -49,7 +50,7 @@ export function useKamper(): Match[] {
     return localKamper.subscribe((k) =>
       setKamper([...k].sort((a, b) => a.starttid - b.starttid)),
     );
-  }, []);
+  }, [enabled]);
   return kamper;
 }
 
@@ -82,16 +83,17 @@ export function useMineTips(uid: string | undefined): Record<string, Prediction>
   return tips;
 }
 
-export function useAlleTips(): Prediction[] {
+export function useAlleTips(enabled = true): Prediction[] {
   const [tips, setTips] = useState<Prediction[]>([]);
   useEffect(() => {
+    if (!enabled) return;
     if (bruker()) {
       return onSnapshot(collection(fbDb(), "tips"), (s) =>
         setTips(s.docs.map((d) => d.data() as Prediction)),
       );
     }
     return localTips.subscribe((alle) => setTips(Object.values(alle)));
-  }, []);
+  }, [enabled]);
   return tips;
 }
 
@@ -125,16 +127,17 @@ export function useMittSpesialTip(uid: string | undefined): SpesialTip | null {
   return tip;
 }
 
-export function useAlleSpesialTips(): SpesialTip[] {
+export function useAlleSpesialTips(enabled = true): SpesialTip[] {
   const [tips, setTips] = useState<SpesialTip[]>([]);
   useEffect(() => {
+    if (!enabled) return;
     if (bruker()) {
       return onSnapshot(collection(fbDb(), "spesialtips"), (s) =>
         setTips(s.docs.map((d) => d.data() as SpesialTip)),
       );
     }
     return localSpesialTips.subscribe((alle) => setTips(Object.values(alle)));
-  }, []);
+  }, [enabled]);
   return tips;
 }
 
@@ -147,6 +150,8 @@ export type LedertavleRad = {
   kampPoeng: number;
   spesialPoeng: number;
   eksakte: number;
+  utfall?: number;
+  feil?: number;
 };
 export type AggregertLedertavle = {
   oppdatert: number;
@@ -168,7 +173,7 @@ export function useAggregertLedertavle(): AggregertLedertavle | null {
   return data;
 }
 
-export function useFasit(): Fasit {
+export function useFasit(enabled = true): Fasit {
   const [fasit, setFasit] = useState<Fasit>({
     gruppeVinner: {},
     gruppeToer: {},
@@ -180,13 +185,14 @@ export function useFasit(): Fasit {
     ronaldoVsMessi: "",
   });
   useEffect(() => {
+    if (!enabled) return;
     if (bruker()) {
       return onSnapshot(doc(fbDb(), "fasit", "vm"), (s) => {
         if (s.exists()) setFasit(s.data() as Fasit);
       });
     }
     return localFasit.subscribe(setFasit);
-  }, []);
+  }, [enabled]);
   return fasit;
 }
 

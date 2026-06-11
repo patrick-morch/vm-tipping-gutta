@@ -46,10 +46,13 @@ function Ledertavle() {
   const { user, demoModus } = useAuth();
   const aggregert = useAggregertLedertavle();
   const brukere = useBrukere();
-  const alleTips = useAlleTips();
-  const alleSpesial = useAlleSpesialTips();
-  const fasit = useFasit();
-  const kamper = useKamper();
+  // Live-beregning fra alle tips kjøres BARE i demo-modus (ingen backend-
+  // aggregering der). I produksjon leser vi det ferdig-aggregerte dokumentet
+  // (1 lesing) i stedet for hele tips-samlingen (~tusenvis av lesinger).
+  const alleTips = useAlleTips(demoModus);
+  const alleSpesial = useAlleSpesialTips(demoModus);
+  const fasit = useFasit(demoModus);
+  const kamper = useKamper(demoModus);
 
   const liveStats = useMemo(() => {
     const ferdige = new Map(
@@ -109,14 +112,30 @@ function Ledertavle() {
   }, [alleSpesial, fasit]);
 
   const rader: RadMedStats[] = useMemo(() => {
-    // Brukere er sannhetskilden for medlemskap. Live-stats fra tips+kamper
-    // og spesialtips+fasit gir umiddelbar oppdatering.
+    // Brukere er sannhetskilden for medlemskap.
     const aggregertMap = new Map(
       (aggregert?.rader || []).map((r) => [r.uid, r]),
     );
     return brukere
       .map((b) => {
         const agg = aggregertMap.get(b.uid);
+        // Produksjon: bruk det ferdig-aggregerte dokumentet (samme regler som
+        // live-beregningen, så ingen forskjell i poeng — bare billigere).
+        if (!demoModus && agg) {
+          return {
+            uid: b.uid,
+            navn: agg.navn || b.navn,
+            avdeling: "",
+            klubbRolle: agg.klubbRolle || b.klubbRolle,
+            poeng: agg.poeng,
+            kampPoeng: agg.kampPoeng,
+            spesialPoeng: agg.spesialPoeng,
+            eksakte: agg.eksakte,
+            utfall: agg.utfall ?? 0,
+            feil: agg.feil ?? 0,
+          };
+        }
+        // Demo-modus (live-beregning) eller bruker uten aggregert rad ennå (0).
         const stats = liveStats.get(b.uid) || {
           kampPoeng: 0,
           eksakte: 0,
@@ -138,7 +157,7 @@ function Ledertavle() {
         };
       })
       .sort((a, b) => b.poeng - a.poeng);
-  }, [aggregert, brukere, liveStats, liveSpesial]);
+  }, [aggregert, brukere, liveStats, liveSpesial, demoModus]);
 
   const top3 = rader.slice(0, 3);
   const resten = rader.slice(3);
@@ -173,8 +192,8 @@ function Ledertavle() {
       {!aggregert && !demoModus && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-xs rounded-2xl px-3 py-2.5 flex items-center gap-2">
           <span>⏳</span>
-          Ledertavlen oppdateres hver morgen kl 10. Første aggregering kommer
-          i morgen tidlig.
+          Ledertavlen oppdateres ca. 10 min etter hver ferdigspilte kamp.
+          Første tall kommer etter første ferdige kamp.
         </div>
       )}
 

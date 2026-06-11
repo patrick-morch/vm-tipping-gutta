@@ -1,37 +1,11 @@
 // Verifiserer poengsystemet ende-til-ende ved å kopiere aggregator-logikken
 // og kjøre kjente scenarier mot forventede utfall.
+//
+// Speiler scripts/aggreger-poeng.mjs: alle lag er tippbare (ingen kuratorliste),
+// fire spesial-bets (vmVinner, toppscorer, toppassist, ronaldoVsMessi), og
+// teller eksakte/utfall/feil per bruker.
 
-const POENG = { vmVinner: 25, toppscorer: 15, toppassist: 10 };
-const TIPPBARE_GRUPPE_LAG = new Set([
-  "Mexico",
-  "Tyskland",
-  "Sveits",
-  "Sverige",
-  "Nederland",
-  "Argentina",
-  "Østerrike",
-  "Brasil",
-  "Skottland",
-  "Belgia",
-  "Portugal",
-  "USA",
-  "Spania",
-  "Uruguay",
-  "England",
-  "Kroatia",
-  "Frankrike",
-  "Senegal",
-  "Norge",
-  "Irak",
-]);
-
-function erTippbar(kamp) {
-  if (!kamp.runde?.startsWith("Gruppe")) return true;
-  return (
-    TIPPBARE_GRUPPE_LAG.has(kamp.hjemmelag) ||
-    TIPPBARE_GRUPPE_LAG.has(kamp.bortelag)
-  );
-}
+const POENG = { vmVinner: 25, toppscorer: 15, toppassist: 10, ronaldoVsMessi: 5 };
 
 function beregnPoeng(tip, resultat, bonus = 1) {
   const eksakt = tip.hjemme === resultat.hjemme && tip.borte === resultat.borte;
@@ -53,6 +27,8 @@ function aggreger({ brukere, kamper, tips, spesial, fasit }) {
       kampPoeng: 0,
       spesialPoeng: 0,
       eksakte: 0,
+      utfall: 0,
+      feil: 0,
     });
   }
   for (const t of tips) {
@@ -60,28 +36,25 @@ function aggreger({ brukere, kamper, tips, spesial, fasit }) {
     if (!rad) continue;
     const kamp = kampMap.get(t.matchId);
     if (!kamp || !kamp.resultat) continue;
-    if (!erTippbar(kamp)) continue;
-    const p = beregnPoeng(t, kamp.resultat, kamp.bonusFaktor || 1);
+    const bonus = kamp.bonusFaktor || 1;
+    const p = beregnPoeng(t, kamp.resultat, bonus);
     rad.kampPoeng += p;
-    if (p >= 3 * (kamp.bonusFaktor || 1)) rad.eksakte += 1;
+    if (p >= 3 * bonus) rad.eksakte += 1;
+    else if (p >= 1 * bonus) rad.utfall += 1;
+    else rad.feil += 1;
   }
+  const norm = (s) => s.trim().toLowerCase();
   for (const s of spesial) {
     const rad = rader.get(s.uid);
     if (!rad) continue;
     if (fasit.vmVinner && fasit.vmVinner === s.vmVinner)
       rad.spesialPoeng += POENG.vmVinner;
-    if (
-      fasit.toppscorer &&
-      s.toppscorer?.trim().toLowerCase() ===
-        fasit.toppscorer.trim().toLowerCase()
-    )
+    if (fasit.toppscorer && s.toppscorer && norm(s.toppscorer) === norm(fasit.toppscorer))
       rad.spesialPoeng += POENG.toppscorer;
-    if (
-      fasit.toppassist &&
-      s.toppassist?.trim().toLowerCase() ===
-        fasit.toppassist.trim().toLowerCase()
-    )
+    if (fasit.toppassist && s.toppassist && norm(s.toppassist) === norm(fasit.toppassist))
       rad.spesialPoeng += POENG.toppassist;
+    if (fasit.ronaldoVsMessi && s.ronaldoVsMessi && s.ronaldoVsMessi === fasit.ronaldoVsMessi)
+      rad.spesialPoeng += POENG.ronaldoVsMessi;
   }
   rader.forEach((r) => {
     r.poeng = r.kampPoeng + r.spesialPoeng;
@@ -114,7 +87,7 @@ const KAMPER = [
     bortelag: "Australia",
     bonusFaktor: 1,
     resultat: { hjemme: 1, borte: 0 },
-  }, // Ikke tippbar
+  }, // Alle lag er nå tippbare
   {
     id: "L1",
     runde: "Gruppe L",
@@ -130,7 +103,7 @@ const KAMPER = [
     bortelag: "Norge",
     bonusFaktor: 2,
     resultat: { hjemme: 1, borte: 2 },
-  }, // Knockout, alltid tippbar
+  }, // Knockout
   {
     id: "kn-2",
     runde: "Finale",
@@ -145,6 +118,7 @@ const FASIT = {
   vmVinner: "Norge",
   toppscorer: "Erling Haaland",
   toppassist: "Martin Ødegaard",
+  ronaldoVsMessi: "messi",
 };
 
 // ─── Test-scenarier ───
@@ -161,24 +135,26 @@ function test(navn, faktisk, forventet) {
 const SCENARIER = [
   {
     bruker: "A",
-    navn: "Eksakt Norge-kamp + utfall + feil + ikke-tippbar",
+    navn: "Eksakt Norge-kamp + utfall + feil + eksakt (alle teller nå)",
     tipps: [
-      { matchId: "I2", hjemme: 2, borte: 1 }, // Eksakt, ×2 → 6p
-      { matchId: "C1", hjemme: 0, borte: 3 }, // Riktig utfall (begge borte) → 1p
-      { matchId: "L1", hjemme: 1, borte: 0 }, // Feil utfall (hjem vs borte) → 0p
-      { matchId: "D2", hjemme: 1, borte: 0 }, // Eksakt på IKKE TIPPBAR → 0p
+      { matchId: "I2", hjemme: 2, borte: 1 }, // Eksakt, ×2 → 6p (eksakt)
+      { matchId: "C1", hjemme: 0, borte: 3 }, // Riktig utfall (begge borte) → 1p (utfall)
+      { matchId: "L1", hjemme: 1, borte: 0 }, // Feil utfall → 0p (feil)
+      { matchId: "D2", hjemme: 1, borte: 0 }, // Eksakt, ×1 → 3p (eksakt)
     ],
     spesial: null,
     forventet: {
-      kampPoeng: 6 + 1 + 0 + 0,
+      kampPoeng: 6 + 1 + 0 + 3,
       spesialPoeng: 0,
-      eksakte: 1,
-      poeng: 7,
+      eksakte: 2,
+      utfall: 1,
+      feil: 1,
+      poeng: 10,
     },
   },
   {
     bruker: "B",
-    navn: "Knockout eksakt + spesial alle tre",
+    navn: "Knockout eksakt + spesial tre treff",
     tipps: [
       { matchId: "kn-1", hjemme: 1, borte: 2 }, // Knockout-eksakt med Norge ×2 → 6p
     ],
@@ -191,6 +167,8 @@ const SCENARIER = [
       kampPoeng: 6,
       spesialPoeng: 25 + 15 + 10,
       eksakte: 1,
+      utfall: 0,
+      feil: 0,
       poeng: 56,
     },
   },
@@ -203,7 +181,7 @@ const SCENARIER = [
       toppscorer: "Messi",
       toppassist: "Mbappé",
     },
-    forventet: { kampPoeng: 0, spesialPoeng: 0, eksakte: 0, poeng: 0 },
+    forventet: { kampPoeng: 0, spesialPoeng: 0, eksakte: 0, utfall: 0, feil: 0, poeng: 0 },
   },
   {
     bruker: "D",
@@ -214,7 +192,7 @@ const SCENARIER = [
       toppscorer: "  ERLING haaland ",
       toppassist: "",
     },
-    forventet: { kampPoeng: 0, spesialPoeng: 15, eksakte: 0, poeng: 15 },
+    forventet: { kampPoeng: 0, spesialPoeng: 15, eksakte: 0, utfall: 0, feil: 0, poeng: 15 },
   },
   {
     bruker: "E",
@@ -223,7 +201,7 @@ const SCENARIER = [
       { matchId: "L1", hjemme: 0, borte: 3 }, // Borte vinner, fasit også borte → 1p
     ],
     spesial: null,
-    forventet: { kampPoeng: 1, spesialPoeng: 0, eksakte: 0, poeng: 1 },
+    forventet: { kampPoeng: 1, spesialPoeng: 0, eksakte: 0, utfall: 1, feil: 0, poeng: 1 },
   },
   {
     bruker: "F",
@@ -232,7 +210,7 @@ const SCENARIER = [
       { matchId: "kn-2", hjemme: 3, borte: 0 }, // Ingen fasit → 0p
     ],
     spesial: null,
-    forventet: { kampPoeng: 0, spesialPoeng: 0, eksakte: 0, poeng: 0 },
+    forventet: { kampPoeng: 0, spesialPoeng: 0, eksakte: 0, utfall: 0, feil: 0, poeng: 0 },
   },
   {
     bruker: "G",
@@ -241,7 +219,14 @@ const SCENARIER = [
       { matchId: "I2", hjemme: 1, borte: 0 }, // Norge vinner 1-0, fasit 2-1, utfall ok → 2p
     ],
     spesial: null,
-    forventet: { kampPoeng: 2, spesialPoeng: 0, eksakte: 0, poeng: 2 },
+    forventet: { kampPoeng: 2, spesialPoeng: 0, eksakte: 0, utfall: 1, feil: 0, poeng: 2 },
+  },
+  {
+    bruker: "H",
+    navn: "Ronaldo vs Messi-treff",
+    tipps: [],
+    spesial: { ronaldoVsMessi: "messi" },
+    forventet: { kampPoeng: 0, spesialPoeng: 5, eksakte: 0, utfall: 0, feil: 0, poeng: 5 },
   },
 ];
 
@@ -264,6 +249,8 @@ for (const s of SCENARIER) {
   test(`kampPoeng`, r.kampPoeng, s.forventet.kampPoeng);
   test(`spesialPoeng`, r.spesialPoeng, s.forventet.spesialPoeng);
   test(`eksakte`, r.eksakte, s.forventet.eksakte);
+  test(`utfall`, r.utfall, s.forventet.utfall);
+  test(`feil`, r.feil, s.forventet.feil);
   test(`poeng (total)`, r.poeng, s.forventet.poeng);
   console.log("");
 }
