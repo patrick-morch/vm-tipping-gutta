@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense, useMemo, type CSSProperties } from "react";
+import { Suspense, useMemo, useState, type CSSProperties } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useKamper, useMineTips, useFasit } from "@/lib/data";
 import type { Match } from "@/lib/types";
@@ -213,9 +213,9 @@ function KnockoutFane() {
         <BracketDesktop />
       </div>
 
-      {/* Mobil/tablet: vertikal runde-for-runde — ingen horisontal scroll */}
+      {/* Mobil/tablet: VG-stil kart eller detaljert liste */}
       <div className="lg:hidden">
-        <RunderMobil />
+        <KnockoutMobil />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -371,6 +371,288 @@ function BracketDesktop() {
         <Halvdel side="høyre" runder={høyre} knockout={knockout} />
       </div>
     </div>
+  );
+}
+
+// Mobil: veksler mellom kompakt bracket-kart (à la VG-profeten) og
+// detaljert liste. Kartet viser hele sluttspillet på én skjerm.
+function KnockoutMobil() {
+  const [visning, setVisning] = useState<"kart" | "liste">("kart");
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-center">
+        <div className="inline-flex bg-surface border border-border rounded-xl p-1 gap-1">
+          {(["kart", "liste"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setVisning(v)}
+              className={`h-8 px-4 rounded-lg text-xs font-semibold transition active:scale-[0.97] ${
+                visning === v
+                  ? "bg-primary text-primaryFg shadow-glow"
+                  : "text-muted hover:text-text"
+              }`}
+            >
+              {v === "kart" ? "Kart" : "Liste"}
+            </button>
+          ))}
+        </div>
+      </div>
+      {visning === "kart" ? <KartMobil /> : <RunderMobil />}
+    </div>
+  );
+}
+
+// VG-stil bracket-kart: begge halvdeler konvergerer mot finalen i midten.
+// 9 kolonner — flagg-kort uten navn; trykk på en kamp for detaljer.
+function KartMobil() {
+  const knockout = useKnockoutKamper();
+  const fasit = useFasit();
+  const [valgt, setValgt] = useState<Match | null>(null);
+
+  const hent = (runde: string, i: number) => knockout[runde]?.[i];
+  const finale = hent("Finale", 0);
+  const bronse = hent("Bronsefinale", 0);
+
+  // [runde, kolonne, antall kort, indeks-offset i sortert kampliste]
+  const kolonner: [string, number, number, number][] = [
+    ["32-delsfinale", 1, 8, 0],
+    ["16-delsfinale", 2, 4, 0],
+    ["Kvartfinale", 3, 2, 0],
+    ["Kvartfinale", 7, 2, 2],
+    ["16-delsfinale", 8, 4, 4],
+    ["32-delsfinale", 9, 8, 8],
+  ];
+
+  const etiketter: { kol: number; tekst: string }[] = [
+    { kol: 1, tekst: "32" },
+    { kol: 2, tekst: "16" },
+    { kol: 3, tekst: "KF" },
+    { kol: 4, tekst: "SF" },
+    { kol: 5, tekst: "FINALE" },
+    { kol: 6, tekst: "SF" },
+    { kol: 7, tekst: "KF" },
+    { kol: 8, tekst: "16" },
+    { kol: 9, tekst: "32" },
+  ];
+
+  return (
+    <div className="relative overflow-x-auto rounded-3xl border border-border bg-gradient-to-br from-surface via-surface to-elevated/30 p-2">
+      <div className="absolute inset-0 pointer-events-none opacity-50 [background-image:radial-gradient(circle_at_center,rgb(var(--gold)/0.08)_0,transparent_55%)]" />
+
+      <div
+        className="relative grid gap-x-0.5 min-w-[340px]"
+        style={{
+          gridTemplateColumns:
+            "repeat(4, minmax(0, 1fr)) auto repeat(4, minmax(0, 1fr))",
+          gridTemplateRows: "18px repeat(16, 23px)",
+        }}
+      >
+        {etiketter.map((e) => (
+          <div
+            key={e.kol}
+            style={{ gridColumn: e.kol, gridRow: 1 }}
+            className={`text-center text-[8px] font-bold tracking-wider self-center ${
+              e.kol === 5 ? "text-gold" : "text-muted/70"
+            }`}
+          >
+            {e.tekst}
+          </div>
+        ))}
+
+        {kolonner.flatMap(([runde, kol, antall, offset]) => {
+          const span = 16 / antall;
+          return Array.from({ length: antall }).map((_, i) => {
+            const kamp = hent(runde, offset + i);
+            return (
+              <div
+                key={`${kol}-${i}`}
+                style={{
+                  gridColumn: kol,
+                  gridRow: `${i * span + 2} / span ${span}`,
+                }}
+                className="flex items-center justify-center min-w-0"
+              >
+                <MiniKamp
+                  kamp={kamp}
+                  valgt={!!kamp && valgt?.id === kamp.id}
+                  onVelg={setValgt}
+                />
+              </div>
+            );
+          });
+        })}
+
+        {/* Semifinaler flankerer finalen */}
+        <div
+          style={{ gridColumn: 4, gridRow: "8 / span 4" }}
+          className="flex items-center justify-center"
+        >
+          <MiniKamp
+            kamp={hent("Semifinale", 0)}
+            valgt={!!hent("Semifinale", 0) && valgt?.id === hent("Semifinale", 0)?.id}
+            onVelg={setValgt}
+          />
+        </div>
+        <div
+          style={{ gridColumn: 6, gridRow: "8 / span 4" }}
+          className="flex items-center justify-center"
+        >
+          <MiniKamp
+            kamp={hent("Semifinale", 1)}
+            valgt={!!hent("Semifinale", 1) && valgt?.id === hent("Semifinale", 1)?.id}
+            onVelg={setValgt}
+          />
+        </div>
+
+        {/* Sentrum: pokal, finale og bronse */}
+        <div
+          style={{ gridColumn: 5, gridRow: "2 / span 6" }}
+          className="flex flex-col items-center justify-end pb-1.5 px-1"
+        >
+          <div className="relative text-center">
+            <div className="absolute -inset-2 bg-gold/15 blur-xl pointer-events-none" />
+            <div className="relative text-2xl drop-shadow-[0_2px_8px_rgb(var(--gold)/0.45)]">
+              🏆
+            </div>
+            <div className="relative text-[7px] font-bold uppercase tracking-[0.12em] text-gold mt-0.5">
+              {fasit.vmVinner ? (
+                <span>
+                  {flagg(fasit.vmVinner)} {kortLagNavn(fasit.vmVinner)}
+                </span>
+              ) : (
+                "Verdensmester"
+              )}
+            </div>
+          </div>
+        </div>
+        <div
+          style={{ gridColumn: 5, gridRow: "8 / span 4" }}
+          className="flex flex-col items-center justify-center gap-1 px-1"
+        >
+          <MiniKamp
+            kamp={finale}
+            gull
+            valgt={!!finale && valgt?.id === finale.id}
+            onVelg={setValgt}
+          />
+        </div>
+        <div
+          style={{ gridColumn: 5, gridRow: "12 / span 5" }}
+          className="flex flex-col items-center justify-start gap-1 px-1 pt-1"
+        >
+          <span className="text-[7px] font-bold uppercase tracking-[0.12em] text-warning bg-warning/10 border border-warning/30 px-1.5 py-0.5 rounded-full">
+            Bronse
+          </span>
+          <MiniKamp
+            kamp={bronse}
+            valgt={!!bronse && valgt?.id === bronse.id}
+            onVelg={setValgt}
+          />
+        </div>
+      </div>
+
+      {/* Detaljlinje for valgt kamp */}
+      <div className="relative mt-2 bg-elevated/70 border border-border rounded-xl px-3 py-2 text-center min-h-[38px] flex items-center justify-center">
+        {valgt ? (
+          <KampDetalj kamp={valgt} />
+        ) : (
+          <span className="text-[11px] text-muted">
+            Trykk på en kamp for detaljer
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function KampDetalj({ kamp }: { kamp: Match }) {
+  const d = new Date(kamp.starttid);
+  const tid = `${d.getDate()}/${d.getMonth() + 1} kl ${d.toLocaleTimeString(
+    "nb-NO",
+    { hour: "2-digit", minute: "2-digit" },
+  )}`;
+  const res = kamp.resultat;
+  return (
+    <div className="text-[11px] leading-tight">
+      <span className="font-semibold">
+        {flagg(kamp.hjemmelag)} {kortLagNavn(kamp.hjemmelag)}
+      </span>
+      <span className="font-bold text-text mx-1.5 tabular-nums">
+        {res ? `${res.hjemme}–${res.borte}` : "–"}
+      </span>
+      <span className="font-semibold">
+        {kortLagNavn(kamp.bortelag)} {flagg(kamp.bortelag)}
+      </span>
+      <div className="text-[10px] text-muted mt-0.5">
+        {kamp.runde} · {res ? "ferdigspilt" : tid}
+        {kamp.bonusFaktor > 1 && (
+          <span className="text-norge font-bold ml-1">×2 poeng</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Bittelite bracket-kort: bare flagg, à la VG-profetens kompaktvisning.
+function MiniKamp({
+  kamp,
+  gull,
+  valgt,
+  onVelg,
+}: {
+  kamp?: Match;
+  gull?: boolean;
+  valgt?: boolean;
+  onVelg: (k: Match) => void;
+}) {
+  const norge = kamp ? erNorgeKamp(kamp) : false;
+  const res = kamp?.resultat;
+  const vinner = res
+    ? res.hjemme > res.borte
+      ? "h"
+      : res.borte > res.hjemme
+        ? "b"
+        : null
+    : null;
+
+  return (
+    <button
+      type="button"
+      disabled={!kamp}
+      onClick={() => kamp && onVelg(kamp)}
+      className={`w-9 rounded-md overflow-hidden border bg-elevated transition active:scale-95 ${
+        valgt
+          ? "border-primary ring-2 ring-primary/40"
+          : gull
+            ? "border-gold/50 shadow-[0_0_12px_rgb(var(--gold)/0.25)]"
+            : norge
+              ? "border-norge/60 shadow-[0_0_10px_rgb(var(--norge)/0.3)]"
+              : "border-border"
+      } ${kamp ? "" : "opacity-50"}`}
+    >
+      <MiniLag lag={kamp?.hjemmelag} vant={vinner === "h"} medSkille />
+      <MiniLag lag={kamp?.bortelag} vant={vinner === "b"} />
+    </button>
+  );
+}
+
+function MiniLag({
+  lag,
+  vant,
+  medSkille,
+}: {
+  lag?: string;
+  vant?: boolean;
+  medSkille?: boolean;
+}) {
+  return (
+    <span
+      className={`h-[19px] flex items-center justify-center text-[13px] leading-none ${
+        medSkille ? "border-b border-border/50" : ""
+      } ${vant ? "bg-primary/20" : ""} ${lag ? "" : "opacity-30"}`}
+    >
+      {lag ? flagg(lag) : "·"}
+    </span>
   );
 }
 
