@@ -36,6 +36,7 @@ function aggreger({ brukere, kamper, tips, spesial, fasit }) {
     if (!rad) continue;
     const kamp = kampMap.get(t.matchId);
     if (!kamp || !kamp.resultat) continue;
+    if (kamp.ferdig === false) continue; // live-stilling teller ikke
     const bonus = kamp.bonusFaktor || 1;
     const p = beregnPoeng(t, kamp.resultat, bonus);
     rad.kampPoeng += p;
@@ -112,6 +113,15 @@ const KAMPER = [
     bonusFaktor: 1,
     resultat: null,
   }, // Ikke spilt
+  {
+    id: "LV1",
+    runde: "Gruppe B",
+    hjemmelag: "Sveits",
+    bortelag: "Qatar",
+    bonusFaktor: 1,
+    resultat: { hjemme: 1, borte: 0 },
+    ferdig: false,
+  }, // Live-stilling — skal IKKE gi poeng
 ];
 
 const FASIT = {
@@ -227,6 +237,15 @@ const SCENARIER = [
     tipps: [],
     spesial: { ronaldoVsMessi: "messi" },
     forventet: { kampPoeng: 0, spesialPoeng: 5, eksakte: 0, utfall: 0, feil: 0, poeng: 5 },
+  },
+  {
+    bruker: "I",
+    navn: "Eksakt på live-kamp (ferdig:false) gir 0 til full tid",
+    tipps: [
+      { matchId: "LV1", hjemme: 1, borte: 0 }, // eksakt, men ferdig:false → 0p
+    ],
+    spesial: null,
+    forventet: { kampPoeng: 0, spesialPoeng: 0, eksakte: 0, utfall: 0, feil: 0, poeng: 0 },
   },
 ];
 

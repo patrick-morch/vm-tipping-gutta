@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useKamper, useMineTips, lagreTip, slettTip } from "@/lib/data";
+import {
+  useKamper,
+  useMineTips,
+  useKampTips,
+  lagreTip,
+  slettTip,
+} from "@/lib/data";
 import { Match, Prediction, beregnPoeng } from "@/lib/types";
 import {
   erNorgeKamp,
@@ -11,6 +17,7 @@ import {
   flagg,
   kampErLåst,
   kortLagNavn,
+  nesteSynkTid,
 } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
@@ -91,6 +98,8 @@ function Kamper() {
 
   const førsteKamp = neste[0];
   const nedTekst = førsteKamp ? formatTid(førsteKamp.starttid - nå) : null;
+  // Når poeng neste gang oppdateres (synk-jobben kjører på faste tider).
+  const nesteOppdatering = formatTid(nesteSynkTid(nå) - nå);
 
   return (
     <div className="space-y-5">
@@ -142,6 +151,7 @@ function Kamper() {
                     tip={tips[kamp.id]}
                     frosset={frosset}
                     låst={kampErLåst(kamp, nå)}
+                    nesteOppdatering={nesteOppdatering}
                     onLagre={(h, b) => lagre(kamp.id, h, b)}
                     onSlett={() => slett(kamp.id)}
                     varsle={varsle}
@@ -276,6 +286,7 @@ function KampKort({
   tip,
   frosset,
   låst,
+  nesteOppdatering,
   onLagre,
   onSlett,
   varsle,
@@ -284,6 +295,7 @@ function KampKort({
   tip?: Prediction;
   frosset?: boolean;
   låst?: boolean;
+  nesteOppdatering?: string;
   onLagre: (h: number, b: number) => Promise<void>;
   onSlett: () => Promise<void>;
   varsle: (melding?: string) => void;
@@ -413,6 +425,15 @@ function KampKort({
           )}
         </div>
       )}
+
+      {låst && kamp.ferdig !== true && nesteOppdatering && (
+        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted">
+          <span>⏱</span>
+          <span>Neste poengoppdatering om ~{nesteOppdatering}</span>
+        </div>
+      )}
+
+      {låst && <AlleTipsForKamp kamp={kamp} />}
     </div>
   );
 }
@@ -452,6 +473,78 @@ function ResultatKort({ kamp, tip }: { kamp: Match; tip?: Prediction }) {
           <span className={`text-[10px] font-bold ${status.farge}`}>
             {status.tekst}
           </span>
+        </div>
+      )}
+      <AlleTipsForKamp kamp={kamp} />
+    </div>
+  );
+}
+
+function AlleTipsForKamp({ kamp }: { kamp: Match }) {
+  const [vis, setVis] = useState(false);
+  // On-demand: leser kun når åpnet (matchId = null når lukket → ingen lesinger).
+  const tips = useKampTips(vis ? kamp.id : null);
+
+  const bonus = kamp.bonusFaktor || 1;
+  const sortert = [...tips].sort((a, b) => {
+    if (kamp.resultat) {
+      return (
+        beregnPoeng(b, kamp.resultat, bonus) -
+        beregnPoeng(a, kamp.resultat, bonus)
+      );
+    }
+    return a.navn.localeCompare(b.navn, "nb");
+  });
+
+  return (
+    <div className="mt-2 pt-2 border-t border-border">
+      <button
+        type="button"
+        onClick={() => setVis((v) => !v)}
+        className="text-[11px] font-semibold text-muted hover:text-text flex items-center gap-1"
+      >
+        <span>{vis ? "▾" : "▸"}</span>
+        {vis ? "Skjul alles tips" : "Se alles tips"}
+      </button>
+      {vis && (
+        <div className="mt-2 space-y-1">
+          {sortert.length === 0 && (
+            <div className="text-[11px] text-muted">
+              Ingen har tippet denne kampen.
+            </div>
+          )}
+          {sortert.map((t) => {
+            let poengTekst: string | null = null;
+            let farge = "text-muted";
+            if (kamp.resultat) {
+              const p = beregnPoeng(t, kamp.resultat, bonus);
+              poengTekst = `+${p}p`;
+              farge =
+                p >= 3 * bonus
+                  ? "text-success"
+                  : p >= 1 * bonus
+                    ? "text-accent"
+                    : "text-muted";
+            }
+            return (
+              <div
+                key={t.uid}
+                className="flex items-center justify-between gap-2 text-[11px]"
+              >
+                <span className="truncate text-text/90">{t.navn}</span>
+                <span className="flex items-center gap-2 flex-shrink-0">
+                  <span className="tabular-nums font-bold">
+                    {t.hjemme}–{t.borte}
+                  </span>
+                  {poengTekst && (
+                    <span className={`font-bold ${farge} w-9 text-right`}>
+                      {poengTekst}
+                    </span>
+                  )}
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

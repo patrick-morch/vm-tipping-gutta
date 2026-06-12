@@ -97,6 +97,34 @@ export function useAlleTips(enabled = true): Prediction[] {
   return tips;
 }
 
+/**
+ * Henter alle tips for ÉN kamp (for "se alles tips" etter at kampen er låst).
+ * Leser kun når matchId er satt (on-demand) — kall med null for å ikke lese.
+ * Tipsene er frosne etter avspark, så de caches lokalt → billig ved gjentatt visning.
+ */
+export function useKampTips(matchId: string | null): Prediction[] {
+  const [tips, setTips] = useState<Prediction[]>([]);
+  useEffect(() => {
+    if (!matchId) {
+      setTips([]);
+      return;
+    }
+    if (bruker()) {
+      const q = query(
+        collection(fbDb(), "tips"),
+        where("matchId", "==", matchId),
+      );
+      return onSnapshot(q, (s) =>
+        setTips(s.docs.map((d) => d.data() as Prediction)),
+      );
+    }
+    return localTips.subscribe((alle) =>
+      setTips(Object.values(alle).filter((t) => t.matchId === matchId)),
+    );
+  }, [matchId]);
+  return tips;
+}
+
 export function useBrukere(): Bruker[] {
   const [brukere, setBrukere] = useState<Bruker[]>([]);
   useEffect(() => {

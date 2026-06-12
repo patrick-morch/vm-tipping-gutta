@@ -6,6 +6,9 @@ export type Match = {
   runde: string;
   bonusFaktor: number;
   resultat?: { hjemme: number; borte: number } | null;
+  // true = ferdigspilt (poeng teller). false = live-stilling (venter på full
+  // tid). undefined på eldre/manuelt satte kamper = behandles som endelig.
+  ferdig?: boolean;
 };
 
 export type Prediction = {

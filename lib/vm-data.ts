@@ -233,6 +233,25 @@ export function spesialErLåst(nå = Date.now()): boolean {
   return nå >= SPESIAL_LÅS_TID;
 }
 
+// Neste tidspunkt poeng oppdateres (synk-jobben kjører på faste UTC-tider, se
+// .github/workflows/sync-resultater.yml): hver :00 og :30 i kampvinduet
+// 18:00–06:30 UTC, pluss 10:00 og 14:00 UTC som dagtid-backup. Returnerer
+// epoch-ms for neste kjøring etter `nå`. Holdes i synk med cron-planen.
+const SYNK_VINDU_TIMER = new Set([18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]);
+export function nesteSynkTid(nå = Date.now()): number {
+  const halvtime = 30 * 60 * 1000;
+  const base = Math.floor(nå / halvtime) * halvtime;
+  for (let i = 1; i <= 48; i++) {
+    const t = base + i * halvtime;
+    const dt = new Date(t);
+    const h = dt.getUTCHours();
+    const m = dt.getUTCMinutes();
+    if (SYNK_VINDU_TIMER.has(h)) return t; // både :00 og :30 i vinduet
+    if (m === 0 && (h === 10 || h === 14)) return t; // dagtid-backup
+  }
+  return base + halvtime;
+}
+
 export const SLUTTSPILL_RUNDER = [
   { id: "32del", navn: "32-delsfinale", antall: 16 },
   { id: "16del", navn: "16-delsfinale", antall: 8 },

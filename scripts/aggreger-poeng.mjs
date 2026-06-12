@@ -77,13 +77,16 @@ async function aggreger() {
     });
   }
 
-  // Kamp-poeng — alle ferdigspilte kamper teller (samme regler som i appen
-  // og live-ledertavlen: alle lag er tippbare).
+  // Kamp-poeng — bare FERDIGSPILTE kamper teller. `ferdig === false` betyr at
+  // resultatet er en live-stilling (en annen kamp ble nettopp ferdig og trigget
+  // aggregering); da venter vi til full tid. Eldre/manuelt satte kamper uten
+  // ferdig-felt regnes som endelige så lenge de har et resultat.
   for (const t of tips) {
     const rad = rader.get(t.uid);
     if (!rad) continue;
     const kamp = kampMap.get(t.matchId);
     if (!kamp || !kamp.resultat) continue;
+    if (kamp.ferdig === false) continue;
     const bonus = kamp.bonusFaktor || 1;
     const p = beregnPoeng(t, kamp.resultat, bonus);
     rad.kampPoeng += p;
@@ -120,7 +123,9 @@ async function aggreger() {
     .doc("ledertavle")
     .set({
       oppdatert: Date.now(),
-      kamperSpilt: Array.from(kampMap.values()).filter((k) => k.resultat).length,
+      kamperSpilt: Array.from(kampMap.values()).filter(
+        (k) => k.resultat && k.ferdig !== false,
+      ).length,
       kamperTotalt: kampMap.size,
       rader: liste,
     });

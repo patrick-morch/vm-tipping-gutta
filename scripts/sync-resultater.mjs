@@ -14,6 +14,8 @@ import { tilNorsk } from "./lib/lag-mapping.mjs";
 const SPORTSDB_BASE = "https://www.thesportsdb.com/api/v1/json/3";
 const LIGA_ID = "4429"; // FIFA World Cup
 
+const TRE_TIMER_MS = 3 * 60 * 60 * 1000;
+
 // Statuser fra TheSportsDB som betyr at kampen er ferdigspilt. Poeng skal
 // først aggregeres ved full tid (ikke på live-score), så ledertavlen settes
 // når resultatet er endelig. Live-scoren skrives uansett til kamp-kortene.
@@ -21,6 +23,7 @@ const FERDIG_STATUS = new Set([
   "MATCH FINISHED",
   "FINISHED",
   "FT",
+  "FULL TIME",
   "AET",
   "AP",
   "PEN",
@@ -28,9 +31,25 @@ const FERDIG_STATUS = new Set([
   "PENALTIES",
 ]);
 
-function erFerdig(status) {
-  if (!status) return false;
-  return FERDIG_STATUS.has(String(status).trim().toUpperCase());
+// Statuser som eksplisitt betyr at kampen IKKE er ferdig (pågår, pause, utsatt).
+const IKKE_FERDIG_STATUS = new Set([
+  "NS", "NOT STARTED", "1H", "2H", "HT", "HALF TIME", "FIRST HALF",
+  "SECOND HALF", "ET", "EXTRA TIME", "BT", "BREAK TIME", "P", "LIVE",
+  "IN PLAY", "SUSP", "SUSPENDED", "POSTPONED", "PST", "ABANDONED",
+  "ABD", "CANCELLED", "TBD",
+]);
+
+// Avgjør om en kamp er ferdigspilt. Primært via statusstrengen; hvis den er
+// blank eller ukjent faller vi tilbake på tid: et resultat finnes OG det er
+// gått > 3 t siden avspark (dekker 90' + ekstraomganger + straffer). Hindrer
+// at en uventet statusstreng fra TheSportsDB fryser poengene for godt.
+function erFerdig(status, starttid, harResultat) {
+  const s = status ? String(status).trim().toUpperCase() : "";
+  if (FERDIG_STATUS.has(s)) return true;
+  if (IKKE_FERDIG_STATUS.has(s)) return false;
+  if (harResultat && starttid && Date.now() - starttid > TRE_TIMER_MS)
+    return true;
+  return false;
 }
 
 // TheSportsDB-runder → norske rundenavn. Gruppespill (1-3) håndteres
@@ -73,20 +92,21 @@ function tilNorske(event) {
   const b = tilNorsk(event.strAwayTeam);
   if (!h || !b) return null;
   const tid = new Date(event.strTimestamp + "Z").getTime();
+  const resultat =
+    event.intHomeScore != null && event.intAwayScore != null
+      ? {
+          hjemme: Number(event.intHomeScore),
+          borte: Number(event.intAwayScore),
+        }
+      : null;
   return {
     idEvent: event.idEvent,
     intRound: Number(event.intRound) || 0,
     hjemmelag: h,
     bortelag: b,
     starttid: tid,
-    ferdig: erFerdig(event.strStatus),
-    resultat:
-      event.intHomeScore != null && event.intAwayScore != null
-        ? {
-            hjemme: Number(event.intHomeScore),
-            borte: Number(event.intAwayScore),
-          }
-        : null,
+    ferdig: erFerdig(event.strStatus, tid, resultat != null),
+    resultat,
   };
 }
 
@@ -161,18 +181,22 @@ async function syncResultater() {
         ? { hjemme: norsk.resultat.borte, borte: norsk.resultat.hjemme }
         : norsk.resultat;
       const eks = treff.kamp.resultat;
-      if (
-        eks &&
-        eks.hjemme === skriv.hjemme &&
-        eks.borte === skriv.borte
-      )
-        continue;
+      const resultatLikt =
+        eks && eks.hjemme === skriv.hjemme && eks.borte === skriv.borte;
+      // ferdig-flagget kan ha endret seg selv om scoren er lik (live → full
+      // tid med samme stilling). Da må vi fortsatt skrive og trigge aggregering.
+      const ferdigLikt = (treff.kamp.ferdig ?? null) === norsk.ferdig;
+      if (resultatLikt && ferdigLikt) continue;
 
-      await db.collection("kamper").doc(treff.id).update({ resultat: skriv });
+      const upd = { ferdig: norsk.ferdig };
+      if (!resultatLikt) upd.resultat = skriv;
+      await db.collection("kamper").doc(treff.id).update(upd);
       console.log(
         `  ✓ ${treff.id}: ${treff.kamp.hjemmelag} ${skriv.hjemme}-${skriv.borte} ${treff.kamp.bortelag}${norsk.ferdig ? " (ferdig)" : " (live)"}`,
       );
       oppdatertResultat += 1;
+      // Trigg aggregering når kampen nettopp ble ferdig (eller fikk korrigert
+      // sluttresultat). Live-oppdateringer trigger ikke poeng.
       if (norsk.ferdig) ferdigeKamper += 1;
     } else {
       // === Knockout: opprett kamp hvis den ikke finnes, ellers oppdater ===
@@ -189,6 +213,7 @@ async function syncResultater() {
           bonusFaktor:
             norsk.hjemmelag === "Norge" || norsk.bortelag === "Norge" ? 2 : 1,
           resultat: norsk.resultat,
+          ferdig: norsk.ferdig,
         });
         console.log(`  + ${id}: ${runde} ${norsk.hjemmelag} vs ${norsk.bortelag}`);
         opprettetKnockout += 1;
@@ -206,13 +231,17 @@ async function syncResultater() {
         if (eks.starttid !== norsk.starttid) {
           oppdateringer.starttid = norsk.starttid;
         }
-        if (
+        const resultatEndret =
           norsk.resultat &&
           (!eks.resultat ||
             eks.resultat.hjemme !== norsk.resultat.hjemme ||
-            eks.resultat.borte !== norsk.resultat.borte)
-        ) {
+            eks.resultat.borte !== norsk.resultat.borte);
+        if (resultatEndret) {
           oppdateringer.resultat = norsk.resultat;
+        }
+        // Skriv ferdig-flagget når det endrer seg (også når scoren er lik).
+        if (norsk.resultat && (eks.ferdig ?? null) !== norsk.ferdig) {
+          oppdateringer.ferdig = norsk.ferdig;
         }
         if (Object.keys(oppdateringer).length > 0) {
           await db.collection("kamper").doc(id).update(oppdateringer);
@@ -220,7 +249,11 @@ async function syncResultater() {
             `  ✓ ${id}: oppdatert (${Object.keys(oppdateringer).join(", ")})`,
           );
           oppdatertResultat += 1;
-          if (oppdateringer.resultat && norsk.ferdig) ferdigeKamper += 1;
+          if (
+            (oppdateringer.resultat || oppdateringer.ferdig != null) &&
+            norsk.ferdig
+          )
+            ferdigeKamper += 1;
         }
       }
     }

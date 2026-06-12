@@ -2,8 +2,17 @@ name: Sync VM-resultater
 
 on:
   schedule:
-    # Hvert 10. min i VM-perioden (11. juni – 19. juli 2026 UTC)
-    - cron: "*/10 * * * *"
+    # Synk rundt kampslutt: hvert 30. min i kampvinduet (UTC). Alle VM-kamper
+    # (gruppe + sluttspill) spilles på US-kveld = europeisk natt, så vinduet
+    # 18:00–06:30 UTC dekker alle. Resultat + poeng oppdateres da innen ~30 min
+    # etter kampslutt, og neste :30 fanger opp overtid/straffer.
+    #
+    # Hvorfor ikke "*/10": GitHub struper hyppige planlagte jobber på private
+    # repo (vi så */10 bli til ~hver 2. time). Færre, målrettede tidspunkt
+    # kjøres mye mer pålitelig — og bruker langt færre GitHub-minutter.
+    - cron: "0,30 18-23 * * *" # 18:00–23:30 UTC (20:00–01:30 norsk)
+    - cron: "0,30 0-6 * * *" # 00:00–06:30 UTC (02:00–08:30 norsk)
+    - cron: "0 10,14 * * *" # dagtid-sikkerhetsnett + backup
   workflow_dispatch: {}
 
 permissions:
