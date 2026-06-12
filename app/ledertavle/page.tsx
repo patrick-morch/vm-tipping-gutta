@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/lib/auth-context";
 import {
   useAggregertLedertavle,
@@ -614,7 +615,8 @@ function SpillerDetalj({
     messi: "🇦🇷 Messi",
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div className="fixed inset-0 z-50 bg-bg overflow-y-auto overscroll-contain">
       <div className="mx-auto max-w-lg px-4 pb-12">
         <div className="sticky top-0 -mx-4 px-4 py-3 bg-bg/85 backdrop-blur border-b border-border/60 flex items-center gap-3 z-10">
@@ -753,6 +755,7 @@ function SpillerDetalj({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
