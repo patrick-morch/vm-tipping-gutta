@@ -100,6 +100,14 @@ function Kamper() {
   const nedTekst = førsteKamp ? formatTid(førsteKamp.starttid - nå) : null;
   // Når poeng neste gang oppdateres (synk-jobben kjører på faste tider).
   const nesteOppdatering = formatTid(nesteSynkTid(nå) - nå);
+  // Kamper som spilles nå (avspark passert, ikke ferdig, < 3,5 t siden start).
+  const pågårNå = kamper.filter(
+    (k) =>
+      erTippbar(k) &&
+      kampErLåst(k, nå) &&
+      k.ferdig !== true &&
+      nå - k.starttid < 3.5 * 3600_000,
+  );
 
   return (
     <div className="space-y-5">
@@ -131,6 +139,25 @@ function Kamper() {
         </div>
       )}
 
+      {pågårNå.length > 0 && (
+        <div className="bg-surface border border-border rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-lg">⏱</span>
+            <div className="min-w-0">
+              <div className="text-sm font-semibold">
+                Neste poengoppdatering
+              </div>
+              <div className="text-[11px] text-muted">
+                {pågårNå.length} kamp{pågårNå.length > 1 ? "er" : ""} spilles nå
+              </div>
+            </div>
+          </div>
+          <div className="text-sm font-bold tabular-nums whitespace-nowrap">
+            om ~{nesteOppdatering}
+          </div>
+        </div>
+      )}
+
       {/* På desktop: kamper venstre (smalere), Cantona-kicket fyller høyrekolonnen */}
       <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6 space-y-5 lg:space-y-0">
         <div className="space-y-5">
@@ -151,7 +178,6 @@ function Kamper() {
                     tip={tips[kamp.id]}
                     frosset={frosset}
                     låst={kampErLåst(kamp, nå)}
-                    nesteOppdatering={nesteOppdatering}
                     onLagre={(h, b) => lagre(kamp.id, h, b)}
                     onSlett={() => slett(kamp.id)}
                     varsle={varsle}
@@ -286,7 +312,6 @@ function KampKort({
   tip,
   frosset,
   låst,
-  nesteOppdatering,
   onLagre,
   onSlett,
   varsle,
@@ -295,7 +320,6 @@ function KampKort({
   tip?: Prediction;
   frosset?: boolean;
   låst?: boolean;
-  nesteOppdatering?: string;
   onLagre: (h: number, b: number) => Promise<void>;
   onSlett: () => Promise<void>;
   varsle: (melding?: string) => void;
@@ -423,13 +447,6 @@ function KampKort({
               {status.tekst}
             </span>
           )}
-        </div>
-      )}
-
-      {låst && kamp.ferdig !== true && nesteOppdatering && (
-        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-muted">
-          <span>⏱</span>
-          <span>Neste poengoppdatering om ~{nesteOppdatering}</span>
         </div>
       )}
 

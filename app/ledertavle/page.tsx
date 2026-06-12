@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   useAggregertLedertavle,
@@ -9,10 +9,12 @@ import {
   useBrukere,
   useFasit,
   useKamper,
+  useSpillerTips,
+  useMittSpesialTip,
   type LedertavleRad,
 } from "@/lib/data";
-import { beregnPoeng } from "@/lib/types";
-import { POENG } from "@/lib/vm-data";
+import { beregnPoeng, type Match, type Prediction } from "@/lib/types";
+import { POENG, flagg, kampErLåst, kortLagNavn } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
 import SideHeader from "@/components/SideHeader";
@@ -166,6 +168,13 @@ function Ledertavle() {
   const minRad = rader.find((r) => r.uid === user?.uid);
   const minPlass = rader.findIndex((r) => r.uid === user?.uid) + 1;
 
+  const [valgtSpiller, setValgtSpiller] = useState<{
+    uid: string;
+    navn: string;
+  } | null>(null);
+  const velgSpiller = (uid: string, navn: string) =>
+    setValgtSpiller({ uid, navn });
+
   const oppdatert = aggregert?.oppdatert
     ? new Date(aggregert.oppdatert).toLocaleString("nb-NO", {
         day: "2-digit",
@@ -202,11 +211,17 @@ function Ledertavle() {
           rad={minRad}
           plass={minPlass}
           total={rader.length}
+          onVelg={velgSpiller}
         />
       )}
 
       {top3.length > 0 && (
-        <Podium top3={top3} egenUid={user?.uid} ledersum={leder} />
+        <Podium
+          top3={top3}
+          egenUid={user?.uid}
+          ledersum={leder}
+          onVelg={velgSpiller}
+        />
       )}
 
       <ListeKort
@@ -214,7 +229,16 @@ function Ledertavle() {
         egenUid={user?.uid}
         startPlass={4}
         ledersum={leder}
+        onVelg={velgSpiller}
       />
+
+      {valgtSpiller && (
+        <SpillerDetalj
+          uid={valgtSpiller.uid}
+          navn={valgtSpiller.navn}
+          onLukk={() => setValgtSpiller(null)}
+        />
+      )}
     </div>
   );
 }
@@ -233,13 +257,19 @@ function DinPlasseringKort({
   rad,
   plass,
   total,
+  onVelg,
 }: {
   rad: RadMedStats;
   plass: number;
   total: number;
+  onVelg: (uid: string, navn: string) => void;
 }) {
   return (
-    <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/30 rounded-2xl p-4 flex items-center gap-4">
+    <button
+      type="button"
+      onClick={() => onVelg(rad.uid, rad.navn)}
+      className="w-full text-left bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/30 rounded-2xl p-4 flex items-center gap-4 hover:border-primary/60 transition"
+    >
       <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
         #{plass}
       </div>
@@ -256,7 +286,7 @@ function DinPlasseringKort({
           poeng
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -264,10 +294,12 @@ function Podium({
   top3,
   egenUid,
   ledersum,
+  onVelg,
 }: {
   top3: RadMedStats[];
   egenUid: string | undefined;
   ledersum: number;
+  onVelg: (uid: string, navn: string) => void;
 }) {
   // Klassisk podium: #2 venstre, #1 sentralt og høyere, #3 høyre
   const har1 = top3[0];
@@ -285,6 +317,7 @@ function Podium({
             plass={2}
             egen={har2.uid === egenUid}
             ledersum={ledersum}
+            onVelg={onVelg}
           />
         ) : (
           <div />
@@ -295,6 +328,7 @@ function Podium({
             plass={1}
             egen={har1.uid === egenUid}
             ledersum={ledersum}
+            onVelg={onVelg}
           />
         ) : (
           <div />
@@ -305,6 +339,7 @@ function Podium({
             plass={3}
             egen={har3.uid === egenUid}
             ledersum={ledersum}
+            onVelg={onVelg}
           />
         ) : (
           <div />
@@ -319,11 +354,13 @@ function PodiumKort({
   plass,
   egen,
   ledersum,
+  onVelg,
 }: {
   rad: RadMedStats;
   plass: 1 | 2 | 3;
   egen: boolean;
   ledersum: number;
+  onVelg: (uid: string, navn: string) => void;
 }) {
   const stil = {
     1: {
@@ -363,7 +400,11 @@ function PodiumKort({
   const er1 = plass === 1;
 
   return (
-    <div className="flex flex-col items-center justify-end min-w-0">
+    <button
+      type="button"
+      onClick={() => onVelg(rad.uid, rad.navn)}
+      className="flex flex-col items-center justify-end min-w-0 hover:opacity-90 transition"
+    >
       {/* Personen på pallen */}
       <div className="flex flex-col items-center gap-1.5 pb-2.5 px-1 min-w-0 w-full">
         <div className={`leading-none ${stil.toppKlasse}`}>{stil.topp}</div>
@@ -419,7 +460,7 @@ function PodiumKort({
           {plass}
         </span>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -428,11 +469,13 @@ function ListeKort({
   egenUid,
   startPlass,
   ledersum,
+  onVelg,
 }: {
   rader: RadMedStats[];
   egenUid: string | undefined;
   startPlass: number;
   ledersum: number;
+  onVelg: (uid: string, navn: string) => void;
 }) {
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
@@ -446,9 +489,11 @@ function ListeKort({
         const egen = rad.uid === egenUid;
         const prosent = ledersum > 0 ? (rad.poeng / ledersum) * 100 : 0;
         return (
-          <div
+          <button
+            type="button"
             key={rad.uid}
-            className={`relative grid grid-cols-[44px_1fr_auto] gap-3 px-4 py-3 items-center border-b border-border last:border-b-0 ${
+            onClick={() => onVelg(rad.uid, rad.navn)}
+            className={`relative w-full text-left grid grid-cols-[44px_1fr_auto] gap-3 px-4 py-3 items-center border-b border-border last:border-b-0 hover:bg-elevated transition ${
               egen ? "bg-primary/10" : ""
             }`}
           >
@@ -483,9 +528,172 @@ function ListeKort({
                 poeng
               </div>
             </div>
-          </div>
+          </button>
         );
       })}
+    </div>
+  );
+}
+
+function SpesialRad({ label, verdi }: { label: string; verdi?: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-muted text-xs">{label}</span>
+      <span className="font-semibold truncate text-right">
+        {verdi || <span className="text-muted/60 font-normal">—</span>}
+      </span>
+    </div>
+  );
+}
+
+function SpillerDetalj({
+  uid,
+  navn,
+  onLukk,
+}: {
+  uid: string;
+  navn: string;
+  onLukk: () => void;
+}) {
+  const tips = useSpillerTips(uid);
+  const spesial = useMittSpesialTip(uid);
+  const kamper = useKamper();
+  const nå = Date.now();
+
+  const kampMap = useMemo(
+    () => new Map(kamper.map((k) => [k.id, k])),
+    [kamper],
+  );
+  // Bare tips på låste (spilte/påbegynte) kamper — skjuler fremtidige tips.
+  const synlige = useMemo(
+    () =>
+      tips
+        .map((t) => ({ t, kamp: kampMap.get(t.matchId) }))
+        .filter(
+          (x): x is { t: Prediction; kamp: Match } =>
+            !!x.kamp && kampErLåst(x.kamp, nå),
+        )
+        .sort((a, b) => b.kamp.starttid - a.kamp.starttid),
+    [tips, kampMap, nå],
+  );
+
+  const rvm: Record<string, string> = {
+    ronaldo: "🇵🇹 Ronaldo",
+    likt: "🤝 Likt",
+    messi: "🇦🇷 Messi",
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      onClick={onLukk}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative bg-surface border border-border rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[85vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="bg-surface border-b border-border px-4 py-3 flex items-center justify-between rounded-t-3xl flex-shrink-0">
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-wider font-bold text-muted">
+              Spillerprofil
+            </div>
+            <h2 className="font-bold text-lg truncate">{navn}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onLukk}
+            className="w-8 h-8 rounded-lg text-muted hover:text-text hover:bg-elevated flex items-center justify-center text-lg flex-shrink-0"
+            aria-label="Lukk"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="overflow-y-auto p-4 space-y-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted mb-2">
+              Spesialtips
+            </div>
+            {spesial ? (
+              <div className="space-y-1.5 text-sm bg-elevated/40 rounded-xl p-3">
+                <SpesialRad
+                  label="VM-vinner"
+                  verdi={
+                    spesial.vmVinner
+                      ? `${flagg(spesial.vmVinner)} ${spesial.vmVinner}`
+                      : ""
+                  }
+                />
+                <SpesialRad label="Toppscorer" verdi={spesial.toppscorer} />
+                <SpesialRad label="Toppassist" verdi={spesial.toppassist} />
+                <SpesialRad
+                  label="Ronaldo/Messi"
+                  verdi={rvm[spesial.ronaldoVsMessi] || ""}
+                />
+              </div>
+            ) : (
+              <div className="text-sm text-muted">Ingen spesialtips.</div>
+            )}
+          </div>
+
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted mb-2">
+              Kamptips ({synlige.length})
+            </div>
+            {synlige.length === 0 ? (
+              <div className="text-sm text-muted">
+                Ingen tips på spilte kamper ennå.
+              </div>
+            ) : (
+              <div className="divide-y divide-border/60">
+                {synlige.map(({ t, kamp }) => {
+                  const harRes = Boolean(kamp.resultat && kamp.ferdig !== false);
+                  const bonus = kamp.bonusFaktor || 1;
+                  const p =
+                    harRes && kamp.resultat
+                      ? beregnPoeng(t, kamp.resultat, bonus)
+                      : null;
+                  const farge =
+                    p == null
+                      ? "text-muted"
+                      : p >= 3 * bonus
+                        ? "text-success"
+                        : p >= 1 * bonus
+                          ? "text-accent"
+                          : "text-muted";
+                  return (
+                    <div
+                      key={t.matchId}
+                      className="flex items-center justify-between gap-2 py-2 text-sm"
+                    >
+                      <div className="min-w-0 flex-1 truncate text-xs">
+                        {kortLagNavn(kamp.hjemmelag)} –{" "}
+                        {kortLagNavn(kamp.bortelag)}
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="tabular-nums font-bold">
+                          {t.hjemme}–{t.borte}
+                        </span>
+                        {harRes && kamp.resultat && (
+                          <span className="text-[10px] text-muted tabular-nums">
+                            (fasit {kamp.resultat.hjemme}–{kamp.resultat.borte})
+                          </span>
+                        )}
+                        {p != null && (
+                          <span className={`font-bold w-9 text-right ${farge}`}>
+                            +{p}p
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

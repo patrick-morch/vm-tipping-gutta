@@ -125,6 +125,30 @@ export function useKampTips(matchId: string | null): Prediction[] {
   return tips;
 }
 
+/**
+ * Henter alle kamptips for ÉN spiller (for spillerprofil i ledertavlen).
+ * Leser kun når uid er satt (on-demand) — kall med null for å ikke lese.
+ */
+export function useSpillerTips(uid: string | null): Prediction[] {
+  const [tips, setTips] = useState<Prediction[]>([]);
+  useEffect(() => {
+    if (!uid) {
+      setTips([]);
+      return;
+    }
+    if (bruker()) {
+      const q = query(collection(fbDb(), "tips"), where("uid", "==", uid));
+      return onSnapshot(q, (s) =>
+        setTips(s.docs.map((d) => d.data() as Prediction)),
+      );
+    }
+    return localTips.subscribe((alle) =>
+      setTips(Object.values(alle).filter((t) => t.uid === uid)),
+    );
+  }, [uid]);
+  return tips;
+}
+
 export function useBrukere(): Bruker[] {
   const [brukere, setBrukere] = useState<Bruker[]>([]);
   useEffect(() => {
