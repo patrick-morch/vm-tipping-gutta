@@ -36,15 +36,21 @@ function Spesial() {
   const [toppscorer, setToppscorer] = useState("");
   const [toppassist, setToppassist] = useState("");
   const [ronaldoVsMessi, setRonaldoVsMessi] = useState<RonaldoVsMessi>("");
-  const [tidLåst, setTidLåst] = useState(() => spesialErLåst());
+  const [nå, setNå] = useState(() => Date.now());
   const frosset = bruker?.frosset === true;
+  // Admin kan midlertidig åpne spesial for denne brukeren etter global lås.
+  const harÅpning = (bruker?.spesialAapenTil ?? 0) > nå;
+  const minutterIgjen = Math.max(
+    0,
+    Math.ceil(((bruker?.spesialAapenTil ?? 0) - nå) / 60000),
+  );
+  const tidLåstGlobalt = spesialErLåst(nå);
+  const tidLåst = tidLåstGlobalt && !harÅpning;
   const låst = tidLåst || frosset;
   const klar = useRef(false);
 
   useEffect(() => {
-    const sjekk = () => setTidLåst(spesialErLåst());
-    sjekk();
-    const t = setInterval(sjekk, 30_000);
+    const t = setInterval(() => setNå(Date.now()), 30_000);
     return () => clearInterval(t);
   }, []);
 
@@ -109,7 +115,13 @@ function Spesial() {
     <div className="space-y-4">
       <SideHeader
         tittel="Spesialtips"
-        undertittel={låst ? `🔒 Låst ${låsTekst}` : `Stenger ${låsTekst}`}
+        undertittel={
+          låst
+            ? `🔒 Låst ${låsTekst}`
+            : harÅpning && tidLåstGlobalt
+              ? `🔓 Åpnet av admin — ${minutterIgjen} min igjen`
+              : `Stenger ${låsTekst}`
+        }
         høyre={
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-muted tabular-nums">
@@ -140,6 +152,13 @@ function Spesial() {
         <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
           <span className="text-lg">🔒</span>
           Spesialtipsene er låst — stengte {låsTekst}. Tipsene er nå spikret.
+        </div>
+      )}
+      {harÅpning && tidLåstGlobalt && !frosset && (
+        <div className="bg-success/10 border border-success/30 text-success text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
+          <span className="text-lg">🔓</span>
+          Admin har åpnet spesialtipsene for deg midlertidig — {minutterIgjen}{" "}
+          min igjen. Endringene lagres automatisk.
         </div>
       )}
 

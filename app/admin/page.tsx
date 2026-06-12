@@ -11,6 +11,7 @@ import {
   slettBruker,
   oppdaterBrukerNavn,
   oppdaterBrukerFrosset,
+  oppdaterSpesialAapenTil,
   nullstillAlleResultater,
   lagreFasit,
 } from "@/lib/data";
@@ -626,6 +627,14 @@ function MedlemRad({
   const [navn, setNavn] = useState(bruker.navn);
   const [lagrer, setLagrer] = useState(false);
   const [frostLagrer, setFrostLagrer] = useState(false);
+  const [spesialLagrer, setSpesialLagrer] = useState(false);
+
+  const spesialÅpenTil = bruker.spesialAapenTil ?? 0;
+  const spesialÅpen = spesialÅpenTil > Date.now();
+  const spesialMinIgjen = Math.max(
+    0,
+    Math.ceil((spesialÅpenTil - Date.now()) / 60000),
+  );
 
   useEffect(() => {
     if (!redigerer) setNavn(bruker.navn);
@@ -653,6 +662,16 @@ function MedlemRad({
       await oppdaterBrukerFrosset(bruker.uid, !bruker.frosset);
     } finally {
       setFrostLagrer(false);
+    }
+  }
+
+  async function toggleSpesial() {
+    setSpesialLagrer(true);
+    try {
+      const ny = spesialÅpen ? 0 : Date.now() + 30 * 60 * 1000;
+      await oppdaterSpesialAapenTil(bruker.uid, ny);
+    } finally {
+      setSpesialLagrer(false);
     }
   }
 
@@ -719,6 +738,11 @@ function MedlemRad({
                 FROSSET
               </span>
             )}
+            {spesialÅpen && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-success/20 text-success font-bold">
+                SPESIAL ÅPEN {spesialMinIgjen}m
+              </span>
+            )}
           </div>
         )}
         <div className="text-[11px] text-muted truncate">{bruker.epost}</div>
@@ -741,6 +765,26 @@ function MedlemRad({
           }
         >
           {frostLagrer ? "…" : bruker.frosset ? "Tin opp" : "Frys"}
+        </button>
+        <button
+          onClick={toggleSpesial}
+          disabled={spesialLagrer}
+          className={`h-8 px-3 rounded-lg border text-xs font-semibold whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed ${
+            spesialÅpen
+              ? "bg-success/15 border-success/40 text-success hover:bg-success/20"
+              : "bg-elevated border-border hover:border-success/50 text-muted hover:text-text"
+          }`}
+          title={
+            spesialÅpen
+              ? "Lukk spesialtips igjen for denne brukeren"
+              : "Åpne spesialtips midlertidig (30 min) for denne brukeren"
+          }
+        >
+          {spesialLagrer
+            ? "…"
+            : spesialÅpen
+              ? "Lukk spesial"
+              : "Åpne spesial 30m"}
         </button>
         <button
           onClick={() => onSlett(bruker)}

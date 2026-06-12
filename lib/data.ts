@@ -340,6 +340,26 @@ export async function oppdaterBrukerFrosset(
 }
 
 /**
+ * Åpner spesialtips midlertidig for én bruker (admin). `tilTid` er epoch-ms;
+ * sett 0 for å lukke igjen. Brukeren kan redigere spesialtips så lenge
+ * spesialAapenTil > nå. Håndheves i firestore.rules + UI.
+ */
+export async function oppdaterSpesialAapenTil(
+  uid: string,
+  tilTid: number,
+): Promise<void> {
+  if (bruker()) {
+    await updateDoc(doc(fbDb(), "brukere", uid), { spesialAapenTil: tilTid });
+    return;
+  }
+  const map = { ...localBrukere.get() };
+  const b = map[uid];
+  if (!b) return;
+  map[uid] = { ...b, spesialAapenTil: tilTid };
+  localBrukere.set(map);
+}
+
+/**
  * Sletter en bruker komplett — brukerdoc, alle kamptipps og spesialtips.
  * Krever admin-rettigheter i Firestore.
  */

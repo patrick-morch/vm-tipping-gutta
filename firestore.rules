@@ -30,6 +30,13 @@ service cloud.firestore {
       return request.time.toMillis() < 1781204400000;
     }
 
+    // Admin kan midlertidig åpne spesialtips for én bruker via feltet
+    // spesialAapenTil (epoch-ms) på brukerdoc-en. Gjelder så lenge tiden > nå.
+    function spesialAapenForBruker(uid) {
+      return exists(/databases/$(database)/documents/brukere/$(uid))
+        && get(/databases/$(database)/documents/brukere/$(uid)).data.get('spesialAapenTil', 0) > request.time.toMillis();
+    }
+
     // Brukere: alle innloggede kan lese (ledertavle).
     // Eier kan opprette egen profil med medlems-rolle og 0 poeng.
     // Eier kan oppdatere navn/avdeling, men ikke rolle eller poeng.
@@ -41,7 +48,8 @@ service cloud.firestore {
         && request.resource.data.poeng == 0;
       allow update: if (erEier(uid)
         && request.resource.data.rolle == resource.data.rolle
-        && request.resource.data.poeng == resource.data.poeng)
+        && request.resource.data.poeng == resource.data.poeng
+        && request.resource.data.get('spesialAapenTil', 0) == resource.data.get('spesialAapenTil', 0))
         || erAdmin();
       allow delete: if erAdmin();
     }
@@ -73,8 +81,10 @@ service cloud.firestore {
     // frem til første VM-kamp starter (avspark). Frosne brukere kan ikke skrive.
     match /spesialtips/{uid} {
       allow read: if erInnlogget();
-      allow create, update: if erEier(uid) && !erFrosset() && spesialAapen();
-      allow delete: if (erEier(uid) && !erFrosset() && spesialAapen()) || erAdmin();
+      allow create, update: if erEier(uid) && !erFrosset()
+        && (spesialAapen() || spesialAapenForBruker(uid));
+      allow delete: if (erEier(uid) && !erFrosset()
+        && (spesialAapen() || spesialAapenForBruker(uid))) || erAdmin();
     }
 
     // Fasit: alle kan lese, bare admin skriver.

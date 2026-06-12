@@ -31,6 +31,10 @@ export type Bruker = {
   // Når true: bruker kan bla i appen men ikke lagre nye tipps eller endre
   // spesialtips. Settes/oppheves av admin.
   frosset?: boolean;
+  // Epoch-ms: admin kan midlertidig åpne spesialtips for denne brukeren etter
+  // den globale låsen. Brukeren kan redigere spesialtips så lenge
+  // spesialAapenTil > nå. Auto-utløper (håndheves i firestore.rules + UI).
+  spesialAapenTil?: number;
 };
 
 export type RonaldoVsMessi = "ronaldo" | "messi" | "likt" | "";
