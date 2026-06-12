@@ -169,11 +169,11 @@ function Ledertavle() {
   const minPlass = rader.findIndex((r) => r.uid === user?.uid) + 1;
 
   const [valgtSpiller, setValgtSpiller] = useState<{
-    uid: string;
-    navn: string;
+    rad: RadMedStats;
+    plass: number;
   } | null>(null);
-  const velgSpiller = (uid: string, navn: string) =>
-    setValgtSpiller({ uid, navn });
+  const velgSpiller = (rad: RadMedStats, plass: number) =>
+    setValgtSpiller({ rad, plass });
 
   const oppdatert = aggregert?.oppdatert
     ? new Date(aggregert.oppdatert).toLocaleString("nb-NO", {
@@ -234,8 +234,8 @@ function Ledertavle() {
 
       {valgtSpiller && (
         <SpillerDetalj
-          uid={valgtSpiller.uid}
-          navn={valgtSpiller.navn}
+          rad={valgtSpiller.rad}
+          plass={valgtSpiller.plass}
           onLukk={() => setValgtSpiller(null)}
         />
       )}
@@ -262,12 +262,12 @@ function DinPlasseringKort({
   rad: RadMedStats;
   plass: number;
   total: number;
-  onVelg: (uid: string, navn: string) => void;
+  onVelg: (rad: RadMedStats, plass: number) => void;
 }) {
   return (
     <button
       type="button"
-      onClick={() => onVelg(rad.uid, rad.navn)}
+      onClick={() => onVelg(rad, plass)}
       className="w-full text-left bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/30 rounded-2xl p-4 flex items-center gap-4 hover:border-primary/60 transition"
     >
       <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
@@ -299,7 +299,7 @@ function Podium({
   top3: RadMedStats[];
   egenUid: string | undefined;
   ledersum: number;
-  onVelg: (uid: string, navn: string) => void;
+  onVelg: (rad: RadMedStats, plass: number) => void;
 }) {
   // Klassisk podium: #2 venstre, #1 sentralt og høyere, #3 høyre
   const har1 = top3[0];
@@ -360,7 +360,7 @@ function PodiumKort({
   plass: 1 | 2 | 3;
   egen: boolean;
   ledersum: number;
-  onVelg: (uid: string, navn: string) => void;
+  onVelg: (rad: RadMedStats, plass: number) => void;
 }) {
   const stil = {
     1: {
@@ -402,7 +402,7 @@ function PodiumKort({
   return (
     <button
       type="button"
-      onClick={() => onVelg(rad.uid, rad.navn)}
+      onClick={() => onVelg(rad, plass)}
       className="flex flex-col items-center justify-end min-w-0 hover:opacity-90 transition"
     >
       {/* Personen på pallen */}
@@ -475,7 +475,7 @@ function ListeKort({
   egenUid: string | undefined;
   startPlass: number;
   ledersum: number;
-  onVelg: (uid: string, navn: string) => void;
+  onVelg: (rad: RadMedStats, plass: number) => void;
 }) {
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
@@ -492,7 +492,7 @@ function ListeKort({
           <button
             type="button"
             key={rad.uid}
-            onClick={() => onVelg(rad.uid, rad.navn)}
+            onClick={() => onVelg(rad, plass)}
             className={`relative w-full text-left grid grid-cols-[44px_1fr_auto] gap-3 px-4 py-3 items-center border-b border-border last:border-b-0 hover:bg-elevated transition ${
               egen ? "bg-primary/10" : ""
             }`}
@@ -535,28 +535,60 @@ function ListeKort({
   );
 }
 
-function SpesialRad({ label, verdi }: { label: string; verdi?: string }) {
+function StatPille({
+  label,
+  verdi,
+  farge = "text-text",
+}: {
+  label: string;
+  verdi: string | number;
+  farge?: string;
+}) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-muted text-xs">{label}</span>
-      <span className="font-semibold truncate text-right">
-        {verdi || <span className="text-muted/60 font-normal">—</span>}
-      </span>
+    <div className="flex-1 rounded-xl bg-bg/40 border border-border/60 px-2 py-1.5 text-center">
+      <div className={`text-base font-extrabold tabular-nums ${farge}`}>
+        {verdi}
+      </div>
+      <div className="text-[9px] uppercase tracking-wider text-muted font-semibold">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function SpesialKort({
+  ikon,
+  label,
+  verdi,
+}: {
+  ikon: string;
+  label: string;
+  verdi: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-elevated/50 border border-border/60 p-3">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-muted mb-1">
+        <span className="text-sm">{ikon}</span>
+        {label}
+      </div>
+      <div className="font-semibold text-sm truncate">
+        {verdi || <span className="text-muted/60 font-normal">Ikke tippet</span>}
+      </div>
     </div>
   );
 }
 
 function SpillerDetalj({
-  uid,
-  navn,
+  rad,
+  plass,
   onLukk,
 }: {
-  uid: string;
-  navn: string;
+  rad: RadMedStats;
+  plass: number;
   onLukk: () => void;
 }) {
-  const tips = useSpillerTips(uid);
-  const spesial = useMittSpesialTip(uid);
+  const tips = useSpillerTips(rad.uid);
+  const spesial = useMittSpesialTip(rad.uid);
   const kamper = useKamper();
   const nå = Date.now();
 
@@ -564,7 +596,6 @@ function SpillerDetalj({
     () => new Map(kamper.map((k) => [k.id, k])),
     [kamper],
   );
-  // Bare tips på låste (spilte/påbegynte) kamper — skjuler fremtidige tips.
   const synlige = useMemo(
     () =>
       tips
@@ -584,114 +615,142 @@ function SpillerDetalj({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      onClick={onLukk}
-    >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative bg-surface border border-border rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md max-h-[85vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="bg-surface border-b border-border px-4 py-3 flex items-center justify-between rounded-t-3xl flex-shrink-0">
-          <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-wider font-bold text-muted">
-              Spillerprofil
-            </div>
-            <h2 className="font-bold text-lg truncate">{navn}</h2>
-          </div>
+    <div className="fixed inset-0 z-50 bg-bg overflow-y-auto overscroll-contain">
+      <div className="mx-auto max-w-lg px-4 pb-12">
+        <div className="sticky top-0 -mx-4 px-4 py-3 bg-bg/85 backdrop-blur border-b border-border/60 flex items-center gap-3 z-10">
           <button
             type="button"
             onClick={onLukk}
-            className="w-8 h-8 rounded-lg text-muted hover:text-text hover:bg-elevated flex items-center justify-center text-lg flex-shrink-0"
-            aria-label="Lukk"
+            className="w-9 h-9 rounded-xl bg-elevated border border-border flex items-center justify-center hover:border-primary transition flex-shrink-0"
+            aria-label="Tilbake"
           >
-            ✕
+            ←
           </button>
+          <span className="font-semibold truncate">Spillerprofil</span>
         </div>
 
-        <div className="overflow-y-auto p-4 space-y-4">
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted mb-2">
-              Spesialtips
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-surface via-surface to-elevated/40 p-5 mt-4">
+          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          <div className="relative flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-elevated border border-border flex items-center justify-center text-xl font-extrabold flex-shrink-0">
+              {initialer(rad.navn)}
             </div>
-            {spesial ? (
-              <div className="space-y-1.5 text-sm bg-elevated/40 rounded-xl p-3">
-                <SpesialRad
-                  label="VM-vinner"
-                  verdi={
-                    spesial.vmVinner
-                      ? `${flagg(spesial.vmVinner)} ${spesial.vmVinner}`
-                      : ""
-                  }
-                />
-                <SpesialRad label="Toppscorer" verdi={spesial.toppscorer} />
-                <SpesialRad label="Toppassist" verdi={spesial.toppassist} />
-                <SpesialRad
-                  label="Ronaldo/Messi"
-                  verdi={rvm[spesial.ronaldoVsMessi] || ""}
-                />
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-[0.18em] font-bold text-primary/80">
+                {plass}. plass
               </div>
-            ) : (
-              <div className="text-sm text-muted">Ingen spesialtips.</div>
-            )}
-          </div>
-
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted mb-2">
-              Kamptips ({synlige.length})
-            </div>
-            {synlige.length === 0 ? (
+              <h1 className="text-2xl font-extrabold leading-tight truncate">
+                {rad.navn}
+              </h1>
               <div className="text-sm text-muted">
-                Ingen tips på spilte kamper ennå.
+                <span className="font-bold text-text">{rad.poeng}</span> poeng
               </div>
-            ) : (
-              <div className="divide-y divide-border/60">
-                {synlige.map(({ t, kamp }) => {
-                  const harRes = Boolean(kamp.resultat && kamp.ferdig !== false);
-                  const bonus = kamp.bonusFaktor || 1;
-                  const p =
-                    harRes && kamp.resultat
-                      ? beregnPoeng(t, kamp.resultat, bonus)
-                      : null;
-                  const farge =
-                    p == null
-                      ? "text-muted"
-                      : p >= 3 * bonus
-                        ? "text-success"
-                        : p >= 1 * bonus
-                          ? "text-accent"
-                          : "text-muted";
-                  return (
-                    <div
-                      key={t.matchId}
-                      className="flex items-center justify-between gap-2 py-2 text-sm"
-                    >
-                      <div className="min-w-0 flex-1 truncate text-xs">
-                        {kortLagNavn(kamp.hjemmelag)} –{" "}
-                        {kortLagNavn(kamp.bortelag)}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="tabular-nums font-bold">
-                          {t.hjemme}–{t.borte}
-                        </span>
-                        {harRes && kamp.resultat && (
-                          <span className="text-[10px] text-muted tabular-nums">
-                            (fasit {kamp.resultat.hjemme}–{kamp.resultat.borte})
-                          </span>
-                        )}
-                        {p != null && (
-                          <span className={`font-bold w-9 text-right ${farge}`}>
-                            +{p}p
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            </div>
           </div>
+          <div className="relative flex gap-2 mt-4">
+            <StatPille label="Kamp" verdi={rad.kampPoeng} />
+            <StatPille label="Spesial" verdi={rad.spesialPoeng} />
+            <StatPille label="Eksakt" verdi={rad.eksakte} farge="text-success" />
+            <StatPille
+              label="Utfall"
+              verdi={rad.utfall ?? 0}
+              farge="text-accent"
+            />
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <div className="text-[10px] uppercase tracking-[0.16em] font-bold text-muted mb-2 px-1">
+            Spesialtips
+          </div>
+          {spesial ? (
+            <div className="grid grid-cols-2 gap-2">
+              <SpesialKort
+                ikon="🏆"
+                label="VM-vinner"
+                verdi={
+                  spesial.vmVinner
+                    ? `${flagg(spesial.vmVinner)} ${spesial.vmVinner}`
+                    : ""
+                }
+              />
+              <SpesialKort
+                ikon="⚽"
+                label="Toppscorer"
+                verdi={spesial.toppscorer}
+              />
+              <SpesialKort
+                ikon="🎯"
+                label="Toppassist"
+                verdi={spesial.toppassist}
+              />
+              <SpesialKort
+                ikon="🐐"
+                label="Ronaldo/Messi"
+                verdi={rvm[spesial.ronaldoVsMessi] || ""}
+              />
+            </div>
+          ) : (
+            <div className="text-sm text-muted bg-elevated/40 rounded-2xl p-4">
+              Ingen spesialtips.
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5">
+          <div className="text-[10px] uppercase tracking-[0.16em] font-bold text-muted mb-2 px-1">
+            Kamptips · {synlige.length}
+          </div>
+          {synlige.length === 0 ? (
+            <div className="text-sm text-muted bg-elevated/40 rounded-2xl p-4">
+              Ingen tips på spilte kamper ennå.
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {synlige.map(({ t, kamp }) => {
+                const harRes = Boolean(kamp.resultat && kamp.ferdig !== false);
+                const bonus = kamp.bonusFaktor || 1;
+                const p =
+                  harRes && kamp.resultat
+                    ? beregnPoeng(t, kamp.resultat, bonus)
+                    : null;
+                const farge =
+                  p == null
+                    ? "text-muted"
+                    : p >= 3 * bonus
+                      ? "text-success"
+                      : p >= 1 * bonus
+                        ? "text-accent"
+                        : "text-muted";
+                return (
+                  <div
+                    key={t.matchId}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-elevated/50 border border-border/50 text-[12px]"
+                  >
+                    <span className="flex-1 min-w-0 truncate">
+                      {kortLagNavn(kamp.hjemmelag)} –{" "}
+                      {kortLagNavn(kamp.bortelag)}
+                    </span>
+                    <span className="tabular-nums font-bold w-12 text-center flex-shrink-0">
+                      {t.hjemme}–{t.borte}
+                    </span>
+                    {harRes && kamp.resultat ? (
+                      <span className="tabular-nums text-[10px] text-muted w-10 text-center flex-shrink-0">
+                        {kamp.resultat.hjemme}–{kamp.resultat.borte}
+                      </span>
+                    ) : (
+                      <span className="w-10 flex-shrink-0" />
+                    )}
+                    <span
+                      className={`font-bold w-8 text-right flex-shrink-0 ${farge}`}
+                    >
+                      {p != null ? `+${p}p` : ""}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -233,23 +233,25 @@ export function spesialErLåst(nå = Date.now()): boolean {
   return nå >= SPESIAL_LÅS_TID;
 }
 
-// Neste tidspunkt poeng oppdateres (synk-jobben kjører på faste UTC-tider, se
-// .github/workflows/sync-resultater.yml): hver :00 og :30 i kampvinduet
-// 18:00–06:30 UTC, pluss 10:00 og 14:00 UTC som dagtid-backup. Returnerer
-// epoch-ms for neste kjøring etter `nå`. Holdes i synk med cron-planen.
-const SYNK_VINDU_TIMER = new Set([18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]);
+// Neste tidspunkt poeng oppdateres. MÅ holdes i synk med cron-planen i
+// .github/workflows/sync-resultater.yml: hvert 5. min i kampvinduet
+// 15:00–05:55 UTC, pluss 09:00 og 13:00 UTC som dagtid-backup. Returnerer
+// epoch-ms for neste kjøring etter `nå`.
+const SYNK_VINDU_TIMER = new Set([
+  15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5,
+]);
 export function nesteSynkTid(nå = Date.now()): number {
-  const halvtime = 30 * 60 * 1000;
-  const base = Math.floor(nå / halvtime) * halvtime;
-  for (let i = 1; i <= 48; i++) {
-    const t = base + i * halvtime;
+  const femMin = 5 * 60 * 1000;
+  const base = Math.floor(nå / femMin) * femMin;
+  for (let i = 1; i <= 24 * 12; i++) {
+    const t = base + i * femMin;
     const dt = new Date(t);
     const h = dt.getUTCHours();
     const m = dt.getUTCMinutes();
-    if (SYNK_VINDU_TIMER.has(h)) return t; // både :00 og :30 i vinduet
-    if (m === 0 && (h === 10 || h === 14)) return t; // dagtid-backup
+    if (SYNK_VINDU_TIMER.has(h)) return t; // hvert 5. min i vinduet
+    if (m === 0 && (h === 9 || h === 13)) return t; // dagtid-backup
   }
-  return base + halvtime;
+  return base + femMin;
 }
 
 export const SLUTTSPILL_RUNDER = [
