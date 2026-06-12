@@ -57,19 +57,17 @@ export default function AlleTipsForKamp({ kamp }: { kamp: Match }) {
             return (
               <div
                 key={t.uid}
-                className="flex items-center justify-between gap-2 text-[11px]"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-elevated/50 border border-border/50 text-[11px]"
               >
-                <span className="truncate text-text/90">{t.navn}</span>
-                <span className="flex items-center gap-2 flex-shrink-0">
-                  <span className="tabular-nums font-bold">
-                    {t.hjemme}–{t.borte}
-                  </span>
-                  {poengTekst && (
-                    <span className={`font-bold ${farge} w-9 text-right`}>
-                      {poengTekst}
-                    </span>
-                  )}
+                <span className="truncate font-semibold max-w-[55%]">
+                  {t.navn}
                 </span>
+                <span className="tabular-nums font-bold bg-bg/60 px-1.5 py-0.5 rounded">
+                  {t.hjemme}–{t.borte}
+                </span>
+                {poengTekst && (
+                  <span className={`font-bold ${farge}`}>{poengTekst}</span>
+                )}
               </div>
             );
           })}
