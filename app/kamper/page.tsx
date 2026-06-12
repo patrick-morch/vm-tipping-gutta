@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import {
-  useKamper,
-  useMineTips,
-  useKampTips,
-  lagreTip,
-  slettTip,
-} from "@/lib/data";
+import { useKamper, useMineTips, lagreTip, slettTip } from "@/lib/data";
 import { Match, Prediction, beregnPoeng } from "@/lib/types";
 import {
   erNorgeKamp,
@@ -22,6 +16,7 @@ import {
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
 import SideHeader from "@/components/SideHeader";
+import AlleTipsForKamp from "@/components/AlleTipsForKamp";
 import { useFrosseToast } from "@/components/FrosseToast";
 
 const ANTALL = 5;
@@ -68,11 +63,6 @@ function Kamper() {
     .filter((k) => kampErLåst(k, nå) && !k.resultat && erTippbar(k))
     .sort((a, b) => a.starttid - b.starttid);
   const visKamper = [...pågår, ...neste].sort((a, b) => a.starttid - b.starttid);
-
-  const sisteFerdige = kamper
-    .filter((k) => k.resultat && k.starttid < nå)
-    .sort((a, b) => b.starttid - a.starttid)
-    .slice(0, 3);
 
   async function lagre(id: string, h: number, b: number) {
     if (!user || !bruker || frosset) return;
@@ -139,7 +129,7 @@ function Kamper() {
         </div>
       )}
 
-      {pågårNå.length > 0 && (
+      {
         <div className="bg-surface border border-border rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <span className="text-lg">⏱</span>
@@ -148,7 +138,9 @@ function Kamper() {
                 Neste poengoppdatering
               </div>
               <div className="text-[11px] text-muted">
-                {pågårNå.length} kamp{pågårNå.length > 1 ? "er" : ""} spilles nå
+                {pågårNå.length > 0
+                  ? `${pågårNå.length} kamp${pågårNå.length > 1 ? "er" : ""} spilles nå`
+                  : "Resultater hentes automatisk"}
               </div>
             </div>
           </div>
@@ -156,7 +148,7 @@ function Kamper() {
             om ~{nesteOppdatering}
           </div>
         </div>
-      )}
+      }
 
       {/* På desktop: kamper venstre (smalere), Cantona-kicket fyller høyrekolonnen */}
       <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6 space-y-5 lg:space-y-0">
@@ -194,23 +186,6 @@ function Kamper() {
             >
               Se alle {åpne.length} åpne kamper →
             </Link>
-          )}
-
-          {sisteFerdige.length > 0 && (
-            <div className="space-y-2 pt-2">
-              <div className="text-[10px] uppercase tracking-[0.15em] font-bold text-muted px-1">
-                Siste resultater
-              </div>
-              <div className="space-y-2">
-                {sisteFerdige.map((kamp) => (
-                  <ResultatKort
-                    key={kamp.id}
-                    kamp={kamp}
-                    tip={tips[kamp.id]}
-                  />
-                ))}
-              </div>
-            </div>
           )}
         </div>
 
@@ -451,119 +426,6 @@ function KampKort({
       )}
 
       {låst && <AlleTipsForKamp kamp={kamp} />}
-    </div>
-  );
-}
-
-function ResultatKort({ kamp, tip }: { kamp: Match; tip?: Prediction }) {
-  if (!kamp.resultat) return null;
-  let status: { tekst: string; farge: string } | null = null;
-  if (tip) {
-    const p = beregnPoeng(tip, kamp.resultat, kamp.bonusFaktor || 1);
-    if (p >= 3) status = { tekst: `+${p}p eksakt`, farge: "text-success" };
-    else if (p >= 1)
-      status = { tekst: `+${p}p utfall`, farge: "text-accent" };
-    else status = { tekst: "0p", farge: "text-muted" };
-  }
-  const erNorge = erNorgeKamp(kamp);
-  return (
-    <div
-      className={`bg-surface/60 border rounded-xl p-2.5 ${
-        erNorge ? "border-norge/30" : "border-border/60"
-      }`}
-    >
-      <div className="flex items-center gap-2">
-        <span className="text-base flex-shrink-0">{flagg(kamp.hjemmelag)}</span>
-        <span className="text-xs font-medium truncate flex-1 text-right">
-          {kortLagNavn(kamp.hjemmelag)}
-        </span>
-        <span className="font-bold text-sm tabular-nums px-2 py-0.5 rounded bg-elevated border border-border">
-          {kamp.resultat.hjemme}–{kamp.resultat.borte}
-        </span>
-        <span className="text-xs font-medium truncate flex-1">
-          {kortLagNavn(kamp.bortelag)}
-        </span>
-        <span className="text-base flex-shrink-0">{flagg(kamp.bortelag)}</span>
-      </div>
-      {status && (
-        <div className="text-center mt-1">
-          <span className={`text-[10px] font-bold ${status.farge}`}>
-            {status.tekst}
-          </span>
-        </div>
-      )}
-      <AlleTipsForKamp kamp={kamp} />
-    </div>
-  );
-}
-
-function AlleTipsForKamp({ kamp }: { kamp: Match }) {
-  const [vis, setVis] = useState(false);
-  // On-demand: leser kun når åpnet (matchId = null når lukket → ingen lesinger).
-  const tips = useKampTips(vis ? kamp.id : null);
-
-  const bonus = kamp.bonusFaktor || 1;
-  const sortert = [...tips].sort((a, b) => {
-    if (kamp.resultat) {
-      return (
-        beregnPoeng(b, kamp.resultat, bonus) -
-        beregnPoeng(a, kamp.resultat, bonus)
-      );
-    }
-    return a.navn.localeCompare(b.navn, "nb");
-  });
-
-  return (
-    <div className="mt-2 pt-2 border-t border-border">
-      <button
-        type="button"
-        onClick={() => setVis((v) => !v)}
-        className="text-[11px] font-semibold text-muted hover:text-text flex items-center gap-1"
-      >
-        <span>{vis ? "▾" : "▸"}</span>
-        {vis ? "Skjul alles tips" : "Se alles tips"}
-      </button>
-      {vis && (
-        <div className="mt-2 space-y-1">
-          {sortert.length === 0 && (
-            <div className="text-[11px] text-muted">
-              Ingen har tippet denne kampen.
-            </div>
-          )}
-          {sortert.map((t) => {
-            let poengTekst: string | null = null;
-            let farge = "text-muted";
-            if (kamp.resultat) {
-              const p = beregnPoeng(t, kamp.resultat, bonus);
-              poengTekst = `+${p}p`;
-              farge =
-                p >= 3 * bonus
-                  ? "text-success"
-                  : p >= 1 * bonus
-                    ? "text-accent"
-                    : "text-muted";
-            }
-            return (
-              <div
-                key={t.uid}
-                className="flex items-center justify-between gap-2 text-[11px]"
-              >
-                <span className="truncate text-text/90">{t.navn}</span>
-                <span className="flex items-center gap-2 flex-shrink-0">
-                  <span className="tabular-nums font-bold">
-                    {t.hjemme}–{t.borte}
-                  </span>
-                  {poengTekst && (
-                    <span className={`font-bold ${farge} w-9 text-right`}>
-                      {poengTekst}
-                    </span>
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

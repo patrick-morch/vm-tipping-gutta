@@ -24,6 +24,7 @@ import { beregnPoeng } from "@/lib/types";
 import { Match, Prediction } from "@/lib/types";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
+import AlleTipsForKamp from "@/components/AlleTipsForKamp";
 
 export default function GruppeDetaljSide() {
   return (
@@ -396,6 +397,7 @@ function KampRad({
           )}
         </div>
       )}
+      {låst && <AlleTipsForKamp kamp={kamp} />}
     </div>
   );
 }
