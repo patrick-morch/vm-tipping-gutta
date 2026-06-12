@@ -15,6 +15,7 @@ import {
   nullstillAlleResultater,
   lagreFasit,
 } from "@/lib/data";
+import { synkResultaterKlient } from "@/lib/sync-klient";
 import { GRUPPER } from "@/lib/vm-data";
 import SpillerVelger from "@/components/SpillerVelger";
 import type { RonaldoVsMessi } from "@/lib/types";
@@ -63,39 +64,66 @@ function Admin() {
 
 const SYNC_WORKFLOW_URL =
   "https://github.com/patrick-morch/vm-tipping-gutta/actions/workflows/sync-resultater.yml";
-const AGGREGER_WORKFLOW_URL =
-  "https://github.com/patrick-morch/vm-tipping-gutta/actions/workflows/aggreger-poeng.yml";
 
 function SyncSeksjon() {
+  const [lagrer, setLagrer] = useState(false);
+  const [melding, setMelding] = useState<string | null>(null);
+  const [feil, setFeil] = useState(false);
+
+  async function synkNå() {
+    setLagrer(true);
+    setMelding(null);
+    setFeil(false);
+    try {
+      const r = await synkResultaterKlient();
+      setMelding(
+        `✓ Ferdig — oppdaterte ${r.oppdatert} kamp${r.oppdatert === 1 ? "" : "er"} (${r.ferdige} ferdigspilt). Ledertavla er regnet på nytt.`,
+      );
+    } catch (e) {
+      setFeil(true);
+      setMelding(`Feil: ${e instanceof Error ? e.message : "ukjent feil"}`);
+    } finally {
+      setLagrer(false);
+    }
+  }
+
   return (
     <section className="bg-surface border border-border rounded-2xl p-4 space-y-3">
       <div>
-        <h2 className="font-semibold">Auto-jobber</h2>
+        <h2 className="font-semibold">Synk &amp; poeng</h2>
         <p className="text-xs text-muted mt-0.5">
-          To GitHub Actions kjører automatisk: <strong>sync</strong> henter nye
-          resultater fra TheSportsDB hvert 10. min, og{" "}
-          <strong>aggreger poeng</strong> regner ut ledertavlen kl 10 hver morgen.
-          Trykk knappene for å trigge dem manuelt.
+          Synken kjører automatisk så ofte GitHub tillater i kampvinduet. Trykk{" "}
+          <strong>Synk nå</strong> for å hente siste resultater fra TheSportsDB
+          og regne ut ledertavla med en gang.
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <a
-          href={SYNC_WORKFLOW_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-center h-10 px-3 rounded-xl bg-elevated border border-border hover:border-primary text-sm font-semibold transition"
+      <button
+        type="button"
+        onClick={synkNå}
+        disabled={lagrer}
+        className="w-full h-11 rounded-xl bg-primary text-primaryFg font-semibold text-sm disabled:opacity-60 transition"
+      >
+        {lagrer ? "Synker…" : "🔄 Synk nå"}
+      </button>
+      {melding && (
+        <div
+          className={`text-xs rounded-xl px-3 py-2.5 border ${
+            feil
+              ? "bg-danger/10 border-danger/30 text-danger"
+              : "bg-success/10 border-success/30 text-success"
+          }`}
         >
-          Synk resultater →
-        </a>
-        <a
-          href={AGGREGER_WORKFLOW_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-center h-10 px-3 rounded-xl bg-elevated border border-border hover:border-primary text-sm font-semibold transition"
-        >
-          Aggreger poeng →
-        </a>
-      </div>
+          {melding}
+        </div>
+      )}
+      <a
+        href={SYNC_WORKFLOW_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-center text-[11px] text-muted hover:text-text underline"
+      >
+        Se GitHub-synkloggen →
+      </a>
     </section>
   );
 }

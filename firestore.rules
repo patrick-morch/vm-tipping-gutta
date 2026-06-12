@@ -93,12 +93,11 @@ service cloud.firestore {
       allow write: if erAdmin();
     }
 
-    // Aggregert ledertavle: alle kan lese, ingen klient kan skrive.
-    // Skrives kun av GitHub Actions med service account (admin SDK
-    // omgår rules — så ingen klientregel for write trenges).
+    // Aggregert ledertavle: alle kan lese. Skrives av GitHub Actions (service
+    // account omgår rules) ELLER av admin via "Synk nå"-knappen i appen.
     match /aggregert/{dok} {
       allow read: if erInnlogget();
-      allow write: if false;
+      allow write: if erAdmin();
     }
   }
 }
