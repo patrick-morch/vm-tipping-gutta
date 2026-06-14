@@ -194,7 +194,9 @@ export async function synkResultaterKlient(): Promise<{
   return { oppdatert, ferdige };
 }
 
-async function aggregerKlient() {
+export async function aggregerKlient() {
+  // Kun i produksjon — i demo regner ledertavla live fra localStorage.
+  if (!isFirebaseConfigured()) return;
   const db = fbDb();
   const [brukereSnap, kamperSnap, tipsSnap, spesialSnap, fasitSnap] =
     await Promise.all([

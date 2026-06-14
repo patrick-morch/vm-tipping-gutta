@@ -14,9 +14,10 @@ import {
   oppdaterSpesialAapenTil,
   nullstillAlleResultater,
   lagreFasit,
+  settResultat,
 } from "@/lib/data";
-import { synkResultaterKlient } from "@/lib/sync-klient";
-import { GRUPPER } from "@/lib/vm-data";
+import { synkResultaterKlient, aggregerKlient } from "@/lib/sync-klient";
+import { GRUPPER, kortLagNavn } from "@/lib/vm-data";
 import SpillerVelger from "@/components/SpillerVelger";
 import type { RonaldoVsMessi } from "@/lib/types";
 import { Bruker, Match } from "@/lib/types";
@@ -54,6 +55,8 @@ function Admin() {
       <SeedSeksjon kamper={kamper} />
 
       <SyncSeksjon />
+
+      <ManuelleResultater kamper={kamper} />
 
       <FasitSeksjon />
 
@@ -125,6 +128,115 @@ function SyncSeksjon() {
         Se GitHub-synkloggen →
       </a>
     </section>
+  );
+}
+
+function ManuelleResultater({ kamper }: { kamper: Match[] }) {
+  const nå = Date.now();
+  const startet = kamper
+    .filter((k) => k.starttid < nå)
+    .sort((a, b) => b.starttid - a.starttid);
+  const mangler = startet.filter((k) => !k.resultat);
+
+  return (
+    <section className="bg-surface border border-border rounded-2xl p-4 space-y-3">
+      <div>
+        <h2 className="font-semibold">Manuelle resultater</h2>
+        <p className="text-xs text-muted mt-0.5">
+          Fyll inn resultat selv når TheSportsDB henger etter. Lagrer og regner
+          ut poeng med en gang.
+        </p>
+      </div>
+      {startet.length === 0 ? (
+        <p className="text-xs text-muted">Ingen kamper har startet ennå.</p>
+      ) : (
+        <>
+          {mangler.length > 0 && (
+            <div className="bg-warning/10 border border-warning/30 text-warning text-xs rounded-xl px-3 py-2">
+              ⚠ {mangler.length} spilt
+              {mangler.length === 1 ? " kamp" : "e kamper"} mangler resultat.
+            </div>
+          )}
+          <div className="space-y-2">
+            {startet.map((k) => (
+              <ResultatRad key={k.id} kamp={k} />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function ResultatRad({ kamp }: { kamp: Match }) {
+  const [h, setH] = useState(kamp.resultat ? String(kamp.resultat.hjemme) : "");
+  const [b, setB] = useState(kamp.resultat ? String(kamp.resultat.borte) : "");
+  const [lagrer, setLagrer] = useState(false);
+  const [lagret, setLagret] = useState(false);
+
+  useEffect(() => {
+    if (kamp.resultat) {
+      setH(String(kamp.resultat.hjemme));
+      setB(String(kamp.resultat.borte));
+    }
+  }, [kamp.resultat]);
+
+  const mangler = !kamp.resultat;
+  const gyldig = h !== "" && b !== "" && Number(h) >= 0 && Number(b) >= 0;
+
+  async function lagre() {
+    if (!gyldig) return;
+    setLagrer(true);
+    setLagret(false);
+    try {
+      await settResultat(kamp.id, Number(h), Number(b));
+      await aggregerKlient();
+      setLagret(true);
+    } finally {
+      setLagrer(false);
+    }
+  }
+
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${
+        mangler ? "border-warning/40 bg-warning/5" : "border-border bg-elevated"
+      }`}
+    >
+      <div className="flex-1 min-w-0 text-xs truncate">
+        <span className="text-[10px] text-muted">{kamp.id}</span>{" "}
+        {kortLagNavn(kamp.hjemmelag)} – {kortLagNavn(kamp.bortelag)}
+      </div>
+      <input
+        type="number"
+        inputMode="numeric"
+        value={h}
+        onChange={(e) => {
+          setH(e.target.value.replace(/[^0-9]/g, "").slice(0, 2));
+          setLagret(false);
+        }}
+        className="w-10 h-8 text-center rounded-lg bg-bg border border-border text-sm tabular-nums"
+      />
+      <span className="text-muted text-xs">–</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        value={b}
+        onChange={(e) => {
+          setB(e.target.value.replace(/[^0-9]/g, "").slice(0, 2));
+          setLagret(false);
+        }}
+        className="w-10 h-8 text-center rounded-lg bg-bg border border-border text-sm tabular-nums"
+      />
+      <button
+        type="button"
+        onClick={lagre}
+        disabled={!gyldig || lagrer}
+        className="h-8 px-3 rounded-lg bg-primary text-primaryFg text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+      >
+        {lagrer ? "…" : lagret ? "✓ Lagret" : "Lagre"}
+      </button>
+    </div>
   );
 }
 

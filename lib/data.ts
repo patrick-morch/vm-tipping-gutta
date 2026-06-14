@@ -456,16 +456,20 @@ export async function settResultat(
   hjemme: number,
   borte: number,
 ) {
+  // Manuelt satt resultat = endelig (ferdig: true), så poeng teller med en gang.
   if (bruker()) {
     await updateDoc(doc(fbDb(), "kamper", matchId), {
       resultat: { hjemme, borte },
+      ferdig: true,
     });
     return;
   }
   const liste = localKamper.get();
   localKamper.set(
     liste.map((k) =>
-      k.id === matchId ? { ...k, resultat: { hjemme, borte } } : k,
+      k.id === matchId
+        ? { ...k, resultat: { hjemme, borte }, ferdig: true }
+        : k,
     ),
   );
 }
