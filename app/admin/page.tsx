@@ -77,7 +77,7 @@ function SyncSeksjon() {
     try {
       const r = await synkResultaterKlient();
       setMelding(
-        `✓ Ferdig — oppdaterte ${r.oppdatert} kamp${r.oppdatert === 1 ? "" : "er"} (${r.ferdige} ferdigspilt). Ledertavla er regnet på nytt.`,
+        `✓ Ledertavla er regnet ut på nytt! ${r.oppdatert} nye/endrede resultat${r.oppdatert === 1 ? "" : "er"} hentet${r.oppdatert === 0 ? " (alt var allerede oppdatert)" : ` (${r.ferdige} ferdigspilt)`}.`,
       );
     } catch (e) {
       setFeil(true);
