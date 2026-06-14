@@ -38,6 +38,7 @@ jobs:
         id: sync
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
         run: node scripts/sync-resultater.mjs
 
       # Aggreger poeng kun når en kamp ble ferdigspilt denne synken (eller

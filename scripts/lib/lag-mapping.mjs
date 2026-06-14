@@ -4,8 +4,10 @@ export const LAG_TIL_NORSK = {
   // Gruppe A
   Mexico: "Mexico",
   "South Korea": "Sør-Korea",
+  "Korea Republic": "Sør-Korea",
   "South Africa": "Sør-Afrika",
   "Czech Republic": "Tsjekkia",
+  Czechia: "Tsjekkia",
 
   // Gruppe B
   Canada: "Canada",
@@ -53,6 +55,7 @@ export const LAG_TIL_NORSK = {
   Uruguay: "Uruguay",
   "Saudi Arabia": "Saudi-Arabia",
   "Cape Verde": "Kapp Verde",
+  "Cape Verde Islands": "Kapp Verde",
 
   // Gruppe I
   France: "Frankrike",

@@ -14,6 +14,38 @@ import { tilNorsk } from "./lib/lag-mapping.mjs";
 const SPORTSDB_BASE = "https://www.thesportsdb.com/api/v1/json/3";
 const LIGA_ID = "4429"; // FIFA World Cup
 
+// Primærkilde: football-data.org (gratis nøkkel dekker VM). Har komplett
+// kampliste + ekte resultater, i motsetning til TheSportsDB-gratis som bare
+// har et fåtall kamper. Settes via FOOTBALL_DATA_TOKEN; mangler den faller vi
+// tilbake på TheSportsDB.
+const FOOTBALL_DATA_BASE = "https://api.football-data.org/v4";
+
+// football-data sin "stage" → samme tall-runde som TheSportsDB sin intRound,
+// slik at resten av løkka (knockout = round >= 4 + KNOCKOUT_RUNDE) funker likt.
+const FD_STAGE_TIL_ROUND = {
+  GROUP_STAGE: 1,
+  LAST_32: 4,
+  LAST_16: 5,
+  QUARTER_FINALS: 6,
+  SEMI_FINALS: 7,
+  THIRD_PLACE: 8,
+  FINAL: 9,
+};
+
+// football-data sin status → TheSportsDB-status som FERDIG_STATUS/IKKE_FERDIG
+// allerede forstår.
+const FD_STATUS_TIL_SPORTSDB = {
+  FINISHED: "FINISHED",
+  AWARDED: "FINISHED",
+  IN_PLAY: "IN PLAY",
+  PAUSED: "HT",
+  SCHEDULED: "NS",
+  TIMED: "NS",
+  SUSPENDED: "SUSPENDED",
+  POSTPONED: "POSTPONED",
+  CANCELLED: "CANCELLED",
+};
+
 const TRE_TIMER_MS = 3 * 60 * 60 * 1000;
 
 // Statuser fra TheSportsDB som betyr at kampen er ferdigspilt. Poeng skal
@@ -79,12 +111,56 @@ function init() {
   admin.initializeApp({ credential: admin.credential.cert(json) });
 }
 
-async function hentEvents() {
+async function hentEventsTheSportsDB() {
   const url = `${SPORTSDB_BASE}/eventsseason.php?id=${LIGA_ID}&s=2026`;
   const r = await fetch(url);
   if (!r.ok) throw new Error(`TheSportsDB svarte ${r.status}`);
   const data = await r.json();
   return data.events || [];
+}
+
+async function hentEventsFootballData(token) {
+  const url = `${FOOTBALL_DATA_BASE}/competitions/WC/matches`;
+  const r = await fetch(url, { headers: { "X-Auth-Token": token } });
+  if (!r.ok) throw new Error(`football-data svarte ${r.status}`);
+  const data = await r.json();
+  const matches = data.matches || [];
+  // Normaliser til samme felt-form som TheSportsDB-events, så tilNorske og
+  // resten av løkka kan brukes uendret.
+  return matches.map((m) => {
+    const ft = m.score?.fullTime || {};
+    return {
+      idEvent: String(m.id),
+      strHomeTeam: m.homeTeam?.name ?? "",
+      strAwayTeam: m.awayTeam?.name ?? "",
+      intHomeScore: ft.home ?? null,
+      intAwayScore: ft.away ?? null,
+      strStatus: FD_STATUS_TIL_SPORTSDB[m.status] || m.status || "",
+      // tilNorske gjør new Date(strTimestamp + "Z"), så strip trailing Z her.
+      strTimestamp: (m.utcDate || "").replace(/Z$/, ""),
+      intRound: FD_STAGE_TIL_ROUND[m.stage] ?? 1,
+    };
+  });
+}
+
+// Henter events fra primærkilden (football-data hvis nøkkel finnes), med
+// TheSportsDB som fallback hvis nøkkel mangler eller kallet feiler.
+async function hentEvents() {
+  const token = process.env.FOOTBALL_DATA_TOKEN;
+  if (token) {
+    try {
+      const ev = await hentEventsFootballData(token);
+      console.log(`Kilde: football-data.org — ${ev.length} kamper`);
+      return ev;
+    } catch (e) {
+      console.log(
+        `⚠ football-data feilet (${e.message}) — faller tilbake til TheSportsDB.`,
+      );
+    }
+  }
+  const ev = await hentEventsTheSportsDB();
+  console.log(`Kilde: TheSportsDB — ${ev.length} events`);
+  return ev;
 }
 
 function tilNorske(event) {
@@ -137,9 +213,8 @@ async function syncResultater() {
   init();
   const db = admin.firestore();
 
-  console.log("Henter VM-events fra TheSportsDB…");
+  console.log("Henter VM-events…");
   const events = await hentEvents();
-  console.log(`Fant ${events.length} events`);
 
   const snap = await db.collection("kamper").get();
   const våreKamper = Object.fromEntries(
@@ -158,6 +233,10 @@ async function syncResultater() {
   let ferdigeKamper = 0;
 
   for (const e of events) {
+    // Hopp stille over placeholder-kamper uten lag ennå (football-data legger
+    // inn alle knockout-slots på forhånd med tomme lagnavn — TBD).
+    if (!e.strHomeTeam?.trim() || !e.strAwayTeam?.trim()) continue;
+
     const norsk = tilNorske(e);
     if (!norsk) {
       console.log(`  ? Ukjent lag: ${e.strHomeTeam} vs ${e.strAwayTeam}`);
