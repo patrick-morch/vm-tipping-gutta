@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useKamper, useMineTips, lagreTip, slettTip } from "@/lib/data";
@@ -36,6 +35,7 @@ function Kamper() {
   const kamper = useKamper();
   const tips = useMineTips(user?.uid);
   const [nå, setNå] = useState(Date.now());
+  const [visAlle, setVisAlle] = useState(false);
   const frosset = bruker?.frosset === true;
   const { varsle, toast } = useFrosseToast();
 
@@ -56,13 +56,18 @@ function Kamper() {
     .sort((a, b) => a.starttid - b.starttid);
   const neste = åpne.slice(0, ANTALL);
   const utenTip = neste.filter((k) => !tips[k.id]).length;
+  // Når man trykker "Se alle" vises hele den åpne kamplisten inline,
+  // ellers bare de neste fem.
+  const synligeÅpne = visAlle ? åpne : neste;
 
   // Kamper som har startet men ikke har resultat ennå — vises som låst
   // til de er ferdigspilt og dukker opp under "Siste resultater".
   const pågår = kamper
     .filter((k) => kampErLåst(k, nå) && !k.resultat && erTippbar(k))
     .sort((a, b) => a.starttid - b.starttid);
-  const visKamper = [...pågår, ...neste].sort((a, b) => a.starttid - b.starttid);
+  const visKamper = [...pågår, ...synligeÅpne].sort(
+    (a, b) => a.starttid - b.starttid,
+  );
 
   async function lagre(id: string, h: number, b: number) {
     if (!user || !bruker || frosset) return;
@@ -180,12 +185,14 @@ function Kamper() {
           ))}
 
           {åpne.length > ANTALL && (
-            <Link
-              href="/sluttspill"
-              className="block text-center bg-surface border border-border hover:border-primary rounded-2xl py-3 text-sm font-medium transition"
+            <button
+              onClick={() => setVisAlle((v) => !v)}
+              className="block w-full text-center bg-surface border border-border hover:border-primary rounded-2xl py-3 text-sm font-medium transition"
             >
-              Se alle {åpne.length} åpne kamper →
-            </Link>
+              {visAlle
+                ? "Vis færre kamper ↑"
+                : `Se alle ${åpne.length} åpne kamper ↓`}
+            </button>
           )}
         </div>
 
