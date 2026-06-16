@@ -14,13 +14,34 @@ export default function AlleTipsForKamp({ kamp }: { kamp: Match }) {
   const tips = useKampTips(vis ? kamp.id : null);
 
   const bonus = kamp.bonusFaktor || 1;
+
+  // Hvor mange har tippet hvert resultat — brukes til å la de mest populære
+  // tippene komme øverst når kampen ikke er spilt ennå.
+  const tippNøkkel = (h: number, b: number) => `${h}-${b}`;
+  const antall = new Map<string, number>();
+  for (const t of tips) {
+    const k = tippNøkkel(t.hjemme, t.borte);
+    antall.set(k, (antall.get(k) || 0) + 1);
+  }
+
+  // Grupperer like tipp under hverandre. Når kampen er spilt: høyest poeng
+  // først, ellers de mest populære resultatene først. Innen hver gruppe
+  // sorteres det alfabetisk på navn.
   const sortert = [...tips].sort((a, b) => {
     if (kamp.resultat) {
-      return (
+      const pd =
         beregnPoeng(b, kamp.resultat, bonus) -
-        beregnPoeng(a, kamp.resultat, bonus)
-      );
+        beregnPoeng(a, kamp.resultat, bonus);
+      if (pd !== 0) return pd;
+    } else {
+      const cd =
+        antall.get(tippNøkkel(b.hjemme, b.borte))! -
+        antall.get(tippNøkkel(a.hjemme, a.borte))!;
+      if (cd !== 0) return cd;
     }
+    // Hold identiske resultat samlet.
+    if (a.hjemme !== b.hjemme) return b.hjemme - a.hjemme;
+    if (a.borte !== b.borte) return b.borte - a.borte;
     return a.navn.localeCompare(b.navn, "nb");
   });
 
@@ -41,7 +62,7 @@ export default function AlleTipsForKamp({ kamp }: { kamp: Match }) {
               Ingen har tippet denne kampen.
             </div>
           )}
-          {sortert.map((t) => {
+          {sortert.map((t, i) => {
             let poengTekst: string | null = null;
             let farge = "text-muted";
             if (kamp.resultat) {
@@ -54,10 +75,17 @@ export default function AlleTipsForKamp({ kamp }: { kamp: Match }) {
                     ? "text-accent"
                     : "text-muted";
             }
+            // Ny gruppe når resultatet skiller seg fra raden over → litt luft.
+            const forrige = sortert[i - 1];
+            const nyGruppe =
+              i > 0 &&
+              (forrige.hjemme !== t.hjemme || forrige.borte !== t.borte);
             return (
               <div
                 key={t.uid}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-elevated/50 border border-border/50 text-[11px]"
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-elevated/50 border border-border/50 text-[11px] ${
+                  nyGruppe ? "mt-2" : ""
+                }`}
               >
                 <span className="flex-1 min-w-0 truncate font-semibold">
                   {t.navn}

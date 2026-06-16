@@ -43,6 +43,8 @@ function initialer(navn: string): string {
 type RadMedStats = LedertavleRad & {
   utfall: number;
   feil: number;
+  // Delt plassering: like poeng gir samme plass (19,16,16,13 → 1,2,2,4).
+  plass: number;
 };
 
 function Ledertavle() {
@@ -119,7 +121,7 @@ function Ledertavle() {
     const aggregertMap = new Map(
       (aggregert?.rader || []).map((r) => [r.uid, r]),
     );
-    return brukere
+    const liste = brukere
       .map((b) => {
         const agg = aggregertMap.get(b.uid);
         // Produksjon: bruk det ferdig-aggregerte dokumentet (samme regler som
@@ -136,6 +138,7 @@ function Ledertavle() {
             eksakte: agg.eksakte,
             utfall: agg.utfall ?? 0,
             feil: agg.feil ?? 0,
+            plass: 0,
           };
         }
         // Demo-modus (live-beregning) eller bruker uten aggregert rad ennå (0).
@@ -157,17 +160,34 @@ function Ledertavle() {
           eksakte: stats.eksakte,
           utfall: stats.utfall,
           feil: stats.feil,
+          plass: 0,
         };
       })
       .sort((a, b) => b.poeng - a.poeng);
+
+    // Delt plassering (standard konkurranse-ranking): like poeng deler plass,
+    // og neste forskjellige poengsum hopper fram til sin faktiske indeks.
+    let forrigePoeng: number | null = null;
+    let forrigePlass = 0;
+    liste.forEach((r, i) => {
+      if (forrigePoeng === null || r.poeng !== forrigePoeng) {
+        r.plass = i + 1;
+        forrigePlass = i + 1;
+        forrigePoeng = r.poeng;
+      } else {
+        r.plass = forrigePlass;
+      }
+    });
+    return liste;
   }, [aggregert, brukere, liveStats, liveSpesial, demoModus]);
 
   const top3 = rader.slice(0, 3);
   const resten = rader.slice(3);
   const leder = top3[0]?.poeng || 0;
 
-  const minRad = rader.find((r) => r.uid === user?.uid);
-  const minPlass = rader.findIndex((r) => r.uid === user?.uid) + 1;
+  const minIndex = rader.findIndex((r) => r.uid === user?.uid);
+  const minRad = minIndex >= 0 ? rader[minIndex] : undefined;
+  const minPlass = minRad?.plass ?? 0;
 
   const [valgtSpiller, setValgtSpiller] = useState<{
     rad: RadMedStats;
@@ -207,7 +227,7 @@ function Ledertavle() {
         </div>
       )}
 
-      {minRad && minPlass > 3 && (
+      {minRad && minIndex > 2 && (
         <DinPlasseringKort
           rad={minRad}
           plass={minPlass}
@@ -228,7 +248,6 @@ function Ledertavle() {
       <ListeKort
         rader={resten}
         egenUid={user?.uid}
-        startPlass={4}
         ledersum={leder}
         onVelg={velgSpiller}
       />
@@ -315,7 +334,7 @@ function Podium({
         {har2 ? (
           <PodiumKort
             rad={har2}
-            plass={2}
+            slot={2}
             egen={har2.uid === egenUid}
             ledersum={ledersum}
             onVelg={onVelg}
@@ -326,7 +345,7 @@ function Podium({
         {har1 ? (
           <PodiumKort
             rad={har1}
-            plass={1}
+            slot={1}
             egen={har1.uid === egenUid}
             ledersum={ledersum}
             onVelg={onVelg}
@@ -337,7 +356,7 @@ function Podium({
         {har3 ? (
           <PodiumKort
             rad={har3}
-            plass={3}
+            slot={3}
             egen={har3.uid === egenUid}
             ledersum={ledersum}
             onVelg={onVelg}
@@ -352,13 +371,15 @@ function Podium({
 
 function PodiumKort({
   rad,
-  plass,
+  slot,
   egen,
   ledersum,
   onVelg,
 }: {
   rad: RadMedStats;
-  plass: 1 | 2 | 3;
+  // Fysisk pall-plass styrer medalje/høyde; tallet som vises er rad.plass
+  // (delt plassering ved poenglikhet).
+  slot: 1 | 2 | 3;
   egen: boolean;
   ledersum: number;
   onVelg: (rad: RadMedStats, plass: number) => void;
@@ -395,15 +416,15 @@ function PodiumKort({
       tag: null,
       tagKlasse: "",
     },
-  }[plass];
+  }[slot];
 
   const prosent = ledersum > 0 ? Math.round((rad.poeng / ledersum) * 100) : 100;
-  const er1 = plass === 1;
+  const er1 = slot === 1;
 
   return (
     <button
       type="button"
-      onClick={() => onVelg(rad, plass)}
+      onClick={() => onVelg(rad, rad.plass)}
       className="flex flex-col items-center justify-end min-w-0 hover:opacity-90 transition"
     >
       {/* Personen på pallen */}
@@ -458,7 +479,7 @@ function PodiumKort({
         className={`w-full rounded-t-2xl border border-b-0 flex items-start justify-center pt-1.5 ${stil.pall}`}
       >
         <span className={`font-extrabold opacity-90 ${stil.tall}`}>
-          {plass}
+          {rad.plass}
         </span>
       </div>
     </button>
@@ -468,13 +489,11 @@ function PodiumKort({
 function ListeKort({
   rader,
   egenUid,
-  startPlass,
   ledersum,
   onVelg,
 }: {
   rader: RadMedStats[];
   egenUid: string | undefined;
-  startPlass: number;
   ledersum: number;
   onVelg: (rad: RadMedStats, plass: number) => void;
 }) {
@@ -485,8 +504,8 @@ function ListeKort({
           Ingen medlemmer å vise.
         </div>
       )}
-      {rader.map((rad, i) => {
-        const plass = startPlass + i;
+      {rader.map((rad) => {
+        const plass = rad.plass;
         const egen = rad.uid === egenUid;
         const prosent = ledersum > 0 ? (rad.poeng / ledersum) * 100 : 0;
         return (
