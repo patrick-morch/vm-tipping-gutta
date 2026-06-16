@@ -1,7 +1,13 @@
-// Klient-side resultat-synk for admin-knappen "Synk nå". Henter resultater fra
-// TheSportsDB (CORS er åpent), skriver til kamper, og bygger ledertavla på nytt
-// — alt fra nettleseren med admins skrivetilgang. Speiler logikken i
-// scripts/sync-resultater.mjs + scripts/aggreger-poeng.mjs.
+// Klient-side resultat-synk for admin-knappen "Synk nå". Henter resultater,
+// skriver til kamper, og bygger ledertavla på nytt — alt fra nettleseren med
+// admins skrivetilgang. Speiler logikken i scripts/sync-resultater.mjs +
+// scripts/aggreger-poeng.mjs.
+//
+// Datakilde: football-data.org (alle 104 VM-kamper + ekte resultater) som
+// primær, TheSportsDB som fallback. NB: football-data tillater bare CORS fra
+// http://localhost — så fra produksjon (web.app) blokkeres kallet og vi faller
+// tilbake til TheSportsDB. Full kraft når admin kjører appen lokalt; i prod
+// gjør GitHub-synken hver time uansett den riktige jobben.
 
 import {
   collection,
@@ -26,7 +32,79 @@ import {
 
 const SPORTSDB = "https://www.thesportsdb.com/api/v1/json/3";
 const LIGA = "4429";
+const FOOTBALL_DATA = "https://api.football-data.org/v4";
+// Settes i .env.local (gitignored). Mangler den → kun TheSportsDB-fallback.
+const FD_TOKEN = process.env.NEXT_PUBLIC_FOOTBALL_DATA_TOKEN;
 const TRE_TIMER = 3 * 60 * 60 * 1000;
+
+// football-data "stage" → samme tall-runde som TheSportsDB intRound.
+const FD_STAGE_TIL_ROUND: Record<string, number> = {
+  GROUP_STAGE: 1,
+  LAST_32: 4,
+  LAST_16: 5,
+  QUARTER_FINALS: 6,
+  SEMI_FINALS: 7,
+  THIRD_PLACE: 8,
+  FINAL: 9,
+};
+const FD_STATUS_TIL_SPORTSDB: Record<string, string> = {
+  FINISHED: "FINISHED",
+  AWARDED: "FINISHED",
+  IN_PLAY: "IN PLAY",
+  PAUSED: "HT",
+  SCHEDULED: "NS",
+  TIMED: "NS",
+  SUSPENDED: "SUSPENDED",
+  POSTPONED: "POSTPONED",
+  CANCELLED: "CANCELLED",
+};
+
+type Event = Record<string, string>;
+
+// Normaliserer football-data-kamper til samme felt-form som TheSportsDB-events,
+// så resten av løkka kan brukes uendret.
+function fraFootballData(matches: Record<string, unknown>[]): Event[] {
+  return matches.map((m) => {
+    const score = (m.score as { fullTime?: { home?: number; away?: number } })
+      ?.fullTime;
+    const home = m.homeTeam as { name?: string } | undefined;
+    const away = m.awayTeam as { name?: string } | undefined;
+    return {
+      idEvent: String(m.id ?? ""),
+      strHomeTeam: home?.name ?? "",
+      strAwayTeam: away?.name ?? "",
+      intHomeScore: score?.home != null ? String(score.home) : "",
+      intAwayScore: score?.away != null ? String(score.away) : "",
+      strStatus:
+        FD_STATUS_TIL_SPORTSDB[m.status as string] || (m.status as string) || "",
+      // erFerdig/Date bruker strTimestamp + "Z", så strip trailing Z.
+      strTimestamp: String(m.utcDate ?? "").replace(/Z$/, ""),
+      intRound: String(FD_STAGE_TIL_ROUND[m.stage as string] ?? 1),
+    };
+  });
+}
+
+// Henter events fra football-data hvis token finnes og CORS slipper gjennom
+// (localhost), ellers TheSportsDB. Kaster aldri — faller alltid tilbake.
+async function hentEvents(): Promise<Event[]> {
+  if (FD_TOKEN) {
+    try {
+      const r = await fetch(`${FOOTBALL_DATA}/competitions/WC/matches`, {
+        headers: { "X-Auth-Token": FD_TOKEN },
+      });
+      if (r.ok) {
+        const d = await r.json();
+        return fraFootballData(d.matches || []);
+      }
+    } catch {
+      // CORS-blokkert (prod) e.l. → fall tilbake til TheSportsDB under.
+    }
+  }
+  const res = await fetch(`${SPORTSDB}/eventsseason.php?id=${LIGA}&s=2026`);
+  if (!res.ok) throw new Error(`TheSportsDB svarte ${res.status}`);
+  const data = await res.json();
+  return data.events || [];
+}
 
 const FERDIG_STATUS = new Set([
   "MATCH FINISHED", "FINISHED", "FT", "FULL TIME", "AET", "AP", "PEN",
@@ -75,10 +153,7 @@ export async function synkResultaterKlient(): Promise<{
   oppdatert: number;
   ferdige: number;
 }> {
-  const res = await fetch(`${SPORTSDB}/eventsseason.php?id=${LIGA}&s=2026`);
-  if (!res.ok) throw new Error(`TheSportsDB svarte ${res.status}`);
-  const data = await res.json();
-  const events: Record<string, string>[] = data.events || [];
+  const events = await hentEvents();
 
   const fb = isFirebaseConfigured();
   let kamper: Match[];
@@ -114,14 +189,21 @@ export async function synkResultaterKlient(): Promise<{
   };
 
   for (const e of events) {
+    // Hopp over placeholder-knockout uten lag ennå (tomme lagnavn).
+    if (!e.strHomeTeam?.trim() || !e.strAwayTeam?.trim()) continue;
     const h = tilNorsk(e.strHomeTeam);
     const b = tilNorsk(e.strAwayTeam);
     if (!h || !b) continue;
     const tid = new Date(e.strTimestamp + "Z").getTime();
-    const resultat: Skår | null =
-      e.intHomeScore != null && e.intAwayScore != null
-        ? { hjemme: Number(e.intHomeScore), borte: Number(e.intAwayScore) }
-        : null;
+    // Tom streng (football-data uten score) OG null (TheSportsDB) = ingen score.
+    const harScore =
+      e.intHomeScore != null &&
+      e.intHomeScore !== "" &&
+      e.intAwayScore != null &&
+      e.intAwayScore !== "";
+    const resultat: Skår | null = harScore
+      ? { hjemme: Number(e.intHomeScore), borte: Number(e.intAwayScore) }
+      : null;
     const ferdig = erFerdig(e.strStatus, tid, resultat != null);
     const intRound = Number(e.intRound) || 0;
 
