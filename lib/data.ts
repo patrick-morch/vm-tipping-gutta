@@ -204,12 +204,28 @@ export type LedertavleRad = {
   eksakte: number;
   utfall?: number;
   feil?: number;
+  // Delt plassering ved forrige aggregering — brukes til ▲▼-bevegelse.
+  plass?: number;
+  forrigePlass?: number | null;
+  // Antall siste ferdige kamper på rad med eksakt treff.
+  streak?: number;
+  // Siste opptil 5 tippede resultater, eldst → nyest: "E"/"U"/"B".
+  form?: string[];
+};
+// Oppsummering av siste ferdigspilte kamp-dag (regnes i aggregeringsjobben).
+export type SisteRunde = {
+  dato: string;
+  antallKamper: number;
+  beste: { navn: string; poeng: number } | null;
+  klatrer: { navn: string; plasser: number } | null;
+  bom: { navn: string; antall: number } | null;
 };
 export type AggregertLedertavle = {
   oppdatert: number;
   kamperSpilt: number;
   kamperTotalt: number;
   rader: LedertavleRad[];
+  sisteRunde?: SisteRunde | null;
 };
 
 export function useAggregertLedertavle(): AggregertLedertavle | null {

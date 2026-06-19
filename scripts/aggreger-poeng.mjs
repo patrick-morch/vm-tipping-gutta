@@ -40,14 +40,29 @@ async function aggreger() {
   const db = admin.firestore();
 
   console.log("Leser data…");
-  const [brukereSnap, kamperSnap, tipsSnap, spesialSnap, fasitSnap] =
-    await Promise.all([
-      db.collection("brukere").get(),
-      db.collection("kamper").get(),
-      db.collection("tips").get(),
-      db.collection("spesialtips").get(),
-      db.collection("fasit").doc("vm").get(),
-    ]);
+  const [
+    brukereSnap,
+    kamperSnap,
+    tipsSnap,
+    spesialSnap,
+    fasitSnap,
+    forrigeSnap,
+  ] = await Promise.all([
+    db.collection("brukere").get(),
+    db.collection("kamper").get(),
+    db.collection("tips").get(),
+    db.collection("spesialtips").get(),
+    db.collection("fasit").doc("vm").get(),
+    db.collection("aggregert").doc("ledertavle").get(),
+  ]);
+
+  // Forrige plassering per bruker → brukes til ▲▼-bevegelse på ledertavla.
+  const forrigePlassMap = new Map();
+  if (forrigeSnap.exists) {
+    for (const r of forrigeSnap.data().rader || []) {
+      if (typeof r.plass === "number") forrigePlassMap.set(r.uid, r.plass);
+    }
+  }
 
   const brukere = brukereSnap.docs.map((d) => d.data());
   const kampMap = new Map(
@@ -114,9 +129,129 @@ async function aggreger() {
       rad.spesialPoeng += POENG.ronaldoVsMessi;
   }
 
+  // Ferdigspilte kamper i kronologisk rekkefølge (for streak + rundeoppsummering).
+  const ferdige = Array.from(kampMap.entries())
+    .map(([id, k]) => ({ id, ...k }))
+    .filter((k) => k.resultat && k.ferdig !== false)
+    .sort((a, b) => a.starttid - b.starttid);
+
+  // Tips gruppert per kamp (gjenbrukes til streak og rundeoppsummering).
+  const tipsPerKamp = new Map();
+  for (const t of tips) {
+    const arr = tipsPerKamp.get(t.matchId) || [];
+    arr.push(t);
+    tipsPerKamp.set(t.matchId, arr);
+  }
+  const tipFor = (uid, matchId) =>
+    (tipsPerKamp.get(matchId) || []).find((t) => t.uid === uid) || null;
+
+  // Streak = antall siste ferdige kamper på rad der brukeren traff eksakt.
+  function beregnStreak(uid) {
+    let s = 0;
+    for (let i = ferdige.length - 1; i >= 0; i--) {
+      const k = ferdige[i];
+      const t = tipFor(uid, k.id);
+      const bonus = k.bonusFaktor || 1;
+      if (t && beregnPoeng(t, k.resultat, bonus) >= 3 * bonus) s += 1;
+      else break;
+    }
+    return s;
+  }
+
+  // Form = de siste (opptil 5) tippede ferdige kampene, eldst → nyest.
+  // "E" = eksakt, "U" = riktig utfall, "B" = bom.
+  function beregnForm(uid) {
+    const ut = [];
+    for (let i = ferdige.length - 1; i >= 0 && ut.length < 5; i--) {
+      const k = ferdige[i];
+      const t = tipFor(uid, k.id);
+      if (!t) continue;
+      const bonus = k.bonusFaktor || 1;
+      const p = beregnPoeng(t, k.resultat, bonus);
+      ut.push(p >= 3 * bonus ? "E" : p >= 1 * bonus ? "U" : "B");
+    }
+    return ut.reverse();
+  }
+
   const liste = Array.from(rader.values())
     .map((r) => ({ ...r, poeng: r.kampPoeng + r.spesialPoeng }))
     .sort((a, b) => b.poeng - a.poeng);
+
+  // Delt plassering (19,16,16,13 → 1,2,2,4) + bevegelse + streak.
+  let forrigePoeng = null;
+  let forrigePlass = 0;
+  liste.forEach((r, i) => {
+    if (forrigePoeng === null || r.poeng !== forrigePoeng) {
+      r.plass = i + 1;
+      forrigePlass = i + 1;
+      forrigePoeng = r.poeng;
+    } else {
+      r.plass = forrigePlass;
+    }
+    r.forrigePlass = forrigePlassMap.has(r.uid)
+      ? forrigePlassMap.get(r.uid)
+      : null;
+    r.streak = beregnStreak(r.uid);
+    r.form = beregnForm(r.uid);
+  });
+
+  // Rundeoppsummering: siste ferdigspilte kamp-DAG (Oslo-tid).
+  const datoKey = (ms) =>
+    new Date(ms).toLocaleDateString("sv-SE", { timeZone: "Europe/Oslo" });
+  const datoTekst = (ms) =>
+    new Date(ms).toLocaleDateString("nb-NO", {
+      timeZone: "Europe/Oslo",
+      day: "numeric",
+      month: "long",
+    });
+
+  let sisteRunde = null;
+  if (ferdige.length) {
+    const sisteKey = ferdige.reduce((mx, k) => {
+      const key = datoKey(k.starttid);
+      return key > mx ? key : mx;
+    }, "");
+    const dagensKamper = ferdige.filter((k) => datoKey(k.starttid) === sisteKey);
+
+    // Poeng og bom per bruker for dagens kamper.
+    const dag = new Map();
+    for (const k of dagensKamper) {
+      const bonus = k.bonusFaktor || 1;
+      for (const t of tipsPerKamp.get(k.id) || []) {
+        const rad = rader.get(t.uid);
+        if (!rad) continue;
+        const p = beregnPoeng(t, k.resultat, bonus);
+        const cur = dag.get(t.uid) || { navn: rad.navn, poeng: 0, bom: 0 };
+        cur.poeng += p;
+        if (p === 0) cur.bom += 1;
+        dag.set(t.uid, cur);
+      }
+    }
+    const dagListe = Array.from(dag.values());
+    const beste = dagListe.length
+      ? dagListe.reduce((a, b) => (b.poeng > a.poeng ? b : a))
+      : null;
+    const bom = dagListe.length
+      ? dagListe.reduce((a, b) => (b.bom > a.bom ? b : a))
+      : null;
+
+    // Kveldens klatrer: størst positiv plass-bevegelse.
+    let klatrer = null;
+    for (const r of liste) {
+      if (r.forrigePlass == null) continue;
+      const diff = r.forrigePlass - r.plass;
+      if (diff > 0 && (!klatrer || diff > klatrer.plasser))
+        klatrer = { navn: r.navn, plasser: diff };
+    }
+
+    sisteRunde = {
+      dato: datoTekst(dagensKamper[0].starttid),
+      antallKamper: dagensKamper.length,
+      beste: beste && beste.poeng > 0 ? { navn: beste.navn, poeng: beste.poeng } : null,
+      klatrer,
+      bom: bom && bom.bom > 0 ? { navn: bom.navn, antall: bom.bom } : null,
+    };
+  }
 
   await db
     .collection("aggregert")
@@ -128,6 +263,7 @@ async function aggreger() {
       ).length,
       kamperTotalt: kampMap.size,
       rader: liste,
+      sisteRunde,
     });
 
   console.log(

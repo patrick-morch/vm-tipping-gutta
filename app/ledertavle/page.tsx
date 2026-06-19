@@ -13,6 +13,7 @@ import {
   useSpillerTips,
   useMittSpesialTip,
   type LedertavleRad,
+  type SisteRunde,
 } from "@/lib/data";
 import { beregnPoeng, type Match, type Prediction } from "@/lib/types";
 import { POENG, flagg, kampErLåst, kortLagNavn } from "@/lib/vm-data";
@@ -45,6 +46,11 @@ type RadMedStats = LedertavleRad & {
   feil: number;
   // Delt plassering: like poeng gir samme plass (19,16,16,13 → 1,2,2,4).
   plass: number;
+  // Plass ved forrige aggregering (for ▲▼) og eksakt-streak.
+  forrigePlass: number | null;
+  streak: number;
+  // Siste opptil 5 resultater (eldst → nyest): "E"/"U"/"B".
+  form: string[];
 };
 
 function Ledertavle() {
@@ -139,6 +145,9 @@ function Ledertavle() {
             utfall: agg.utfall ?? 0,
             feil: agg.feil ?? 0,
             plass: 0,
+            forrigePlass: agg.forrigePlass ?? null,
+            streak: agg.streak ?? 0,
+            form: agg.form ?? [],
           };
         }
         // Demo-modus (live-beregning) eller bruker uten aggregert rad ennå (0).
@@ -161,6 +170,9 @@ function Ledertavle() {
           utfall: stats.utfall,
           feil: stats.feil,
           plass: 0,
+          forrigePlass: null,
+          streak: 0,
+          form: [],
         };
       })
       .sort((a, b) => b.poeng - a.poeng);
@@ -245,6 +257,10 @@ function Ledertavle() {
         />
       )}
 
+      {aggregert?.sisteRunde && (
+        <RundeOppsummering runde={aggregert.sisteRunde} />
+      )}
+
       <ListeKort
         rader={resten}
         egenUid={user?.uid}
@@ -269,6 +285,129 @@ function StatLinje({ rad }: { rad: RadMedStats }) {
       <span className="text-success">✓ {rad.eksakte}</span>
       <span className="text-accent">≈ {rad.utfall}</span>
       <span className="text-muted">✗ {rad.feil}</span>
+      {rad.streak >= 2 && (
+        <span className="text-gold" title={`${rad.streak} eksakte på rad`}>
+          🔥 {rad.streak}
+        </span>
+      )}
+      <FormPrikker form={rad.form} />
+    </div>
+  );
+}
+
+// Form-guide: siste resultater som små firkanter, eldst → nyest. Samme
+// fargekode som ✓≈✗-raden over: grønn = eksakt, blå = riktig utfall, grå = bom.
+function FormPrikker({ form }: { form: string[] }) {
+  if (!form || form.length === 0) return null;
+  const farge: Record<string, string> = {
+    E: "bg-green-500",
+    U: "bg-blue-400",
+    B: "bg-muted/30 border border-muted/40",
+  };
+  const tekst: Record<string, string> = {
+    E: "Eksakt",
+    U: "Riktig utfall",
+    B: "Bom",
+  };
+  return (
+    <span className="flex items-center gap-1 ml-auto" title="Siste form">
+      {form.map((f, i) => (
+        <span
+          key={i}
+          title={tekst[f]}
+          className={`w-2 h-2 rounded-sm ${farge[f] || "bg-muted/30"}`}
+        />
+      ))}
+    </span>
+  );
+}
+
+// Oppsummering av siste ferdigspilte kamp-dag — beste tipper, klatrer, bom-konge.
+function RundeOppsummering({ runde }: { runde: SisteRunde }) {
+  const punkter = [
+    runde.beste && {
+      ikon: "🏆",
+      etikett: "Rundens beste",
+      navn: runde.beste.navn,
+      verdi: `+${runde.beste.poeng}p`,
+      farge: "text-gold",
+    },
+    runde.klatrer && {
+      ikon: "📈",
+      etikett: "Kveldens klatrer",
+      navn: runde.klatrer.navn,
+      verdi: `▲${runde.klatrer.plasser}`,
+      farge: "text-success",
+    },
+    runde.bom && {
+      ikon: "💀",
+      etikett: "Bom-kongen",
+      navn: runde.bom.navn,
+      verdi: `${runde.bom.antall} bom`,
+      farge: "text-danger",
+    },
+  ].filter(Boolean) as {
+    ikon: string;
+    etikett: string;
+    navn: string;
+    verdi: string;
+    farge: string;
+  }[];
+
+  if (punkter.length === 0) return null;
+
+  return (
+    <div className="bg-surface border border-border rounded-2xl p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-base">🗓</span>
+        <div className="text-[10px] uppercase tracking-[0.14em] font-bold text-muted">
+          Siste runde · {runde.dato}
+        </div>
+        <span className="text-[10px] text-muted/60">
+          {runde.antallKamper} kamp{runde.antallKamper > 1 ? "er" : ""}
+        </span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {punkter.map((p) => (
+          <div
+            key={p.etikett}
+            className="bg-elevated/50 border border-border/50 rounded-xl px-3 py-2.5"
+          >
+            <div className="text-[10px] text-muted font-semibold flex items-center gap-1">
+              <span>{p.ikon}</span>
+              {p.etikett}
+            </div>
+            <div className="flex items-baseline justify-between gap-2 mt-1">
+              <span className="font-bold text-sm truncate">{p.navn}</span>
+              <span className={`text-xs font-bold flex-shrink-0 ${p.farge}`}>
+                {p.verdi}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ▲▼-bevegelse siden forrige poengoppdatering. Null forrigePlass = ny rad.
+function Bevegelse({ rad }: { rad: RadMedStats }) {
+  if (rad.forrigePlass == null) return null;
+  const diff = rad.forrigePlass - rad.plass;
+  if (diff === 0)
+    return <div className="text-[10px] leading-none text-muted/60">–</div>;
+  const opp = diff > 0;
+  return (
+    <div
+      className={`text-[10px] leading-none font-bold tabular-nums ${
+        opp ? "text-success" : "text-danger"
+      }`}
+      title={
+        opp ? `Opp ${diff} plasser` : `Ned ${Math.abs(diff)} plasser`
+      }
+    >
+      {opp ? "▲" : "▼"}
+      {Math.abs(diff)}
     </div>
   );
 }
@@ -290,8 +429,9 @@ function DinPlasseringKort({
       onClick={() => onVelg(rad, plass)}
       className="w-full text-left bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/30 rounded-2xl p-4 flex items-center gap-4 hover:border-primary/60 transition"
     >
-      <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">
-        #{plass}
+      <div className="w-12 h-12 rounded-2xl bg-primary/20 flex flex-col items-center justify-center text-primary font-bold text-lg">
+        <span className="leading-none">#{plass}</span>
+        <Bevegelse rad={rad} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-[10px] text-primary uppercase tracking-wider font-bold">
@@ -522,6 +662,7 @@ function ListeKort({
             )}
             <div className="text-center">
               <div className="text-sm font-bold text-muted">{plass}</div>
+              <Bevegelse rad={rad} />
             </div>
             <div className="min-w-0">
               <div className="font-semibold flex items-center gap-2 flex-wrap leading-tight">

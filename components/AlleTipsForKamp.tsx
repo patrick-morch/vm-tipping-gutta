@@ -45,6 +45,27 @@ export default function AlleTipsForKamp({ kamp }: { kamp: Match }) {
     return a.navn.localeCompare(b.navn, "nb");
   });
 
+  // Snitt-tipp og vanligste resultat i gjengen (regnes av de innlastede tipsene).
+  const oppsummering = (() => {
+    if (tips.length === 0) return null;
+    const snittH = Math.round(
+      tips.reduce((s, t) => s + t.hjemme, 0) / tips.length,
+    );
+    const snittB = Math.round(
+      tips.reduce((s, t) => s + t.borte, 0) / tips.length,
+    );
+    let vanligst = "";
+    let vanligstAntall = 0;
+    for (const [k, n] of antall) {
+      if (n > vanligstAntall) {
+        vanligst = k;
+        vanligstAntall = n;
+      }
+    }
+    const [vH, vB] = vanligst.split("-");
+    return { snittH, snittB, vH, vB, vanligstAntall };
+  })();
+
   return (
     <div className="mt-2 pt-2 border-t border-border">
       <button
@@ -60,6 +81,24 @@ export default function AlleTipsForKamp({ kamp }: { kamp: Match }) {
           {sortert.length === 0 && (
             <div className="text-[11px] text-muted">
               Ingen har tippet denne kampen.
+            </div>
+          )}
+          {oppsummering && (
+            <div className="flex items-center gap-3 px-2.5 py-1.5 rounded-lg bg-bg/40 text-[11px] text-muted mb-1">
+              <span>
+                Snitt:{" "}
+                <span className="font-bold text-text tabular-nums">
+                  {oppsummering.snittH}–{oppsummering.snittB}
+                </span>
+              </span>
+              <span className="text-muted/40">·</span>
+              <span>
+                Vanligst:{" "}
+                <span className="font-bold text-text tabular-nums">
+                  {oppsummering.vH}–{oppsummering.vB}
+                </span>{" "}
+                ({oppsummering.vanligstAntall})
+              </span>
             </div>
           )}
           {sortert.map((t, i) => {
