@@ -253,6 +253,37 @@ async function aggreger() {
     };
   }
 
+  // Historikk: kumulative kamp-poeng per kamp-dag, slik at utviklingsgrafen
+  // kan lese ETT dokument i stedet for alle tips (gratis-kvote).
+  const punkter = [];
+  for (const k of ferdige) {
+    const key = datoKey(k.starttid);
+    const siste = punkter[punkter.length - 1];
+    if (!siste || siste.key !== key)
+      punkter.push({ key, label: datoTekst(k.starttid), kamper: [k] });
+    else siste.kamper.push(k);
+  }
+  const løpende = new Map();
+  const historikkPoeng = {};
+  for (const b of brukere) {
+    løpende.set(b.uid, 0);
+    historikkPoeng[b.uid] = [];
+  }
+  for (const p of punkter) {
+    for (const k of p.kamper) {
+      const bonus = k.bonusFaktor || 1;
+      for (const t of tipsPerKamp.get(k.id) || []) {
+        if (!løpende.has(t.uid)) continue;
+        løpende.set(t.uid, løpende.get(t.uid) + beregnPoeng(t, k.resultat, bonus));
+      }
+    }
+    for (const b of brukere) historikkPoeng[b.uid].push(løpende.get(b.uid));
+  }
+  const historikk = {
+    punkter: punkter.map((p) => ({ key: p.key, label: p.label })),
+    poeng: historikkPoeng,
+  };
+
   await db
     .collection("aggregert")
     .doc("ledertavle")
@@ -264,6 +295,7 @@ async function aggreger() {
       kamperTotalt: kampMap.size,
       rader: liste,
       sisteRunde,
+      historikk,
     });
 
   console.log(

@@ -65,7 +65,17 @@ function Kamper() {
   const pågår = kamper
     .filter((k) => kampErLåst(k, nå) && !k.resultat && erTippbar(k))
     .sort((a, b) => a.starttid - b.starttid);
-  const visKamper = [...pågår, ...synligeÅpne].sort(
+
+  // Ferdigspilte kamper blir liggende på Kamper-siden i ~2 timer etter full
+  // tid (avspark + ~2t kamp + 2t), så forsvinner de som vanlig.
+  const SPILT_SYNLIG_MS = 4 * 3600_000;
+  const nyligSpilte = kamper
+    .filter(
+      (k) => k.resultat && erTippbar(k) && nå - k.starttid < SPILT_SYNLIG_MS,
+    )
+    .sort((a, b) => a.starttid - b.starttid);
+
+  const visKamper = [...nyligSpilte, ...pågår, ...synligeÅpne].sort(
     (a, b) => a.starttid - b.starttid,
   );
 

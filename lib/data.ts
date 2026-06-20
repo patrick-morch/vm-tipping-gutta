@@ -220,12 +220,19 @@ export type SisteRunde = {
   klatrer: { navn: string; plasser: number } | null;
   bom: { navn: string; antall: number } | null;
 };
+// Kumulativ kamp-poeng-historikk per kamp-dag → utviklingsgrafen leser dette
+// ene dokumentet i stedet for alle tips (holder oss på gratis-kvoten).
+export type Historikk = {
+  punkter: { key: string; label: string }[];
+  poeng: Record<string, number[]>;
+};
 export type AggregertLedertavle = {
   oppdatert: number;
   kamperSpilt: number;
   kamperTotalt: number;
   rader: LedertavleRad[];
   sisteRunde?: SisteRunde | null;
+  historikk?: Historikk | null;
 };
 
 export function useAggregertLedertavle(): AggregertLedertavle | null {

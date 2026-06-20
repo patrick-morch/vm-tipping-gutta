@@ -24,7 +24,7 @@ export default function Skall({ children }: { children: ReactNode }) {
     { href: "/sluttspill", tittel: "Bracket", ikon: "🏆" },
     { href: "/spesial", tittel: "Spesial", ikon: "⭐" },
     { href: "/ledertavle", tittel: "Tabell", ikon: "🏅" },
-    { href: "/poeng", tittel: "Poeng", ikon: "📖" },
+    { href: "/utvikling", tittel: "Graf", ikon: "📈" },
   ];
 
   return (
