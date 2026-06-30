@@ -224,9 +224,22 @@ export const SPESIAL_LÅS_TID = (() => {
   return Math.min(...kamper.map((k) => k.starttid)) - SPESIAL_LÅS_FØR_MS;
 })();
 
-// Tipping på en kamp låses i det kampen starter (avspark).
+// Tipping på en kamp låses i det kampen starter (avspark). Brukes til å
+// avgjøre om en kamp har startet (vise resultat, avsløre alles tips, osv.).
 export function kampErLåst(kamp: { starttid: number }, nå = Date.now()): boolean {
   return nå >= kamp.starttid;
+}
+
+// Redigering av tips holdes åpen et lite NÅDEVINDU etter avspark, så ingen
+// mister tippet på målstreken pga. treg finger, dårlig nett eller litt
+// klokke-skew. Samme grense håndheves i firestore.rules (kampAapen), så
+// klient og server er enige. Skulle et tipp likevel havne utenfor vinduet,
+// fanges det nå av server-bekreftelsen i lagreTip og vises som «ikke
+// bekreftet» i stedet for å forsvinne stille.
+export const TIPPING_NADE_MS = 60_000;
+
+export function tippingLåst(kamp: { starttid: number }, nå = Date.now()): boolean {
+  return nå >= kamp.starttid + TIPPING_NADE_MS;
 }
 
 export function spesialErLåst(nå = Date.now()): boolean {

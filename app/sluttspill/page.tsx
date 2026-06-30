@@ -9,7 +9,6 @@ import type { Match } from "@/lib/types";
 import {
   GRUPPER,
   NORGE,
-  erNorgeKamp,
   erTippbar,
   flagg,
   kortLagNavn,
@@ -189,16 +188,177 @@ const HELE_RUNDER: Runde[] = [
 
 // Grupperer knockout-kamper per runde, sortert på avspark. Brukes til å
 // fylle bracket-sporene med ekte lag etterhvert som sync-jobben oppretter dem.
-function useKnockoutKamper(): Record<string, Match[]> {
+
+// Et bracket-spor: enten et ekte lag (når gruppa er ferdig / kampen er synket)
+// eller en posisjons-etikett ("Vinner gruppe A", "2'er gruppe C", "3.-plass …").
+type Lagslot = { lag?: string; label: string; kode?: string };
+type BracketKamp = {
+  id: string;
+  runde: string;
+  a: Lagslot;
+  b: Lagslot;
+  starttid?: number;
+  resultat?: { hjemme: number; borte: number } | null;
+};
+
+// Offisielt 16-delsfinale-oppsett (VM 2026, kamp 73–88), lagt i den rekkefølgen
+// braket-treet forventer: indeks 0–7 = venstre halvdel, 8–15 = høyre halvdel.
+// Paringen mater R16/kvart/semi slik FIFA har fastsatt, så vinnerne flyter
+// riktig vei mot finalen. "3:ABCDF" = beste 3.-plass fra én av de gruppene.
+const POSISJON_R32: [string, string][] = [
+  ["2A", "2B"], // 73
+  ["1F", "2C"], // 75
+  ["1E", "3:ABCDF"], // 74
+  ["1I", "3:CDFGH"], // 77
+  ["2K", "2L"], // 83
+  ["1H", "2J"], // 84
+  ["1D", "3:BEFIJ"], // 81
+  ["1G", "3:AEHIJ"], // 82
+  ["1C", "2F"], // 76
+  ["2E", "2I"], // 78
+  ["1A", "3:CEFHI"], // 79
+  ["1L", "3:EHIJK"], // 80
+  ["1J", "2H"], // 86
+  ["2D", "2G"], // 88
+  ["1B", "3:EFGIJ"], // 85
+  ["1K", "3:DEIJL"], // 87
+];
+
+type GruppeStatus = {
+  ferdig: boolean;
+  tabell: ReturnType<typeof beregnTabell>;
+};
+
+// Slår opp ekte lag for en posisjonskode hvis gruppa er ferdigspilt, ellers
+// returnerer den bare etiketten. 3.-plass-koden kan ikke knyttes til ett lag
+// før hele gruppespillet er over (FIFA-tabell med 495 kombinasjoner), så den
+// vises alltid som etikett.
+function lagFraKode(
+  kode: string,
+  grupper: Map<string, GruppeStatus>,
+  // Gruppebokstav → 3.-plass-lag, kun for de 8 som faktisk er videre. Tom til
+  // hele gruppespillet er ferdig.
+  kvalifiserteTreere: Map<string, string>,
+): Lagslot {
+  if (kode.startsWith("3:")) {
+    const kandidatGrupper = kode.slice(2).split("");
+    // Smal inn til de gruppene hvis 3.-plass faktisk gikk videre.
+    const videre = kandidatGrupper.filter((g) => kvalifiserteTreere.has(g));
+    // Når bare ÉN av kandidatgruppene er blant de 8 beste treerne, er sporet
+    // entydig bestemt → vis det ekte laget. (Den fulle FIFA-fordelingen av
+    // treere på spor kommer uansett inn automatisk når trekningen synkes.)
+    if (kvalifiserteTreere.size > 0 && videre.length === 1) {
+      return {
+        lag: kvalifiserteTreere.get(videre[0]),
+        label: `3.-plass gruppe ${videre[0]}`,
+        kode: "3.",
+      };
+    }
+    const vis = videre.length > 0 ? videre : kandidatGrupper;
+    return { label: `3.-plass (${vis.join("/")})`, kode: "3." };
+  }
+  const pos = Number(kode[0]);
+  const bokstav = kode[1];
+  const label =
+    pos === 1 ? `Vinner gruppe ${bokstav}` : `2'er gruppe ${bokstav}`;
+  const g = grupper.get(bokstav);
+  if (g?.ferdig && g.tabell[pos - 1]) {
+    return { lag: g.tabell[pos - 1].lag, label, kode };
+  }
+  return { label, kode };
+}
+
+// De 8 beste 3.-plassene (av 12 grupper) går videre i 48-lags-formatet.
+// Returnerer gruppebokstav → lagnavn, men bare når ALLE grupper er ferdige,
+// så vi ikke gjetter mens tabellene fortsatt endrer seg.
+function beregnKvalifiserteTreere(
+  grupper: Map<string, GruppeStatus>,
+): Map<string, string> {
+  const ut = new Map<string, string>();
+  const alleFerdig = [...grupper.values()].every((g) => g.ferdig);
+  if (!alleFerdig) return ut;
+  [...grupper.entries()]
+    .map(([id, g]) => ({ id, rad: g.tabell[2] }))
+    .filter((x) => !!x.rad)
+    .sort(
+      (a, b) =>
+        b.rad.poeng - a.rad.poeng ||
+        b.rad.målDiff - a.rad.målDiff ||
+        b.rad.målFor - a.rad.målFor,
+    )
+    .slice(0, 8)
+    .forEach((t) => ut.set(t.id, t.rad.lag));
+  return ut;
+}
+
+// Bygger hele braketten: 16-delsfinalen projiseres fra gruppetabellene (lag
+// fylles inn etterhvert som grupper blir ferdige), dypere runder står som TBD
+// til de spilles. Ekte synkede knockout-kamper overstyrer projeksjonen.
+function useBracket(): Record<string, BracketKamp[]> {
   const kamper = useKamper();
   return useMemo(() => {
-    const m: Record<string, Match[]> = {};
+    const grupper = new Map<string, GruppeStatus>();
+    GRUPPER.forEach((g) => {
+      const gk = kamper.filter((k) => k.runde === `Gruppe ${g.id}`);
+      const spilt = gk.filter((k) => k.resultat).length;
+      grupper.set(g.id, {
+        ferdig: gk.length > 0 && spilt === gk.length,
+        tabell: beregnTabell(g.lag, gk),
+      });
+    });
+
+    const kvalifiserteTreere = beregnKvalifiserteTreere(grupper);
+
+    const synket: Record<string, Match[]> = {};
     for (const k of kamper) {
       if (k.runde.startsWith("Gruppe")) continue;
-      (m[k.runde] ||= []).push(k);
+      (synket[k.runde] ||= []).push(k);
     }
-    Object.values(m).forEach((l) => l.sort((a, b) => a.starttid - b.starttid));
-    return m;
+    Object.values(synket).forEach((l) =>
+      l.sort((a, b) => a.starttid - b.starttid),
+    );
+
+    const fraEkte = (m: Match): BracketKamp => ({
+      id: m.id,
+      runde: m.runde,
+      a: { lag: m.hjemmelag, label: "" },
+      b: { lag: m.bortelag, label: "" },
+      starttid: m.starttid,
+      resultat: m.resultat ?? null,
+    });
+
+    const out: Record<string, BracketKamp[]> = {};
+    out["32-delsfinale"] = POSISJON_R32.map(([ca, cb], i) => {
+      const ekte = synket["32-delsfinale"]?.[i];
+      if (ekte) return fraEkte(ekte);
+      return {
+        id: `r32-${i}`,
+        runde: "32-delsfinale",
+        a: lagFraKode(ca, grupper, kvalifiserteTreere),
+        b: lagFraKode(cb, grupper, kvalifiserteTreere),
+      };
+    });
+
+    const tomme: [string, number][] = [
+      ["16-delsfinale", 8],
+      ["Kvartfinale", 4],
+      ["Semifinale", 2],
+      ["Finale", 1],
+      ["Bronsefinale", 1],
+    ];
+    for (const [kort, n] of tomme) {
+      out[kort] = Array.from({ length: n }).map((_, i) => {
+        const ekte = synket[kort]?.[i];
+        if (ekte) return fraEkte(ekte);
+        return {
+          id: `${kort}-${i}`,
+          runde: kort,
+          a: { label: "" },
+          b: { label: "" },
+        };
+      });
+    }
+    return out;
   }, [kamper]);
 }
 
@@ -220,7 +380,8 @@ function KnockoutFane() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="bg-surface border border-border rounded-2xl p-3 text-center text-xs text-muted">
-          Braketten fylles inn automatisk så snart lag og kamptider er klare.
+          Lag fylles inn fra ferdigspilte grupper. Motstandere og kamptider
+          kommer etterhvert.
         </div>
         <Link
           href="/kamper"
@@ -242,19 +403,27 @@ function KvalifisertNå() {
     const grupper = GRUPPER.map((g) => {
       const gk = kamper.filter((k) => k.runde === `Gruppe ${g.id}`);
       const spilt = gk.filter((k) => k.resultat).length;
-      return { id: g.id, spilt, total: gk.length, tabell: beregnTabell(g.lag, gk) };
+      return {
+        id: g.id,
+        spilt,
+        total: gk.length,
+        // Ferdig = alle gruppekampene har resultat → de to øverste er låst.
+        ferdig: gk.length > 0 && spilt === gk.length,
+        tabell: beregnTabell(g.lag, gk),
+      };
     });
     const spiltTotalt = grupper.reduce((s, g) => s + g.spilt, 0);
     const totalKamper = grupper.reduce((s, g) => s + g.total, 0);
+    const ferdigeGrupper = grupper.filter((g) => g.ferdig).length;
     // 8 beste treere går videre i 48-lags-formatet
     const treere = grupper
       .filter((g) => g.spilt > 0)
-      .map((g) => ({ gruppe: g.id, ...g.tabell[2] }))
+      .map((g) => ({ gruppe: g.id, ferdig: g.ferdig, ...g.tabell[2] }))
       .sort(
         (a, b) =>
           b.poeng - a.poeng || b.målDiff - a.målDiff || b.målFor - a.målFor,
       );
-    return { grupper, spiltTotalt, totalKamper, treere };
+    return { grupper, spiltTotalt, totalKamper, treere, ferdigeGrupper };
   }, [kamper]);
 
   const brakettFull =
@@ -267,10 +436,16 @@ function KvalifisertNå() {
       <div className="relative">
         <div className="flex items-baseline justify-between gap-2 mb-3">
           <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-primary">
-            Kvalifisert akkurat nå
+            Videre til knockout
           </h3>
           <span className="text-[10px] text-muted">
-            prognose · {data.spiltTotalt}/{data.totalKamper} kamper spilt
+            {data.ferdigeGrupper > 0 && (
+              <span className="text-success font-semibold">
+                {data.ferdigeGrupper}/{data.grupper.length} grupper klare
+              </span>
+            )}
+            {data.ferdigeGrupper > 0 && " · "}
+            {data.spiltTotalt}/{data.totalKamper} kamper spilt
           </span>
         </div>
 
@@ -278,15 +453,25 @@ function KvalifisertNå() {
           {data.grupper.map((g) => (
             <div
               key={g.id}
-              className="bg-elevated/60 border border-border rounded-xl px-2.5 py-2 min-w-0"
+              className={`rounded-xl px-2.5 py-2 min-w-0 border ${
+                g.ferdig
+                  ? "bg-success/5 border-success/40"
+                  : "bg-elevated/60 border-border"
+              }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[10px] font-bold text-muted">
                   GRUPPE {g.id}
                 </span>
-                <span className="text-[9px] text-muted/70 tabular-nums">
-                  {g.spilt}/{g.total}
-                </span>
+                {g.ferdig ? (
+                  <span className="text-[9px] font-bold text-success">
+                    ✓ KLAR
+                  </span>
+                ) : (
+                  <span className="text-[9px] text-muted/70 tabular-nums">
+                    {g.spilt}/{g.total}
+                  </span>
+                )}
               </div>
               {g.spilt === 0 ? (
                 <div className="text-[11px] text-muted/60 py-1">
@@ -311,6 +496,11 @@ function KvalifisertNå() {
                     <span className="truncate font-medium">
                       {kortLagNavn(s.lag)}
                     </span>
+                    {g.ferdig && (
+                      <span className="ml-auto flex-shrink-0 text-[8px] font-bold uppercase tracking-wider text-success/80">
+                        videre
+                      </span>
+                    )}
                   </div>
                 ))
               )}
@@ -337,6 +527,9 @@ function KvalifisertNå() {
                 >
                   {flagg(t.lag)} {kortLagNavn(t.lag)}
                   <span className="text-muted/70 tabular-nums">{t.poeng}p</span>
+                  {t.ferdig && i < 8 && (
+                    <span className="text-success font-bold">✓</span>
+                  )}
                 </span>
               ))}
             </div>
@@ -350,7 +543,7 @@ function KvalifisertNå() {
 function BracketDesktop() {
   const venstre = RUNDER_YTRE_TIL_INDRE;
   const høyre = [...RUNDER_YTRE_TIL_INDRE].reverse();
-  const knockout = useKnockoutKamper();
+  const bracket = useBracket();
 
   return (
     <div className="relative bg-gradient-to-br from-surface via-surface to-elevated/30 border border-border rounded-3xl p-4 overflow-x-auto">
@@ -362,13 +555,13 @@ function BracketDesktop() {
         style={{ "--rad": RAD } as CSSProperties}
       >
         {/* Venstre halvdel: ytre → indre (flyt mot høyre) */}
-        <Halvdel side="venstre" runder={venstre} knockout={knockout} />
+        <Halvdel side="venstre" runder={venstre} bracket={bracket} />
 
         {/* Sentrum: pokal, finale og bronse */}
         <SentrumKolonne />
 
         {/* Høyre halvdel: indre → ytre (flyt mot venstre) */}
-        <Halvdel side="høyre" runder={høyre} knockout={knockout} />
+        <Halvdel side="høyre" runder={høyre} bracket={bracket} />
       </div>
     </div>
   );
@@ -405,11 +598,11 @@ function KnockoutMobil() {
 // VG-stil bracket-kart: begge halvdeler konvergerer mot finalen i midten.
 // 9 kolonner — flagg-kort uten navn; trykk på en kamp for detaljer.
 function KartMobil() {
-  const knockout = useKnockoutKamper();
+  const bracket = useBracket();
   const fasit = useFasit();
-  const [valgt, setValgt] = useState<Match | null>(null);
+  const [valgt, setValgt] = useState<BracketKamp | null>(null);
 
-  const hent = (runde: string, i: number) => knockout[runde]?.[i];
+  const hent = (runde: string, i: number) => bracket[runde]?.[i];
   const finale = hent("Finale", 0);
   const bronse = hent("Bronsefinale", 0);
 
@@ -565,29 +758,39 @@ function KartMobil() {
   );
 }
 
-function KampDetalj({ kamp }: { kamp: Match }) {
-  const d = new Date(kamp.starttid);
-  const tid = `${d.getDate()}/${d.getMonth() + 1} kl ${d.toLocaleTimeString(
-    "nb-NO",
-    { hour: "2-digit", minute: "2-digit" },
-  )}`;
+function formatTid(ms: number) {
+  const d = new Date(ms);
+  return `${d.getDate()}/${d.getMonth() + 1} kl ${d.toLocaleTimeString("nb-NO", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+}
+
+function slotFlagg(s: Lagslot) {
+  return s.lag ? flagg(s.lag) : "🏳";
+}
+function slotNavn(s: Lagslot) {
+  return s.lag ? kortLagNavn(s.lag) : s.label || "TBD";
+}
+
+function KampDetalj({ kamp }: { kamp: BracketKamp }) {
   const res = kamp.resultat;
+  const tid = kamp.starttid
+    ? formatTid(kamp.starttid)
+    : "Kamptid ikke satt";
   return (
     <div className="text-[11px] leading-tight">
       <span className="font-semibold">
-        {flagg(kamp.hjemmelag)} {kortLagNavn(kamp.hjemmelag)}
+        {slotFlagg(kamp.a)} {slotNavn(kamp.a)}
       </span>
       <span className="font-bold text-text mx-1.5 tabular-nums">
         {res ? `${res.hjemme}–${res.borte}` : "–"}
       </span>
       <span className="font-semibold">
-        {kortLagNavn(kamp.bortelag)} {flagg(kamp.bortelag)}
+        {slotNavn(kamp.b)} {slotFlagg(kamp.b)}
       </span>
       <div className="text-[10px] text-muted mt-0.5">
         {kamp.runde} · {res ? "ferdigspilt" : tid}
-        {kamp.bonusFaktor > 1 && (
-          <span className="text-norge font-bold ml-1">×2 poeng</span>
-        )}
       </div>
     </div>
   );
@@ -600,12 +803,14 @@ function MiniKamp({
   valgt,
   onVelg,
 }: {
-  kamp?: Match;
+  kamp?: BracketKamp;
   gull?: boolean;
   valgt?: boolean;
-  onVelg: (k: Match) => void;
+  onVelg: (k: BracketKamp) => void;
 }) {
-  const norge = kamp ? erNorgeKamp(kamp) : false;
+  const norge = kamp ? kamp.a.lag === NORGE || kamp.b.lag === NORGE : false;
+  // Et spor regnes som "fylt" hvis minst ett ekte lag er på plass.
+  const fylt = !!(kamp && (kamp.a.lag || kamp.b.lag));
   const res = kamp?.resultat;
   const vinner = res
     ? res.hjemme > res.borte
@@ -628,41 +833,47 @@ function MiniKamp({
             : norge
               ? "border-norge/60 shadow-[0_0_10px_rgb(var(--norge)/0.3)]"
               : "border-border"
-      } ${kamp ? "" : "opacity-50"}`}
+      } ${fylt ? "" : "opacity-60"}`}
     >
-      <MiniLag lag={kamp?.hjemmelag} vant={vinner === "h"} medSkille />
-      <MiniLag lag={kamp?.bortelag} vant={vinner === "b"} />
+      <MiniLag slot={kamp?.a} vant={vinner === "h"} medSkille />
+      <MiniLag slot={kamp?.b} vant={vinner === "b"} />
     </button>
   );
 }
 
 function MiniLag({
-  lag,
+  slot,
   vant,
   medSkille,
 }: {
-  lag?: string;
+  slot?: Lagslot;
   vant?: boolean;
   medSkille?: boolean;
 }) {
+  const innhold = slot?.lag ? (
+    flagg(slot.lag)
+  ) : slot?.kode ? (
+    <span className="text-[8px] font-bold text-muted/80">{slot.kode}</span>
+  ) : (
+    "·"
+  );
   return (
     <span
       className={`h-[19px] flex items-center justify-center text-[13px] leading-none ${
         medSkille ? "border-b border-border/50" : ""
-      } ${vant ? "bg-primary/20" : ""} ${lag ? "" : "opacity-30"}`}
+      } ${vant ? "bg-primary/20" : ""} ${slot?.lag ? "" : "opacity-40"}`}
     >
-      {lag ? flagg(lag) : "·"}
+      {innhold}
     </span>
   );
 }
 
 // Mobil: rundene stablet vertikalt, kamper i kompakt 2-kolonners rutenett.
 function RunderMobil() {
-  const kamper = useKamper();
   const fasit = useFasit();
-  const knockout = useKnockoutKamper();
-  const finale = kamper.find((k) => k.runde === "Finale");
-  const bronse = kamper.find((k) => k.runde === "Bronsefinale");
+  const bracket = useBracket();
+  const finale = bracket["Finale"]?.[0];
+  const bronse = bracket["Bronsefinale"]?.[0];
 
   return (
     <div className="space-y-3">
@@ -679,7 +890,7 @@ function RunderMobil() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {Array.from({ length: r.kamper }).map((_, i) => (
-              <KampKort key={i} kamp={knockout[r.kort]?.[i]} visTid />
+              <SlotKort key={i} kamp={bracket[r.kort]?.[i]} visTid />
             ))}
           </div>
         </div>
@@ -718,11 +929,11 @@ function RunderMobil() {
 function Halvdel({
   side,
   runder,
-  knockout,
+  bracket,
 }: {
   side: "venstre" | "høyre";
   runder: Runde[];
-  knockout: Record<string, Match[]>;
+  bracket: Record<string, BracketKamp[]>;
 }) {
   const erVenstre = side === "venstre";
   // Indre side = mot sentrum. Ytre side = mot kanten.
@@ -778,8 +989,8 @@ function Halvdel({
                       />
                     </>
                   )}
-                  <KampKort
-                    kamp={knockout[r.kort]?.[erVenstre ? i : r.kamper + i]}
+                  <SlotKort
+                    kamp={bracket[r.kort]?.[erVenstre ? i : r.kamper + i]}
                   />
                 </div>
               ))}
@@ -792,10 +1003,10 @@ function Halvdel({
 }
 
 function SentrumKolonne() {
-  const kamper = useKamper();
   const fasit = useFasit();
-  const finale = kamper.find((k) => k.runde === "Finale");
-  const bronse = kamper.find((k) => k.runde === "Bronsefinale");
+  const bracket = useBracket();
+  const finale = bracket["Finale"]?.[0];
+  const bronse = bracket["Bronsefinale"]?.[0];
 
   return (
     <div className="flex-none w-[150px] xl:w-[168px] px-1">
@@ -821,15 +1032,11 @@ function SentrumKolonne() {
   );
 }
 
-function BronseKort({
-  kamp,
-}: {
-  kamp?: { hjemmelag: string; bortelag: string; resultat?: { hjemme: number; borte: number } | null };
-}) {
-  const lagH = kamp ? kortLagNavn(kamp.hjemmelag) : "TBD";
-  const lagB = kamp ? kortLagNavn(kamp.bortelag) : "TBD";
-  const fH = kamp ? flagg(kamp.hjemmelag) : "🏳";
-  const fB = kamp ? flagg(kamp.bortelag) : "🏳";
+function BronseKort({ kamp }: { kamp?: BracketKamp }) {
+  const lagH = kamp ? slotNavn(kamp.a) : "TBD";
+  const lagB = kamp ? slotNavn(kamp.b) : "TBD";
+  const fH = kamp ? slotFlagg(kamp.a) : "🏳";
+  const fB = kamp ? slotFlagg(kamp.b) : "🏳";
   const scoreH = kamp?.resultat?.hjemme ?? "–";
   const scoreB = kamp?.resultat?.borte ?? "–";
 
@@ -860,44 +1067,77 @@ function BronseKort({
   );
 }
 
-// Én lag-rad i et bracket-kort.
-function LagRad({ medSkille }: { medSkille?: boolean }) {
+// Én bracket-rad: ekte lag (flagg + navn + score) hvis kjent, ellers en
+// posisjons-etikett ("Vinner gruppe A" / "3.-plass …") eller TBD.
+function SlotRad({
+  slot,
+  score,
+  vant,
+  medSkille,
+}: {
+  slot?: Lagslot;
+  score?: number;
+  vant?: boolean;
+  medSkille?: boolean;
+}) {
+  const lag = slot?.lag;
   return (
     <div
       className={`flex items-center justify-between gap-2 px-2.5 py-1.5 ${
         medSkille ? "border-b border-border/40" : ""
       }`}
     >
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <div className="w-4 h-4 rounded-full bg-border/60 border border-border flex-shrink-0" />
-        <span className="text-[11px] text-muted truncate">TBD</span>
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        {lag ? (
+          <>
+            <span className="text-sm flex-shrink-0">{flagg(lag)}</span>
+            <span
+              className={`text-[11px] truncate ${
+                vant
+                  ? "font-bold"
+                  : score != null
+                    ? "text-muted"
+                    : `font-medium ${lag === NORGE ? "text-norge" : ""}`
+              }`}
+            >
+              {kortLagNavn(lag)}
+            </span>
+          </>
+        ) : (
+          <>
+            <div className="w-4 h-4 rounded-full bg-border/60 border border-border flex-shrink-0" />
+            <span className="text-[11px] text-muted/80 truncate">
+              {slot?.label || "TBD"}
+            </span>
+          </>
+        )}
       </div>
-      <span className="text-xs text-muted font-mono tabular-nums w-4 text-right">
-        –
+      <span
+        className={`text-xs font-mono tabular-nums w-4 text-right ${
+          vant ? "font-bold" : "text-muted"
+        }`}
+      >
+        {score ?? "–"}
       </span>
     </div>
   );
 }
 
-// Bracket-kort: TBD-placeholder til kampen er synket inn, deretter ekte
-// lag, kamptid og resultat. `visTid` brukes i mobil-visningen der det er
-// plass til en tidslinje; på desktop ligger tiden i title-tooltip.
-function KampKort({ kamp, visTid }: { kamp?: Match; visTid?: boolean }) {
+// Bracket-kort: viser de to sporene (lag eller etikett), kamptid og resultat.
+// `visTid` brukes i mobil-visningen der det er plass til en tidslinje; på
+// desktop ligger tiden i title-tooltip.
+function SlotKort({ kamp, visTid }: { kamp?: BracketKamp; visTid?: boolean }) {
   if (!kamp) {
     return (
-      <div className="w-full rounded-lg overflow-hidden bg-elevated border border-border hover:border-primary/40 transition-colors">
-        <LagRad medSkille />
-        <LagRad />
+      <div className="w-full rounded-lg overflow-hidden bg-elevated border border-border">
+        <SlotRad medSkille />
+        <SlotRad />
       </div>
     );
   }
 
-  const d = new Date(kamp.starttid);
-  const tidTekst = `${d.getDate()}/${d.getMonth() + 1} kl ${d.toLocaleTimeString(
-    "nb-NO",
-    { hour: "2-digit", minute: "2-digit" },
-  )}`;
-  const norge = erNorgeKamp(kamp);
+  const tidTekst = kamp.starttid ? formatTid(kamp.starttid) : null;
+  const norge = kamp.a.lag === NORGE || kamp.b.lag === NORGE;
   const res = kamp.resultat;
   const vinner = res
     ? res.hjemme > res.borte
@@ -909,67 +1149,27 @@ function KampKort({ kamp, visTid }: { kamp?: Match; visTid?: boolean }) {
 
   return (
     <div
-      title={`${kamp.hjemmelag} – ${kamp.bortelag} · ${tidTekst}`}
+      title={`${slotNavn(kamp.a)} – ${slotNavn(kamp.b)}${
+        tidTekst ? ` · ${tidTekst}` : ""
+      }`}
       className={`w-full rounded-lg overflow-hidden bg-elevated border transition-colors ${
         norge
           ? "border-norge/50 shadow-[0_0_16px_rgb(var(--norge)/0.15)]"
           : "border-border hover:border-primary/40"
       }`}
     >
-      {visTid && !res && (
+      {visTid && tidTekst && !res && (
         <div className="px-2.5 pt-1.5 text-[9px] font-semibold text-muted/80 tabular-nums">
           {tidTekst}
         </div>
       )}
-      <EkteLagRad
-        lag={kamp.hjemmelag}
+      <SlotRad
+        slot={kamp.a}
         score={res?.hjemme}
         vant={vinner === "h"}
         medSkille
       />
-      <EkteLagRad lag={kamp.bortelag} score={res?.borte} vant={vinner === "b"} />
-    </div>
-  );
-}
-
-function EkteLagRad({
-  lag,
-  score,
-  vant,
-  medSkille,
-}: {
-  lag: string;
-  score?: number;
-  vant?: boolean;
-  medSkille?: boolean;
-}) {
-  return (
-    <div
-      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 ${
-        medSkille ? "border-b border-border/40" : ""
-      }`}
-    >
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        <span className="text-sm flex-shrink-0">{flagg(lag)}</span>
-        <span
-          className={`text-[11px] truncate ${
-            vant
-              ? "font-bold"
-              : score != null
-                ? "text-muted"
-                : `font-medium ${lag === NORGE ? "text-norge" : ""}`
-          }`}
-        >
-          {kortLagNavn(lag)}
-        </span>
-      </div>
-      <span
-        className={`text-xs font-mono tabular-nums w-4 text-right ${
-          vant ? "font-bold" : "text-muted"
-        }`}
-      >
-        {score ?? "–"}
-      </span>
+      <SlotRad slot={kamp.b} score={res?.borte} vant={vinner === "b"} />
     </div>
   );
 }
@@ -1004,15 +1204,11 @@ function FinaleRad({
 }
 
 // Finale-kampen i sentrum — gull-fremhevet. Synker med live kampdata.
-function FinaleKort({
-  kamp,
-}: {
-  kamp?: { hjemmelag: string; bortelag: string; resultat?: { hjemme: number; borte: number } | null };
-}) {
-  const lagH = kamp ? kortLagNavn(kamp.hjemmelag) : "TBD";
-  const lagB = kamp ? kortLagNavn(kamp.bortelag) : "TBD";
-  const fH = kamp ? flagg(kamp.hjemmelag) : "🏳";
-  const fB = kamp ? flagg(kamp.bortelag) : "🏳";
+function FinaleKort({ kamp }: { kamp?: BracketKamp }) {
+  const lagH = kamp ? slotNavn(kamp.a) : "TBD";
+  const lagB = kamp ? slotNavn(kamp.b) : "TBD";
+  const fH = kamp ? slotFlagg(kamp.a) : "🏳";
+  const fB = kamp ? slotFlagg(kamp.b) : "🏳";
   const scoreH = kamp?.resultat?.hjemme ?? "–";
   const scoreB = kamp?.resultat?.borte ?? "–";
 

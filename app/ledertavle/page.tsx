@@ -217,19 +217,60 @@ function Ledertavle() {
       })
     : null;
 
+  const [deler, setDeler] = useState(false);
+  async function håndterDel() {
+    if (deler || rader.length === 0) return;
+    setDeler(true);
+    try {
+      const { delLedertavle } = await import("@/lib/del-ledertavle");
+      // VM 2026 har 104 kamper totalt (72 gruppe + 32 sluttspill), så vi viser
+      // spilte mot hele turneringen — ikke bare antall kamper i basen ennå.
+      const VM_KAMPER_TOTALT = 104;
+      await delLedertavle({
+        rader: rader.slice(0, 8).map((r) => ({
+          plass: r.plass,
+          navn: r.navn,
+          poeng: r.poeng,
+          egen: r.uid === user?.uid,
+        })),
+        undertittel: aggregert
+          ? `${aggregert.kamperSpilt} av ${VM_KAMPER_TOTALT} kamper spilt`
+          : `${rader.length} medlemmer`,
+        minPlass: minRad ? minPlass : undefined,
+        minNavn: minRad?.navn,
+        minPoeng: minRad?.poeng,
+        total: rader.length,
+      });
+    } finally {
+      setDeler(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
-      <SideHeader
-        tittel="Ledertavle"
-        undertittel={
-          <>
-            {aggregert
-              ? `${aggregert.kamperSpilt}/${aggregert.kamperTotalt} kamper spilt`
-              : `${rader.length} medlemmer`}
-            {oppdatert && <span className="ml-1">· oppdatert {oppdatert}</span>}
-          </>
-        }
-      />
+      <div className="flex items-start justify-between gap-3">
+        <SideHeader
+          tittel="Ledertavle"
+          undertittel={
+            <>
+              {aggregert
+                ? `${aggregert.kamperSpilt}/${aggregert.kamperTotalt} kamper spilt`
+                : `${rader.length} medlemmer`}
+              {oppdatert && (
+                <span className="ml-1">· oppdatert {oppdatert}</span>
+              )}
+            </>
+          }
+        />
+        <button
+          type="button"
+          onClick={håndterDel}
+          disabled={deler || rader.length === 0}
+          className="flex-shrink-0 mt-1 inline-flex items-center gap-1.5 rounded-xl bg-surface border border-border hover:border-primary px-3 py-2 text-xs font-semibold transition active:scale-[0.97] disabled:opacity-50"
+        >
+          {deler ? "Lager…" : "📸 Del"}
+        </button>
+      </div>
 
       {!aggregert && !demoModus && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-xs rounded-2xl px-3 py-2.5 flex items-center gap-2">

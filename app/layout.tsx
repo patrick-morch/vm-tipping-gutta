@@ -4,8 +4,22 @@ import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: "VM-tipping",
-  description: "Klubbens VM-tipping",
+  metadataBase: new URL("https://vm-tipping-gutta.web.app"),
+  title: "VM-tipping — Gutta",
+  description: "Klubbens VM-tipping. Tipp kampene, følg ledertavla.",
+  openGraph: {
+    title: "VM-tipping — Gutta",
+    description: "Tipp kampene, følg ledertavla og sluttspillet.",
+    url: "https://vm-tipping-gutta.web.app",
+    siteName: "VM-tipping — Gutta",
+    locale: "nb_NO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "VM-tipping — Gutta",
+    description: "Tipp kampene, følg ledertavla og sluttspillet.",
+  },
 };
 
 export default function RootLayout({

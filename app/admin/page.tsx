@@ -7,6 +7,7 @@ import {
   useKamper,
   useBrukere,
   useFasit,
+  useSpillerTips,
   seedAlleKamper,
   slettBruker,
   oppdaterBrukerNavn,
@@ -14,10 +15,11 @@ import {
   oppdaterSpesialAapenTil,
   nullstillAlleResultater,
   lagreFasit,
+  lagreTip,
   settResultat,
 } from "@/lib/data";
 import { synkResultaterKlient, aggregerKlient } from "@/lib/sync-klient";
-import { GRUPPER, kortLagNavn } from "@/lib/vm-data";
+import { GRUPPER, kortLagNavn, tippingLåst } from "@/lib/vm-data";
 import SpillerVelger from "@/components/SpillerVelger";
 import type { RonaldoVsMessi } from "@/lib/types";
 import { Bruker, Match } from "@/lib/types";
@@ -57,6 +59,8 @@ function Admin() {
       <SyncSeksjon />
 
       <ManuelleResultater kamper={kamper} />
+
+      <EtterregistrerTips kamper={kamper} brukere={brukere} />
 
       <FasitSeksjon />
 
@@ -237,6 +241,192 @@ function ResultatRad({ kamp }: { kamp: Match }) {
         {lagrer ? "…" : lagret ? "✓ Lagret" : "Lagre"}
       </button>
     </div>
+  );
+}
+
+function EtterregistrerTips({
+  kamper,
+  brukere,
+}: {
+  kamper: Match[];
+  brukere: Bruker[];
+}) {
+  const [uid, setUid] = useState("");
+  const [matchId, setMatchId] = useState("");
+  const [h, setH] = useState("");
+  const [b, setB] = useState("");
+  const [lagrer, setLagrer] = useState(false);
+  const [melding, setMelding] = useState<string | null>(null);
+  const [feil, setFeil] = useState(false);
+
+  // Eksisterende tips for valgt bruker — for å forhåndsfylle og vise hva som
+  // allerede ligger inne (så man ikke overskriver ved et uhell).
+  const brukerTips = useSpillerTips(uid || null);
+  const eksisterende = brukerTips.find((t) => t.matchId === matchId);
+
+  const sorterteBrukere = [...brukere].sort((a, b) =>
+    a.navn.localeCompare(b.navn, "nb"),
+  );
+  // Spilte kamper først (det er der tips går tapt og ikke kan legges inn selv).
+  const sorterteKamper = [...kamper].sort((a, b) => b.starttid - a.starttid);
+
+  const valgtBruker = brukere.find((x) => x.uid === uid);
+  const valgtKamp = kamper.find((k) => k.id === matchId);
+
+  // Forhåndsfyll feltene fra eksisterende tipp når valget endres.
+  useEffect(() => {
+    if (eksisterende) {
+      setH(String(eksisterende.hjemme));
+      setB(String(eksisterende.borte));
+    } else {
+      setH("");
+      setB("");
+    }
+    setMelding(null);
+    setFeil(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid, matchId, eksisterende?.hjemme, eksisterende?.borte]);
+
+  const gyldig =
+    uid !== "" &&
+    matchId !== "" &&
+    h !== "" &&
+    b !== "" &&
+    Number(h) >= 0 &&
+    Number(b) >= 0;
+
+  async function lagre() {
+    if (!gyldig || !valgtBruker) return;
+    setLagrer(true);
+    setMelding(null);
+    setFeil(false);
+    try {
+      await lagreTip({
+        matchId,
+        uid,
+        navn: valgtBruker.navn,
+        hjemme: Number(h),
+        borte: Number(b),
+        lagretTid: Date.now(),
+      });
+      // Regn ut ledertavla på nytt så det etterregistrerte tippet teller.
+      await aggregerKlient();
+      setMelding(
+        `✓ Tipp lagret for ${valgtBruker.navn}: ${kortLagNavn(
+          valgtKamp?.hjemmelag ?? "",
+        )} ${h}–${b} ${kortLagNavn(
+          valgtKamp?.bortelag ?? "",
+        )}. Poeng er oppdatert.`,
+      );
+    } catch (e) {
+      setFeil(true);
+      setMelding(
+        `Kunne ikke lagre: ${e instanceof Error ? e.message : "ukjent feil"}`,
+      );
+    } finally {
+      setLagrer(false);
+    }
+  }
+
+  return (
+    <section className="bg-surface border border-border rounded-2xl p-4 space-y-3">
+      <div>
+        <h2 className="font-semibold">Etterregistrer tapt tipp</h2>
+        <p className="text-xs text-muted mt-0.5">
+          Legg inn et tipp på vegne av en spiller som ble rammet av
+          lagringsfeilen — fungerer også etter at kampen har startet. Velg
+          spiller og kamp, fyll inn det de skulle hatt, og lagre. Ledertavla
+          regnes ut på nytt automatisk.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <select
+          value={uid}
+          onChange={(e) => setUid(e.target.value)}
+          className="h-11 px-3 rounded-xl bg-elevated border border-border focus:border-primary focus:outline-none text-sm"
+        >
+          <option value="">Velg spiller…</option>
+          {sorterteBrukere.map((br) => (
+            <option key={br.uid} value={br.uid}>
+              {br.navn}
+            </option>
+          ))}
+        </select>
+        <select
+          value={matchId}
+          onChange={(e) => setMatchId(e.target.value)}
+          className="h-11 px-3 rounded-xl bg-elevated border border-border focus:border-primary focus:outline-none text-sm"
+        >
+          <option value="">Velg kamp…</option>
+          {sorterteKamper.map((k) => (
+            <option key={k.id} value={k.id}>
+              {k.id} · {kortLagNavn(k.hjemmelag)}–{kortLagNavn(k.bortelag)}
+              {tippingLåst(k) ? " (startet)" : " (åpen)"}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {uid && matchId && (
+        <div className="text-[11px] text-muted">
+          {eksisterende
+            ? `Har allerede et tipp: ${eksisterende.hjemme}–${eksisterende.borte} (lagring overskriver det).`
+            : "Ingen tipp lagret på denne kampen ennå."}
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <div className="flex-1 text-xs truncate text-muted">
+          {valgtKamp
+            ? `${kortLagNavn(valgtKamp.hjemmelag)} – ${kortLagNavn(
+                valgtKamp.bortelag,
+              )}`
+            : "—"}
+        </div>
+        <input
+          type="number"
+          inputMode="numeric"
+          value={h}
+          disabled={!uid || !matchId}
+          onChange={(e) =>
+            setH(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))
+          }
+          className="w-10 h-9 text-center rounded-lg bg-bg border border-border text-sm tabular-nums disabled:opacity-50"
+        />
+        <span className="text-muted text-xs">–</span>
+        <input
+          type="number"
+          inputMode="numeric"
+          value={b}
+          disabled={!uid || !matchId}
+          onChange={(e) =>
+            setB(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))
+          }
+          className="w-10 h-9 text-center rounded-lg bg-bg border border-border text-sm tabular-nums disabled:opacity-50"
+        />
+        <button
+          type="button"
+          onClick={lagre}
+          disabled={!gyldig || lagrer}
+          className="h-9 px-3 rounded-lg bg-primary text-primaryFg text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+        >
+          {lagrer ? "Lagrer…" : "Lagre tipp"}
+        </button>
+      </div>
+
+      {melding && (
+        <div
+          className={`text-xs rounded-xl px-3 py-2.5 border ${
+            feil
+              ? "bg-danger/10 border-danger/30 text-danger"
+              : "bg-success/10 border-success/30 text-success"
+          }`}
+        >
+          {melding}
+        </div>
+      )}
+    </section>
   );
 }
 

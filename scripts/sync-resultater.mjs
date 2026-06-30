@@ -139,6 +139,10 @@ async function hentEventsFootballData(token) {
       // tilNorske gjør new Date(strTimestamp + "Z"), så strip trailing Z her.
       strTimestamp: (m.utcDate || "").replace(/Z$/, ""),
       intRound: FD_STAGE_TIL_ROUND[m.stage] ?? 1,
+      // "REGULAR" / "EXTRA_TIME" / "PENALTY_SHOOTOUT". Vi better kun på 90-min,
+      // så cup-kamper som gikk til ekstraomganger skal IKKE auto-lagres (kilden
+      // gir bare stillingen etter ekstraomganger for dem).
+      duration: m.score?.duration ?? null,
     };
   });
 }
@@ -183,6 +187,7 @@ function tilNorske(event) {
     starttid: tid,
     ferdig: erFerdig(event.strStatus, tid, resultat != null),
     resultat,
+    duration: event.duration ?? null,
   };
 }
 
@@ -255,6 +260,8 @@ async function syncResultater() {
         continue;
       }
       if (!norsk.resultat) continue;
+      // Manuelt satt resultat er låst — la admins inntasting stå urørt.
+      if (treff.kamp.manuelt) continue;
 
       const skriv = treff.flippet
         ? { hjemme: norsk.resultat.borte, borte: norsk.resultat.hjemme }
@@ -283,6 +290,23 @@ async function syncResultater() {
       const runde = KNOCKOUT_RUNDE[norsk.intRound] || `Runde ${norsk.intRound}`;
       const eks = våreKamper[id];
 
+      // Vi better bare på 90-min-stillingen. Gikk kampen til ekstraomganger/
+      // straffer gir kilden kun stillingen ETTER ET, så da skriver vi IKKE
+      // resultatet automatisk — 90-min-stillingen legges inn manuelt, og
+      // synken lar den stå urørt. Lag/tid synkes uansett.
+      // Et manuelt satt resultat (eks.manuelt) er alltid låst — uavhengig av
+      // duration. TheSportsDB-fallback mangler duration-feltet og ville ellers
+      // overskrevet admins manuelle 90-min-inntasting på neste synk.
+      const utvidet =
+        norsk.duration === "EXTRA_TIME" ||
+        norsk.duration === "PENALTY_SHOOTOUT";
+      const skrivResultat = !utvidet && !(eks && eks.manuelt);
+      if (utvidet && norsk.resultat) {
+        console.log(
+          `  ⏱ ${id}: ${norsk.hjemmelag} vs ${norsk.bortelag} gikk til ekstraomganger — 90-min-stilling legges inn manuelt`,
+        );
+      }
+
       if (!eks) {
         await db.collection("kamper").doc(id).set({
           hjemmelag: norsk.hjemmelag,
@@ -291,12 +315,12 @@ async function syncResultater() {
           runde,
           bonusFaktor:
             norsk.hjemmelag === "Norge" || norsk.bortelag === "Norge" ? 2 : 1,
-          resultat: norsk.resultat,
-          ferdig: norsk.ferdig,
+          resultat: skrivResultat ? norsk.resultat : null,
+          ferdig: skrivResultat ? norsk.ferdig : false,
         });
         console.log(`  + ${id}: ${runde} ${norsk.hjemmelag} vs ${norsk.bortelag}`);
         opprettetKnockout += 1;
-        if (norsk.resultat && norsk.ferdig) ferdigeKamper += 1;
+        if (skrivResultat && norsk.resultat && norsk.ferdig) ferdigeKamper += 1;
       } else {
         // Oppdater hvis matchups eller resultat har endret seg
         const oppdateringer = {};
@@ -310,7 +334,11 @@ async function syncResultater() {
         if (eks.starttid !== norsk.starttid) {
           oppdateringer.starttid = norsk.starttid;
         }
+        // Resultat/ferdig skrives bare når kampen ble avgjort innen 90 min
+        // (skrivResultat). Gikk den til ekstraomganger, lar vi 90-min-
+        // stillingen (manuelt satt) stå urørt.
         const resultatEndret =
+          skrivResultat &&
           norsk.resultat &&
           (!eks.resultat ||
             eks.resultat.hjemme !== norsk.resultat.hjemme ||
@@ -319,7 +347,7 @@ async function syncResultater() {
           oppdateringer.resultat = norsk.resultat;
         }
         // Skriv ferdig-flagget når det endrer seg (også når scoren er lik).
-        if (norsk.resultat && (eks.ferdig ?? null) !== norsk.ferdig) {
+        if (skrivResultat && norsk.resultat && (eks.ferdig ?? null) !== norsk.ferdig) {
           oppdateringer.ferdig = norsk.ferdig;
         }
         if (Object.keys(oppdateringer).length > 0) {

@@ -6,6 +6,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocFromServer,
   getDocs,
   onSnapshot,
   orderBy,
@@ -274,7 +275,20 @@ export function useFasit(enabled = true): Fasit {
 export async function lagreTip(p: Prediction) {
   if (bruker()) {
     const id = `${p.uid}_${p.matchId}`;
-    await setDoc(doc(fbDb(), "tips", id), p);
+    const ref = doc(fbDb(), "tips", id);
+    await setDoc(ref, p);
+    // VIKTIG: med offline-cache (persistentLocalCache) fullfører setDoc så snart
+    // tippet er skrevet til lokal IndexedDB — det sier INGENTING om at serveren
+    // godtok det. En regel-avvisning (kampen låst) eller mistet nett gjør at
+    // skrivingen aldri når serveren, men appen viser tippet som lagret.
+    // Vi leser derfor tilbake fra serveren og kaster hvis tippet ikke ligger
+    // der, så UI-et kan vise «ikke bekreftet» i stedet for å lyve.
+    const server = await getDocFromServer(ref);
+    if (!server.exists()) {
+      throw new Error(
+        "Tippet nådde ikke serveren — kampen kan være låst, eller du er uten nett.",
+      );
+    }
     return;
   }
   const id = `${p.uid}_${p.matchId}`;
@@ -324,12 +338,14 @@ export async function nullstillAlleResultater(): Promise<number> {
     const db = fbDb();
     const snap = await getDocs(collection(db, "kamper"));
     await Promise.all(
-      snap.docs.map((d) => updateDoc(d.ref, { resultat: null })),
+      snap.docs.map((d) =>
+        updateDoc(d.ref, { resultat: null, manuelt: false }),
+      ),
     );
     return snap.size;
   }
   const kamper = localKamper.get();
-  localKamper.set(kamper.map((k) => ({ ...k, resultat: null })));
+  localKamper.set(kamper.map((k) => ({ ...k, resultat: null, manuelt: false })));
   return kamper.length;
 }
 
@@ -480,10 +496,13 @@ export async function settResultat(
   borte: number,
 ) {
   // Manuelt satt resultat = endelig (ferdig: true), så poeng teller med en gang.
+  // manuelt: true låser resultatet mot auto-synken, slik at en manuelt tastet
+  // 90-min-stilling (sluttspill m/ekstraomganger) ikke blir overskrevet igjen.
   if (bruker()) {
     await updateDoc(doc(fbDb(), "kamper", matchId), {
       resultat: { hjemme, borte },
       ferdig: true,
+      manuelt: true,
     });
     return;
   }
@@ -491,7 +510,7 @@ export async function settResultat(
   localKamper.set(
     liste.map((k) =>
       k.id === matchId
-        ? { ...k, resultat: { hjemme, borte }, ferdig: true }
+        ? { ...k, resultat: { hjemme, borte }, ferdig: true, manuelt: true }
         : k,
     ),
   );

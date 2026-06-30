@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useKamper, useMineTips, lagreTip, slettTip } from "@/lib/data";
 import { Match, Prediction, beregnPoeng } from "@/lib/types";
@@ -11,6 +11,7 @@ import {
   kampErLåst,
   kortLagNavn,
   nesteSynkTid,
+  tippingLåst,
 } from "@/lib/vm-data";
 import Skall from "@/components/Skall";
 import Beskytt from "@/components/Beskytt";
@@ -82,7 +83,9 @@ function Kamper() {
   async function lagre(id: string, h: number, b: number) {
     if (!user || !bruker || frosset) return;
     const kamp = kamper.find((k) => k.id === id);
-    if (kamp && kampErLåst(kamp)) return;
+    if (kamp && tippingLåst(kamp)) return;
+    // Kaster videre hvis serveren ikke bekrefter — KampKort fanger det og
+    // viser «ikke bekreftet» i stedet for å late som tippet er lagret.
     await lagreTip({
       matchId: id,
       uid: user.uid,
@@ -137,6 +140,8 @@ function Kamper() {
         }
       />
 
+      {!frosset && <TippefristBanner kamper={kamper} tips={tips} nå={nå} />}
+
       {frosset && (
         <div className="bg-warning/10 border border-warning/30 text-warning text-sm rounded-2xl px-4 py-3 flex items-center gap-2">
           <span className="text-lg">❄️</span>
@@ -184,7 +189,7 @@ function Kamper() {
                     kamp={kamp}
                     tip={tips[kamp.id]}
                     frosset={frosset}
-                    låst={kampErLåst(kamp, nå)}
+                    redigerStengt={tippingLåst(kamp, nå)}
                     onLagre={(h, b) => lagre(kamp.id, h, b)}
                     onSlett={() => slett(kamp.id)}
                     varsle={varsle}
@@ -226,6 +231,58 @@ function Kamper() {
       </div>
 
       {toast}
+    </div>
+  );
+}
+
+// Tippefrist-nudge: dukker bare opp når du mangler tips på en kamp som låses
+// snart. Rød/«haster» under 3 timer til avspark, ellers en rolig påminnelse.
+// Forsvinner helt så snart alt er tippet.
+function TippefristBanner({
+  kamper,
+  tips,
+  nå,
+}: {
+  kamper: Match[];
+  tips: Record<string, Prediction>;
+  nå: number;
+}) {
+  const TIME = 3600_000;
+  const utippede = kamper
+    .filter((k) => k.starttid > nå && erTippbar(k) && !tips[k.id])
+    .sort((a, b) => a.starttid - b.starttid);
+  if (utippede.length === 0) return null;
+
+  const neste = utippede[0];
+  const msTil = neste.starttid - nå;
+  // Ikke mas i tide og utide — vis bare når noe låses innen 12 timer.
+  if (msTil > 12 * TIME) return null;
+
+  const haster = msTil <= 3 * TIME;
+  const antallSnart = utippede.filter(
+    (k) => k.starttid - nå <= 12 * TIME,
+  ).length;
+
+  return (
+    <div
+      className={`rounded-2xl px-4 py-3 flex items-center gap-3 border ${
+        haster
+          ? "bg-danger/10 border-danger/40 text-danger"
+          : "bg-accent/10 border-accent/40 text-accent"
+      }`}
+    >
+      <span className="text-lg flex-shrink-0">{haster ? "⏰" : "✍️"}</span>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-bold">
+          {antallSnart === 1
+            ? "1 kamp mangler tips"
+            : `${antallSnart} kamper mangler tips`}
+        </div>
+        <div className="text-[11px] opacity-90 truncate">
+          Neste låses om {formatTid(msTil)} · {kortLagNavn(neste.hjemmelag)} mot{" "}
+          {kortLagNavn(neste.bortelag)}
+        </div>
+      </div>
     </div>
   );
 }
@@ -303,7 +360,7 @@ function KampKort({
   kamp,
   tip,
   frosset,
-  låst,
+  redigerStengt,
   onLagre,
   onSlett,
   varsle,
@@ -311,14 +368,29 @@ function KampKort({
   kamp: Match;
   tip?: Prediction;
   frosset?: boolean;
-  låst?: boolean;
+  redigerStengt?: boolean;
   onLagre: (h: number, b: number) => Promise<void>;
   onSlett: () => Promise<void>;
   varsle: (melding?: string) => void;
 }) {
-  const blokkert = Boolean(frosset || låst);
+  // Inputs sperres allerede et lite vindu før avspark (redigerStengt), mens
+  // `låst` (selve avsparket) styrer badge + avsløring av alles tips.
+  const blokkert = Boolean(frosset || redigerStengt);
   const [hjem, setHjem] = useState(tip ? String(tip.hjemme) : "");
   const [bort, setBort] = useState(tip ? String(tip.borte) : "");
+  // Lagrings-status så brukeren ser at tippet faktisk nådde serveren —
+  // ikke bare ble skrevet til lokal cache.
+  const [lagreStatus, setLagreStatus] = useState<
+    "idle" | "lagrer" | "ok" | "feil"
+  >("idle");
+  const montert = useRef(true);
+  useEffect(() => {
+    montert.current = true;
+    return () => {
+      montert.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (tip) {
       setHjem(String(tip.hjemme));
@@ -336,18 +408,55 @@ function KampKort({
   const uendret =
     tip && gyldig && Number(hjem) === tip.hjemme && Number(bort) === tip.borte;
 
+  async function utførLagre(h: number, b: number) {
+    setLagreStatus("lagrer");
+    try {
+      await onLagre(h, b);
+      if (montert.current) setLagreStatus("ok");
+    } catch {
+      if (montert.current) setLagreStatus("feil");
+      varsle("Tippet ble ikke bekreftet — sjekk nett og prøv igjen.");
+    }
+  }
+  async function utførSlett() {
+    setLagreStatus("lagrer");
+    try {
+      await onSlett();
+      if (montert.current) setLagreStatus("idle");
+    } catch {
+      if (montert.current) setLagreStatus("feil");
+      varsle("Kunne ikke slette tippet — sjekk nett og prøv igjen.");
+    }
+  }
+
+  // Siste «ulagrede» handling holdes i en ref, så vi kan flushe den umiddelbart
+  // ved blur eller når kortet forsvinner (f.eks. bytte side innen 500 ms) i
+  // stedet for å miste den når debounce-timeren ryddes.
+  const flushRef = useRef<() => void>(() => {});
+  flushRef.current = () => {
+    if (blokkert || uendret) return;
+    if (gyldig) utførLagre(Number(hjem), Number(bort));
+    else if (tom && tip) utførSlett();
+  };
+
   useEffect(() => {
     if (blokkert || uendret) return;
-    if (gyldig) {
-      const t = setTimeout(() => onLagre(Number(hjem), Number(bort)), 500);
-      return () => clearTimeout(t);
-    }
-    if (tom && tip) {
-      const t = setTimeout(() => onSlett(), 500);
+    if (gyldig || (tom && tip)) {
+      const t = setTimeout(() => flushRef.current(), 500);
       return () => clearTimeout(t);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hjem, bort, gyldig, tom, uendret, Boolean(tip), blokkert]);
+
+  // Flush ved unmount: taster man inn et tipp og bytter side / lukker appen
+  // innen debounce-vinduet, lagres det likevel før kortet rives ned.
+  useEffect(
+    () => () => {
+      flushRef.current();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const dato = new Date(kamp.starttid);
   const klokke = dato.toLocaleTimeString("nb-NO", {
@@ -384,7 +493,7 @@ function KampKort({
               ×{kamp.bonusFaktor} POENG
             </span>
           )}
-          {låst && !kamp.resultat && (
+          {redigerStengt && !kamp.resultat && (
             <span className="px-2 py-0.5 rounded-full bg-warning/15 text-warning font-bold tracking-wider">
               🔒 LÅST
             </span>
@@ -400,9 +509,19 @@ function KampKort({
           <span className="text-2xl flex-shrink-0">{flagg(kamp.hjemmelag)}</span>
         </div>
         <div className="relative flex items-center gap-1.5">
-          <Sc verdi={hjem} onChange={setHjem} disabled={blokkert} />
+          <Sc
+            verdi={hjem}
+            onChange={setHjem}
+            disabled={blokkert}
+            onBlur={() => flushRef.current()}
+          />
           <span className="text-muted/60 text-xs font-bold">:</span>
-          <Sc verdi={bort} onChange={setBort} disabled={blokkert} />
+          <Sc
+            verdi={bort}
+            onChange={setBort}
+            disabled={blokkert}
+            onBlur={() => flushRef.current()}
+          />
           {blokkert && (
             <div
               className="absolute inset-0 cursor-not-allowed"
@@ -426,6 +545,20 @@ function KampKort({
         </div>
       </div>
 
+      {!blokkert && !kamp.resultat && lagreStatus !== "idle" && (
+        <div className="mt-2 text-center text-[10px] font-semibold">
+          {lagreStatus === "lagrer" && (
+            <span className="text-muted">Lagrer…</span>
+          )}
+          {lagreStatus === "ok" && (
+            <span className="text-success">✓ Lagret</span>
+          )}
+          {lagreStatus === "feil" && (
+            <span className="text-danger">⚠ Ikke bekreftet – sjekk nett</span>
+          )}
+        </div>
+      )}
+
       {kamp.resultat && (
         <div className="mt-2 pt-2 border-t border-border flex items-center justify-between">
           <div className="text-[11px]">
@@ -442,7 +575,7 @@ function KampKort({
         </div>
       )}
 
-      {låst && <AlleTipsForKamp kamp={kamp} />}
+      {redigerStengt && <AlleTipsForKamp kamp={kamp} />}
     </div>
   );
 }
@@ -451,10 +584,12 @@ function Sc({
   verdi,
   onChange,
   disabled,
+  onBlur,
 }: {
   verdi: string;
   onChange: (v: string) => void;
   disabled?: boolean;
+  onBlur?: () => void;
 }) {
   return (
     <input
@@ -464,6 +599,7 @@ function Sc({
       max={20}
       value={verdi}
       disabled={disabled}
+      onBlur={onBlur}
       onChange={(e) =>
         onChange(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))
       }

@@ -18,10 +18,12 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/brukere/$(request.auth.uid))
         && get(/databases/$(database)/documents/brukere/$(request.auth.uid)).data.get('frosset', false) == true;
     }
-    // Tipping på en kamp låses i det kampen starter (avspark).
+    // Tipping på en kamp er åpen til 60 sek etter avspark (nådevindu, så
+    // ingen mister tippet på målstreken). Samme grense som tippingLåst i
+    // klienten (TIPPING_NADE_MS), så klient og server er enige.
     function kampAapen(matchId) {
       return exists(/databases/$(database)/documents/kamper/$(matchId))
-        && get(/databases/$(database)/documents/kamper/$(matchId)).data.starttid > request.time.toMillis();
+        && get(/databases/$(database)/documents/kamper/$(matchId)).data.starttid + 60000 > request.time.toMillis();
     }
 
     // Spesialtips låses når første VM-kamp starter (avspark 11. juni 2026 = 21:00 norsk tid).
@@ -61,16 +63,20 @@ service cloud.firestore {
     }
 
     // Tips: alle innloggede kan lese, eier kan opprette/oppdatere/slette
-    // egne tipps frem til kampstart. Frosne brukere kan ikke skrive.
+    // egne tipps frem til nådevinduet stenger. Frosne brukere kan ikke skrive.
+    // Admin kan opprette/oppdatere/slette tips for hvem som helst når som helst
+    // — brukes til å etterregistrere tips som gikk tapt pga. lagringsfeil.
     match /tips/{tipId} {
       allow read: if erInnlogget();
-      allow create: if erInnlogget()
+      allow create: if (erInnlogget()
         && !erFrosset()
         && request.resource.data.uid == request.auth.uid
-        && kampAapen(request.resource.data.matchId);
-      allow update: if !erFrosset()
+        && kampAapen(request.resource.data.matchId))
+        || erAdmin();
+      allow update: if (!erFrosset()
         && resource.data.uid == request.auth.uid
-        && kampAapen(resource.data.matchId);
+        && kampAapen(resource.data.matchId))
+        || erAdmin();
       allow delete: if (!erFrosset()
         && resource.data.uid == request.auth.uid
         && kampAapen(resource.data.matchId))

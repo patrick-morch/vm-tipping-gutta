@@ -9,6 +9,12 @@ export type Match = {
   // true = ferdigspilt (poeng teller). false = live-stilling (venter på full
   // tid). undefined på eldre/manuelt satte kamper = behandles som endelig.
   ferdig?: boolean;
+  // true = resultatet er satt manuelt av admin (typisk 90-min-stillingen for en
+  // sluttspillkamp som gikk til ekstraomganger). Auto-synken skal da ALDRI
+  // overskrive resultat/ferdig — uavhengig av datakilde (football-data gir bare
+  // ekstraomgang-stillingen, og TheSportsDB-fallback mangler duration-feltet
+  // som ellers ville beskyttet inntastingen).
+  manuelt?: boolean;
 };
 
 export type Prediction = {
